@@ -38,6 +38,16 @@ export default function RoutineCalendar({
   onRoutineClick,
 }: RoutineCalendarProps) {
   const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [isMobile, setIsMobile] = useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -84,9 +94,12 @@ export default function RoutineCalendar({
             key={weekStart.toString()}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-sm font-bold text-white whitespace-nowrap"
+            className="text-xs sm:text-sm font-bold text-white whitespace-nowrap"
           >
-            {format(weekStart, 'd MMMM', { locale: fr })} — {format(weekEnd, 'd MMMM', { locale: fr })}
+            {isMobile 
+              ? `${format(weekStart, 'dd/MM')} — ${format(weekEnd, 'dd/MM')}`
+              : `${format(weekStart, 'd MMMM', { locale: fr })} — ${format(weekEnd, 'd MMMM', { locale: fr })}`
+            }
           </motion.h3>
         </div>
         
@@ -99,9 +112,9 @@ export default function RoutineCalendar({
         </button>
       </div>
 
-      {/* Week Grid - With Horizontal Scroll on small screens */}
-      <div className="overflow-x-auto pb-4 custom-scrollbar">
-        <div className="grid grid-cols-7 min-w-[900px] md:min-w-0 divide-x divide-white/5">
+      {/* Week Grid */}
+      <div className="overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-7 md:divide-x divide-y md:divide-y-0 divide-white/5">
           {weekDays.map((dayDate, dayIndex) => {
             const dayRoutines = getRoutinesForDay(dayIndex);
             const isToday = isSameDay(dayDate, new Date());

@@ -55,7 +55,7 @@ body {
 
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 1.5rem;
+    padding: 1rem;
   }
 }
 

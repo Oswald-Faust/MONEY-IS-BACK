@@ -82,7 +82,7 @@ export default function DrivePage() {
 
   // Breadcrumbs logic
   const getBreadcrumbs = () => {
-    const crumbs = [{ id: null, name: 'Drive' }];
+    const crumbs: { id: string | null; name: string }[] = [{ id: null, name: 'Drive' }];
     if (currentFolderId) {
       const folder = driveFolders.find(f => f._id === currentFolderId);
       if (folder) {

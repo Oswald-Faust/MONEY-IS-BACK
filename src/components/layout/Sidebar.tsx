@@ -22,6 +22,7 @@ import {
   Plus,
   Search,
   User,
+  X,
 } from 'lucide-react';
 
 const mainNavItems = [
@@ -59,58 +60,82 @@ const demoProjects: PartialProject[] = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { sidebarCollapsed, toggleSidebar, projects, setProjectModalOpen } = useAppStore();
+  const { sidebarCollapsed, toggleSidebar, projects, setProjectModalOpen, isMobileMenuOpen, setMobileMenuOpen } = useAppStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   if (!mounted) return null;
 
   return (
-    <motion.aside
-      initial={false}
-      animate={{ width: sidebarCollapsed ? 80 : 280 }}
-      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="fixed left-0 top-0 h-screen bg-[#0c0c12] border-r border-[rgba(255,255,255,0.06)] flex flex-col z-50"
-    >
-      {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-[rgba(255,255,255,0.06)]">
-        <AnimatePresence mode="wait">
-          {!sidebarCollapsed && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center gap-3"
-            >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">PH</span>
-              </div>
-              <div>
-                <h1 className="font-semibold text-white text-sm">Project Hub</h1>
-                <p className="text-xs text-gray-500">Workspace</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        
-        <button
-          onClick={toggleSidebar}
-          className="p-2 rounded-lg hover:bg-[rgba(255,255,255,0.05)] text-gray-500 hover:text-gray-300 transition-colors"
-        >
-          {sidebarCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </button>
-      </div>
+    <AnimatePresence>
+      {/* Backdrop for mobile */}
+      {isMobile && isMobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+        />
+      )}
+
+      <motion.aside
+        initial={isMobile ? { x: -280 } : false}
+        animate={isMobile 
+          ? { x: isMobileMenuOpen ? 0 : -280, width: 280 } 
+          : { x: 0, width: sidebarCollapsed ? 80 : 280 }
+        }
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        className={`fixed left-0 top-0 h-screen bg-[#0c0c12] border-r border-[rgba(255,255,255,0.06)] flex flex-col z-[70] ${
+          isMobile ? 'shadow-2xl' : ''
+        }`}
+      >
+        {/* Header */}
+        <div className="p-4 flex items-center justify-between border-b border-[rgba(255,255,255,0.06)]">
+          <AnimatePresence mode="wait">
+            {(!sidebarCollapsed || isMobile) && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex items-center gap-3"
+              >
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">PH</span>
+                </div>
+                <div>
+                  <h1 className="font-semibold text-white text-sm">Project Hub</h1>
+                  <p className="text-xs text-gray-500">Workspace</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <button
+            onClick={isMobile ? () => setMobileMenuOpen(false) : toggleSidebar}
+            className="p-2 rounded-lg hover:bg-[rgba(255,255,255,0.05)] text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            {isMobile ? (
+              <X className="w-4 h-4" />
+            ) : (
+              sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />
+            )}
+          </button>
+        </div>
 
       {/* Search */}
-      {!sidebarCollapsed && (
+      {(!sidebarCollapsed || isMobile) && (
         <div className="px-4 py-4">
           <div className="relative group">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-indigo-400 transition-colors duration-200" />
@@ -144,7 +169,7 @@ export default function Sidebar() {
                 >
                   <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-indigo-400' : ''}`} />
                   <AnimatePresence mode="wait">
-                    {!sidebarCollapsed && (
+                    {(!sidebarCollapsed || isMobile) && (
                       <motion.span
                         initial={{ opacity: 0, width: 0 }}
                         animate={{ opacity: 1, width: 'auto' }}
@@ -162,7 +187,7 @@ export default function Sidebar() {
         </div>
 
         {/* Projects Section */}
-        {!sidebarCollapsed && (
+        {(!sidebarCollapsed || isMobile) && (
           <div className="mt-6">
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -195,7 +220,7 @@ export default function Sidebar() {
         )}
 
         {/* Secondary Navigation */}
-        {!sidebarCollapsed && (
+        {(!sidebarCollapsed || isMobile) && (
           <div className="mt-6">
             <div className="px-3 mb-2">
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -249,7 +274,7 @@ export default function Sidebar() {
             </div>
             
             <AnimatePresence mode="wait">
-              {!sidebarCollapsed && (
+              {(!sidebarCollapsed || isMobile) && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -267,7 +292,7 @@ export default function Sidebar() {
             </AnimatePresence>
           </Link>
           
-          {!sidebarCollapsed && (
+          {(!sidebarCollapsed || isMobile) && (
             <div className="flex items-center gap-1">
               <Link href="/settings">
                 <button className="p-1.5 rounded-lg hover:bg-indigo-500/10 text-gray-500 hover:text-indigo-400 transition-colors">
@@ -285,5 +310,6 @@ export default function Sidebar() {
         </div>
       </div>
     </motion.aside>
+    </AnimatePresence>
   );
 }

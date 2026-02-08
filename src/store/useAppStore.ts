@@ -64,7 +64,9 @@ interface AppState {
   
   // UI State
   sidebarCollapsed: boolean;
+  isMobileMenuOpen: boolean;
   toggleSidebar: () => void;
+  setMobileMenuOpen: (open: boolean) => void;
   activeView: 'dashboard' | 'calendar' | 'tasks' | 'projects' | 'routines' | 'objectives' | 'ideas' | 'ids' | 'drive';
   setActiveView: (view: AppState['activeView']) => void;
   
@@ -181,7 +183,9 @@ export const useAppStore = create<AppState>()(
       
       // UI State
       sidebarCollapsed: false,
+      isMobileMenuOpen: false,
       toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+      setMobileMenuOpen: (open) => set({ isMobileMenuOpen: open }),
       activeView: 'dashboard',
       setActiveView: (view) => set({ activeView: view }),
       

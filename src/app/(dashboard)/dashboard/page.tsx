@@ -95,10 +95,10 @@ export default function DashboardPage() {
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button
             onClick={() => setTaskModalOpen(true)}
-            className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition-all flex items-center gap-2"
+            className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Nouvelle tâche
@@ -109,7 +109,7 @@ export default function DashboardPage() {
               setCurrentProject(null);
               setProjectModalOpen(true);
             }}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center justify-center gap-2 px-6"
           >
             <Plus className="w-4 h-4" />
             Nouveau projet
