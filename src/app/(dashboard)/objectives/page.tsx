@@ -1,0 +1,188 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Target, Search, Filter, ChevronLeft } from 'lucide-react';
+import { ObjectiveCard } from '@/components/ui';
+import { useAppStore } from '@/store';
+import { useSearchParams, useRouter } from 'next/navigation';
+import type { Objective } from '@/types';
+
+export default function ObjectivesPage() {
+  const { objectives, projects, setObjectiveModalOpen, addObjective } = useAppStore();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const projectId = searchParams.get('project');
+  const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterPriority, setFilterPriority] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    // Add demo data if empty
+    if (mounted && objectives.length === 0) {
+      const demoObjectives: Objective[] = [
+        {
+          _id: '1',
+          title: 'Lancer la Beta',
+          description: 'Objectif principal du trimestre',
+          project: '1',
+          projectName: 'FINEA',
+          projectColor: '#22c55e',
+          creator: '1',
+          progress: 80,
+          status: 'in_progress',
+          priority: 'high',
+          checkpoints: [
+            { id: '1-1', title: 'Finaliser l\'API', completed: true },
+            { id: '1-2', title: 'Dashboard UI', completed: true },
+            { id: '1-3', title: 'Tests utilisateurs', completed: false },
+          ],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          _id: '2',
+          title: 'Expansion Marketing',
+          description: 'Nouveaux canaux d\'acquisition',
+          project: '2',
+          projectName: 'BUISPACE',
+          projectColor: '#f97316',
+          creator: '1',
+          progress: 50,
+          status: 'in_progress',
+          priority: 'medium',
+          checkpoints: [
+            { id: '2-1', title: 'Campagne Facebook', completed: true },
+            { id: '2-2', title: 'SEO Optimisation', completed: true },
+            { id: '2-3', title: 'Partenariats influenceurs', completed: false },
+            { id: '2-4', title: 'Webinaire de lancement', completed: false },
+            { id: '2-5', title: 'Newsletter hebdomadaire', completed: false },
+            { id: '2-6', title: 'Reporting mensuel', completed: false },
+          ],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+      ];
+      demoObjectives.forEach(obj => addObjective(obj));
+    }
+  }, [mounted, objectives.length, addObjective]);
+
+  if (!mounted) return null;
+
+  const selectedProject = projects.find(p => p._id === projectId);
+
+  const filteredObjectives = objectives.filter(obj => {
+    const matchesSearch = obj.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesPriority = filterPriority === 'all' || obj.priority === filterPriority;
+    const matchesProject = !projectId || obj.project === projectId;
+    return matchesSearch && matchesPriority && matchesProject;
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+      >
+        <div className="flex items-center gap-4">
+          {projectId && (
+            <button
+              onClick={() => router.push(`/projects/${projectId}`)}
+              className="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white hover:bg-white/[0.08] transition-all"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+              {!projectId && <Target className="w-8 h-8 text-indigo-400" />}
+              {selectedProject ? `Objectifs - ${selectedProject.name}` : 'Objectifs Globaux'}
+            </h1>
+            <p className="text-gray-500 mt-1">
+              {filteredObjectives.length} objectifs {selectedProject ? 'pour ce projet' : 'au total'}
+            </p>
+          </div>
+        </div>
+        
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setObjectiveModalOpen(true)}
+          className="
+            px-4 py-2.5 rounded-xl flex items-center gap-2
+            bg-gradient-to-r from-indigo-600 to-purple-600
+            text-white font-medium text-sm
+            hover:from-indigo-500 hover:to-purple-500
+            transition-all duration-200
+          "
+        >
+          <Plus className="w-4 h-4" />
+          Nouvel objectif
+        </motion.button>
+      </motion.div>
+
+      {/* Filters */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="flex flex-col md:flex-row gap-4"
+      >
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher un objectif..."
+            className="w-full pl-12 pr-4 py-3 text-sm bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Filter className="w-5 h-5 text-gray-500" />
+          <select
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value as 'all' | 'high' | 'medium' | 'low')}
+            className="px-4 py-3 text-sm bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-all duration-200"
+          >
+            <option value="all">Toutes les priorités</option>
+            <option value="high">Haute</option>
+            <option value="medium">Moyenne</option>
+            <option value="low">Basse</option>
+          </select>
+        </div>
+      </motion.div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        <AnimatePresence mode="popLayout">
+          {filteredObjectives.map((objective) => (
+            <motion.div
+              key={objective._id}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <ObjectiveCard objective={objective} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {filteredObjectives.length === 0 && (
+        <div className="text-center py-20 bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
+          <Target className="w-12 h-12 text-gray-600 mx-auto mb-4 opacity-20" />
+          <p className="text-gray-500">Aucun objectif trouvé</p>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,26 +1,157 @@
 @import "tailwindcss";
 
+/* ========================================
+   PROJECT HUB - Clean Premium Dark Theme
+   ======================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core Colors */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #0f0f15;
+  --bg-tertiary: #14141d;
+  --bg-card: rgba(20, 20, 29, 0.7);
+
+  /* Glass Effects */
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-hover: rgba(255, 255, 255, 0.04);
+
+  /* Accent Colors */
+  --accent-primary: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+
+  /* Text Colors */
+  --text-main: #ffffff;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Spacing */
+  --sidebar-w: 280px;
+  --sidebar-coll: 80px;
+  --radius-xl: 16px;
+  --radius-lg: 12px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ========================================
+   Base Styles
+   ======================================== */
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Base Layout Spacing */
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1.5rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ========================================
+   Components
+   ======================================== */
+
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(24, 24, 35, 0.8);
+}
+
+/* Inputs & Buttons - More breathing room */
+input, select, textarea {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 0.875rem 1rem;
+  color: white;
+  transition: all 0.2s;
+  font-size: 0.9375rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.btn-primary {
+  background: var(--accent-gradient);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  color: white;
+  transition: all 0.2s;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Priority Colors */
+.priority-important { color: #ef4444; border-color: rgba(239, 68, 68, 0.5); }
+.priority-less { color: #3b82f6; border-color: rgba(59, 130, 246, 0.5); }
+.priority-waiting { color: #94a3b8; border-color: rgba(148, 163, 184, 0.5); }
+
+/* Utilities */
+.text-dim { color: var(--text-dim); }
+.text-muted { color: var(--text-muted); }
+
+/* Animation wrapper */
+.page-fade {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -1,0 +1,227 @@
+'use client';
+
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Loader2, FolderKanban, Clock } from 'lucide-react';
+import { useAppStore } from '@/store';
+import toast from 'react-hot-toast';
+import type { RoutineDays, Project } from '@/types';
+
+interface CreateRoutineModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  projects?: Project[];
+}
+
+const dayOptions: { key: keyof RoutineDays; label: string }[] = [
+  { key: 'monday', label: 'Lun' },
+  { key: 'tuesday', label: 'Mar' },
+  { key: 'wednesday', label: 'Mer' },
+  { key: 'thursday', label: 'Jeu' },
+  { key: 'friday', label: 'Ven' },
+  { key: 'saturday', label: 'Sam' },
+  { key: 'sunday', label: 'Dim' },
+];
+
+export default function CreateRoutineModal({ isOpen, onClose, projects }: CreateRoutineModalProps) {
+  const { addRoutine, projects: storeProjects } = useAppStore();
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    project: '',
+    time: '',
+    days: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: false,
+      sunday: false,
+    } as RoutineDays,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const projectList = projects?.length ? projects : storeProjects;
+  
+  const selectedProject = projectList.find(p => p._id === formData.project);
+
+  const toggleDay = (day: keyof RoutineDays) => {
+    setFormData({
+      ...formData,
+      days: {
+        ...formData.days,
+        [day]: !formData.days[day],
+      },
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.title.trim()) {
+      toast.error('Le titre de la routine est requis');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const newRoutine = {
+        _id: Date.now().toString(),
+        title: formData.title,
+        description: formData.description,
+        project: formData.project,
+        projectColor: selectedProject?.color || '#6366f1',
+        creator: '1',
+        days: formData.days,
+        time: formData.time || undefined,
+        isActive: true,
+        color: selectedProject?.color || '#6366f1',
+        completedDates: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      addRoutine(newRoutine);
+      toast.success('Routine créée avec succès !');
+      setFormData({
+        title: '',
+        description: '',
+        project: '',
+        time: '',
+        days: {
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: false,
+          sunday: false,
+        },
+      });
+      onClose();
+    } catch {
+      toast.error('Erreur lors de la création de la routine');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
+          >
+            <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-white">Nouvelle routine</h2>
+                <button
+                  onClick={onClose}
+                  className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Titre *</label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    placeholder="Ex: Séance de sport, Lecture..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <FolderKanban className="w-4 h-4" /> Projet associé
+                  </label>
+                  <select
+                    value={formData.project}
+                    onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    <option value="" className="bg-bg-primary text-white">Aucun projet</option>
+                    {projectList.map((p) => (
+                      <option key={p._id} value={p._id} className="bg-bg-primary text-white">
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <Clock className="w-4 h-4" /> Heure (optionnel)
+                  </label>
+                  <input
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-4">Récurrence</label>
+                  <div className="flex justify-between gap-1">
+                    {dayOptions.map((day) => (
+                      <button
+                        key={day.key}
+                        type="button"
+                        onClick={() => toggleDay(day.key)}
+                        className={`
+                          flex-1 py-3 rounded-xl border text-xs font-bold transition-all
+                          ${formData.days[day.key]
+                            ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
+                            : 'bg-white/5 border-white/10 text-dim hover:bg-white/10'}
+                        `}
+                      >
+                        {day.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-white/5">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 py-4 rounded-xl bg-white/5 text-gray-300 font-bold hover:bg-white/10 transition-all"
+                  >
+                    ANNULER
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 py-4 rounded-xl bg-indigo-500 text-white font-bold hover:bg-indigo-400 transition-all disabled:opacity-50"
+                  >
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'CRÉER'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
