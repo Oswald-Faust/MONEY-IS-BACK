@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
       workspaces: user.workspaces,
     };
 
-    return NextResponse.json({
+    // Créer la réponse
+    const response = NextResponse.json({
       success: true,
       data: {
         user: userResponse,
@@ -64,6 +65,17 @@ export async function POST(request: NextRequest) {
       },
       message: 'Connexion réussie',
     });
+
+    // Définir le cookie auth-token côté serveur (valable 7 jours)
+    response.cookies.set('auth-token', token, {
+      httpOnly: false, // Doit être false pour que le client puisse le lire
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 jours en secondes
+      path: '/',
+    });
+
+    return response;
   } catch (error: any) {
     console.error('Login error:', error);
     return NextResponse.json(

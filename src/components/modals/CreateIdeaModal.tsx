@@ -3,9 +3,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lightbulb, Loader2, Plus, Paperclip, Image as ImageIcon, File as FileIcon, Trash2 } from 'lucide-react';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import type { Attachment } from '@/types';
+
+import { useSearchParams } from 'next/navigation';
 
 interface CreateIdeaModalProps {
   isOpen: boolean;
@@ -14,14 +16,29 @@ interface CreateIdeaModalProps {
 
 export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProps) {
   const { projects, addIdea } = useAppStore();
+  const { token: authToken } = useAuthStore();
+  const searchParams = useSearchParams();
+  const defaultProjectId = searchParams.get('project');
+  
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    project: '',
-    status: 'active' as const,
+    project: '', 
+    status: 'raw' as 'raw' | 'standby' | 'in_progress' | 'implemented' | 'archived',
     tags: [] as string[],
   });
+
+  // Pre-select project when modal opens or projectId changes
+  React.useEffect(() => {
+    if (isOpen && defaultProjectId) {
+      setFormData(prev => ({ ...prev, project: defaultProjectId }));
+    } else if (isOpen && !defaultProjectId) {
+       // Reset if no project selected in URL (optional, depending on UX preference)
+       // setFormData(prev => ({ ...prev, project: '' }));
+    }
+  }, [isOpen, defaultProjectId]);
+
   const [newTag, setNewTag] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
 
@@ -52,42 +69,54 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
     
     setLoading(true);
     try {
+      if (!authToken) {
+        toast.error('Vous devez être connecté');
+        return;
+      }
+
       // Create attachment objects
       const processedAttachments: Attachment[] = attachments.map(file => ({
         id: Math.random().toString(36).substr(2, 9),
         name: file.name,
-        url: URL.createObjectURL(file), // Local preview URL
+        url: '', // No real upload yet
         type: file.type,
         size: file.size,
         uploadedAt: new Date().toISOString()
       }));
 
-      const newIdea = {
-        _id: Math.random().toString(36).substr(2, 9),
-        title: formData.title,
-        content: formData.content,
-        project: formData.project || undefined,
-        creator: '1',
-        attachments: processedAttachments,
-        tags: formData.tags,
-        status: formData.status,
-        votes: [],
-        comments: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      addIdea(newIdea);
-      toast.success('Idée ajoutée avec succès');
-      onClose();
-      setFormData({
-        title: '',
-        content: '',
-        project: '',
-        status: 'active',
-        tags: [],
+      const response = await fetch('/api/ideas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          content: formData.content,
+          project: formData.project,
+          status: formData.status,
+          tags: formData.tags,
+          attachments: processedAttachments
+        }),
       });
-      setAttachments([]);
+
+      const data = await response.json();
+
+      if (data.success) {
+        addIdea(data.data);
+        toast.success('Idée ajoutée avec succès');
+        onClose();
+        setFormData({
+          title: '',
+          content: '',
+          project: '',
+          status: 'raw',
+          tags: [],
+        });
+        setAttachments([]);
+      } else {
+        toast.error(data.error || 'Erreur lors de la création');
+      }
     } catch {
       toast.error('Erreur lors de l\'ajout de l\'idée');
     } finally {
@@ -130,7 +159,7 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-400 ml-1">Titre de l&apos;idée</label>
@@ -201,6 +230,20 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
                     <Plus className="w-5 h-5" />
                   </button>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-400 ml-1">Statut</label>
+                <select
+                  value={formData.status}
+                  onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+                  className="w-full px-4 py-3 bg-[#1a1a24] border border-white/10 rounded-2xl text-white outline-none focus:border-amber-500/50 appearance-none"
+                >
+                  <option value="raw">Premier degré (Idée brute)</option>
+                  <option value="standby">Standby (Mise de côté)</option>
+                  <option value="in_progress">En cours (Mise en place)</option>
+                  <option value="implemented">Terminé (Mis en place)</option>
+                </select>
               </div>
 
               <div className="space-y-2">

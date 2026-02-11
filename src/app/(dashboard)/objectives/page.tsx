@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Target, Search, Filter, ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Filter, Plus, Search, Target, Loader2 } from 'lucide-react';
 import { ObjectiveCard } from '@/components/ui';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import { useSearchParams, useRouter } from 'next/navigation';
-import type { Objective } from '@/types';
+import toast from 'react-hot-toast';
 
 export default function ObjectivesPage() {
-  const { objectives, projects, setObjectiveModalOpen, addObjective } = useAppStore();
+  const { objectives, projects, setObjectiveModalOpen, setObjectives } = useAppStore();
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('project');
@@ -17,59 +17,42 @@ export default function ObjectivesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState<'all' | 'high' | 'medium' | 'low'>('all');
 
+  const { token } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    // Add demo data if empty
-    if (mounted && objectives.length === 0) {
-      const demoObjectives: Objective[] = [
-        {
-          _id: '1',
-          title: 'Lancer la Beta',
-          description: 'Objectif principal du trimestre',
-          project: '1',
-          projectName: 'FINEA',
-          projectColor: '#22c55e',
-          creator: '1',
-          progress: 80,
-          status: 'in_progress',
-          priority: 'high',
-          checkpoints: [
-            { id: '1-1', title: 'Finaliser l\'API', completed: true },
-            { id: '1-2', title: 'Dashboard UI', completed: true },
-            { id: '1-3', title: 'Tests utilisateurs', completed: false },
-          ],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          _id: '2',
-          title: 'Expansion Marketing',
-          description: 'Nouveaux canaux d\'acquisition',
-          project: '2',
-          projectName: 'BUISPACE',
-          projectColor: '#f97316',
-          creator: '1',
-          progress: 50,
-          status: 'in_progress',
-          priority: 'medium',
-          checkpoints: [
-            { id: '2-1', title: 'Campagne Facebook', completed: true },
-            { id: '2-2', title: 'SEO Optimisation', completed: true },
-            { id: '2-3', title: 'Partenariats influenceurs', completed: false },
-            { id: '2-4', title: 'Webinaire de lancement', completed: false },
-            { id: '2-5', title: 'Newsletter hebdomadaire', completed: false },
-            { id: '2-6', title: 'Reporting mensuel', completed: false },
-          ],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+    const fetchObjectives = async () => {
+      if (!token) return;
+
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/objectives', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          setObjectives(data.data);
+        } else {
+          toast.error(data.error || 'Erreur lors du chargement des objectifs');
         }
-      ];
-      demoObjectives.forEach(obj => addObjective(obj));
+      } catch {
+        toast.error('Erreur lors du chargement des objectifs');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchObjectives();
     }
-  }, [mounted, objectives.length, addObjective]);
+  }, [token, setObjectives]);
 
   if (!mounted) return null;
 
@@ -78,7 +61,9 @@ export default function ObjectivesPage() {
   const filteredObjectives = objectives.filter(obj => {
     const matchesSearch = obj.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPriority = filterPriority === 'all' || obj.priority === filterPriority;
-    const matchesProject = !projectId || obj.project === projectId;
+    // Le projet peut être un ID (string) ou un objet peuplé
+    const objectiveProjectId = typeof obj.project === 'object' ? (obj.project as { _id: string })?._id : obj.project;
+    const matchesProject = !projectId || objectiveProjectId === projectId;
     return matchesSearch && matchesPriority && matchesProject;
   });
 
@@ -177,12 +162,16 @@ export default function ObjectivesPage() {
         </AnimatePresence>
       </div>
 
-      {filteredObjectives.length === 0 && (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+        </div>
+      ) : filteredObjectives.length === 0 ? (
         <div className="text-center py-20 bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
           <Target className="w-12 h-12 text-gray-600 mx-auto mb-4 opacity-20" />
           <p className="text-gray-500">Aucun objectif trouvé</p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

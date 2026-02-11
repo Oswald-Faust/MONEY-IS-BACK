@@ -9,12 +9,20 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const body = await request.json();
-    const { firstName, lastName, email, password } = body;
+    const { firstName, lastName, email, password, role = 'user' } = body;
 
     // Validation
     if (!firstName || !lastName || !email || !password) {
       return NextResponse.json(
         { success: false, error: 'Tous les champs sont requis' },
+        { status: 400 }
+      );
+    }
+
+    // Valider le rôle
+    if (role !== 'user' && role !== 'admin') {
+      return NextResponse.json(
+        { success: false, error: 'Rôle invalide' },
         { status: 400 }
       );
     }
@@ -34,7 +42,7 @@ export async function POST(request: NextRequest) {
       lastName,
       email: email.toLowerCase(),
       password,
-      role: 'admin',
+      role: role,
       preferences: {
         theme: 'dark',
         notifications: true,
@@ -72,7 +80,8 @@ export async function POST(request: NextRequest) {
       preferences: user.preferences,
     };
 
-    return NextResponse.json({
+    // Créer la réponse
+    const response = NextResponse.json({
       success: true,
       data: {
         user: userResponse,
@@ -84,6 +93,17 @@ export async function POST(request: NextRequest) {
       },
       message: 'Inscription réussie',
     });
+
+    // Définir le cookie auth-token côté serveur (valable 7 jours)
+    response.cookies.set('auth-token', token, {
+      httpOnly: false, // Doit être false pour que le client puisse le lire
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 jours en secondes
+      path: '/',
+    });
+
+    return response;
   } catch (error: any) {
     console.error('Register error:', error);
     return NextResponse.json(

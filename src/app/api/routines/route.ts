@@ -17,7 +17,12 @@ export async function GET(request: NextRequest) {
     const projectId = searchParams.get('project');
     const activeOnly = searchParams.get('active') !== 'false';
 
-    const query: any = { creator: auth.userId };
+    const query: any = {};
+    if (auth.role !== 'admin') {
+      // Pour l'instant on rend tout public comme demandé, 
+      // on pourra ajouter une info isPublic sur les routines plus tard
+    }
+    
     if (projectId) query.project = projectId;
     if (activeOnly) query.isActive = true;
 

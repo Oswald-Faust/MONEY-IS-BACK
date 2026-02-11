@@ -4,7 +4,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Trash2, Share2, MessageSquare, Paperclip } from 'lucide-react';
 import type { Idea } from '@/types';
-import { useAppStore } from '@/store';
+import { useAuthStore, useAppStore } from '@/store';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 interface IdeaCardProps {
   idea: Idea;
@@ -12,21 +14,63 @@ interface IdeaCardProps {
 
 export default function IdeaCard({ idea }: IdeaCardProps) {
   const { deleteIdea, projects } = useAppStore();
+  const { token } = useAuthStore();
+  const router = useRouter();
   const project = projects.find(p => p._id === idea.project);
+
+  const statusConfig = {
+    raw: { label: 'Premier Degré', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
+    standby: { label: 'Standby', color: 'bg-amber-500/20 text-amber-500 border-amber-500/30' },
+    in_progress: { label: 'En Cours', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+    implemented: { label: 'Terminé', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
+    archived: { label: 'Archivé', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
+  };
+
+  const statusInfo = statusConfig[idea.status as keyof typeof statusConfig] || statusConfig.raw;
+
+  const handleDelete = async () => {
+    if (!confirm('Supprimer cette idée ?')) return;
+    
+    try {
+      if (!token) {
+        // Fallback for local dev if no token (shouldn't happen in authenticated app)
+        deleteIdea(idea._id);
+        return;
+      }
+
+      const response = await fetch(`/api/ideas?id=${idea._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        deleteIdea(idea._id);
+        toast.success('Idée supprimée');
+      } else {
+        toast.error('Erreur lors de la suppression');
+      }
+    } catch {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ y: -4 }}
-      className="glass-card group p-5 flex flex-col gap-4 relative overflow-hidden"
+      onClick={() => router.push(`/ideas/${idea._id}`)}
+      className="glass-card group p-5 flex flex-col gap-4 relative overflow-hidden h-full cursor-pointer"
     >
       {/* Background Glow */}
       <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[60px] opacity-20 transition-all group-hover:opacity-30`} style={{ backgroundColor: project?.color || '#f59e0b' }} />
 
       <div className="flex items-start justify-between relative z-10">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="flex-1 pr-8">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             {project && (
               <span 
                 className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border"
@@ -39,20 +83,21 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
                 {project.name}
               </span>
             )}
-            <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-md">
-              {new Date(idea.createdAt).toLocaleDateString()}
+            <span 
+              className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${statusInfo.color}`}
+            >
+              {statusInfo.label}
             </span>
           </div>
           <h3 className="text-lg font-bold text-white group-hover:text-amber-500 transition-colors tracking-tight leading-tight">
             {idea.title}
           </h3>
         </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-0">
           <button 
-            onClick={() => {
-              if (confirm('Supprimer cette idée ?')) {
-                deleteIdea(idea._id);
-              }
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete();
             }}
             className="p-2 rounded-xl hover:bg-red-500/10 text-gray-600 hover:text-red-400 transition-all"
           >

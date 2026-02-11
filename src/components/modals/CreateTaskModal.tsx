@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, Calendar, Flag, FolderKanban } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
-import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import type { TaskPriority, Project } from '@/types';
 
@@ -21,16 +20,11 @@ const priorityOptions: { value: TaskPriority; label: string; color: string }[] =
   { value: 'waiting', label: 'En attente', color: '#94a3b8' },
 ];
 
-const demoProjects: Project[] = [
-  { _id: '1', name: 'FINEA', color: '#22c55e', description: '', icon: '', workspace: '', owner: '', members: [], status: 'active', tasksCount: 0, completedTasksCount: 0, createdAt: '', updatedAt: '' },
-  { _id: '2', name: 'BUISPACE', color: '#f97316', description: '', icon: '', workspace: '', owner: '', members: [], status: 'active', tasksCount: 0, completedTasksCount: 0, createdAt: '', updatedAt: '' },
-  { _id: '3', name: 'AFFI', color: '#ef4444', description: '', icon: '', workspace: '', owner: '', members: [], status: 'active', tasksCount: 0, completedTasksCount: 0, createdAt: '', updatedAt: '' },
-  { _id: '4', name: 'MATHIAS', color: '#94a3b8', description: '', icon: '', workspace: '', owner: '', members: [], status: 'active', tasksCount: 0, completedTasksCount: 0, createdAt: '', updatedAt: '' },
-  { _id: '5', name: 'AGBK', color: '#8b5cf6', description: '', icon: '', workspace: '', owner: '', members: [], status: 'active', tasksCount: 0, completedTasksCount: 0, createdAt: '', updatedAt: '' },
-];
+// Les demoProjects ont été supprimés pour utiliser les vrais projets du store
 
-export default function CreateTaskModal({ isOpen, onClose, projects, defaultProjectId }: CreateTaskModalProps) {
-  const { addTask } = useAppStore();
+export default function CreateTaskModal({ isOpen, onClose, projects: propProjects, defaultProjectId }: CreateTaskModalProps) {
+  const { addTask, projects: storeProjects } = useAppStore();
+  const { token, user } = useAuthStore();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -42,9 +36,8 @@ export default function CreateTaskModal({ isOpen, onClose, projects, defaultProj
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const projectList = projects?.length ? projects : demoProjects;
+  const projectList = propProjects?.length ? propProjects : storeProjects;
   
-  const selectedProject = projectList.find(p => p._id === formData.project);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,38 +55,43 @@ export default function CreateTaskModal({ isOpen, onClose, projects, defaultProj
     setIsSubmitting(true);
 
     try {
-      const newTask = {
-        _id: Date.now().toString(),
-        title: formData.title,
-        description: formData.description,
-        project: formData.project,
-        projectName: selectedProject?.name,
-        projectColor: selectedProject?.color,
-        creator: '1',
-        priority: formData.priority,
-        status: 'todo' as const,
-        dueDate: formData.dueDate || undefined,
-        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
-        subtasks: [],
-        attachments: [],
-        comments: [],
-        order: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      if (!token || !user) {
+        toast.error('Vous devez être connecté');
+        return;
+      }
 
-      addTask(newTask);
-      toast.success('Tâche créée avec succès !');
-      setFormData({
-        title: '',
-        description: '',
-        project: defaultProjectId || '',
-        priority: 'less_important',
-        dueDate: '',
-        tags: '',
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          project: formData.project,
+          priority: formData.priority,
+          dueDate: formData.dueDate || undefined,
+          tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+        }),
       });
-      onClose();
-    } catch (error) {
+
+      const data = await response.json();
+
+      if (data.success) {
+        addTask(data.data);
+        toast.success('Tâche créée avec succès !');
+        setFormData({
+          title: '',
+          description: '',
+          project: defaultProjectId || '',
+          priority: 'less_important',
+          dueDate: '',
+          tags: '',
+        });
+        onClose();
+      }
+    } catch {
       toast.error('Erreur lors de la création de la tâche');
     } finally {
       setIsSubmitting(false);
@@ -175,34 +173,36 @@ export default function CreateTaskModal({ isOpen, onClose, projects, defaultProj
                   />
                 </div>
 
-                {/* Project Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
-                    <FolderKanban className="w-4 h-4" />
-                    Projet *
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {projectList.map((project) => (
-                      <button
-                        key={project._id}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, project: project._id })}
-                        className={`
-                          flex items-center gap-2 p-3 rounded-xl border transition-all duration-200
-                          ${formData.project === project._id
-                            ? 'bg-[rgba(255,255,255,0.08)] border-white/20'
-                            : 'bg-[rgba(255,255,255,0.02)] border-white/5 hover:bg-[rgba(255,255,255,0.05)]'}
-                        `}
-                      >
-                        <div
-                          className="w-3 h-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: project.color }}
-                        />
-                        <span className="text-sm text-white truncate">{project.name}</span>
-                      </button>
-                    ))}
+                {/* Project Selection - Hidden if defaultProjectId is provided */}
+                {!defaultProjectId && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                      <FolderKanban className="w-4 h-4" />
+                      Projet *
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {projectList.map((project) => (
+                        <button
+                          key={project._id}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, project: project._id })}
+                          className={`
+                            flex items-center gap-2 p-3 rounded-xl border transition-all duration-200
+                            ${formData.project === project._id
+                              ? 'bg-[rgba(255,255,255,0.08)] border-white/20'
+                              : 'bg-[rgba(255,255,255,0.02)] border-white/5 hover:bg-[rgba(255,255,255,0.05)]'}
+                          `}
+                        >
+                          <div
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: project.color }}
+                          />
+                          <span className="text-sm text-white truncate">{project.name}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Priority */}
                 <div>
@@ -242,7 +242,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects, defaultProj
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Date d'échéance
+                    Date d&apos;échéance
                   </label>
                   <input
                     type="date"

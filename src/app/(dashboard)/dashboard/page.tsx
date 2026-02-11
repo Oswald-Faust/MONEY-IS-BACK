@@ -14,58 +14,103 @@ import {
   LayoutGrid,
   RotateCcw,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import ProjectCard from '@/components/ui/ProjectCard';
 import TaskCard from '@/components/ui/TaskCard';
 import CustomCalendar from '@/components/ui/CustomCalendar';
 import RoutineCalendar from '@/components/ui/RoutineCalendar';
 import { useAppStore, useAuthStore } from '@/store';
-import type { Project, Task, Routine } from '@/types';
-
-// Demo data for initialization
-const demoProjects: Project[] = [
-  { _id: '1', name: 'FINEA', description: 'Application de gestion financière', color: '#22c55e', icon: 'folder', workspace: '1', owner: '1', members: [], status: 'active', tasksCount: 12, completedTasksCount: 8, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '2', name: 'BUISPACE', description: 'Plateforme immobilière', color: '#f97316', icon: 'folder', workspace: '1', owner: '1', members: [], status: 'active', tasksCount: 18, completedTasksCount: 5, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '3', name: 'AFFI', description: 'Système d\'affiliation', color: '#ef4444', icon: 'folder', workspace: '1', owner: '1', members: [], status: 'active', tasksCount: 7, completedTasksCount: 3, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '4', name: 'MATHIAS', description: 'Projets personnels', color: '#94a3b8', icon: 'folder', workspace: '1', owner: '1', members: [], status: 'active', tasksCount: 4, completedTasksCount: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '5', name: 'AGBK', description: 'Business Development', color: '#8b5cf6', icon: 'folder', workspace: '1', owner: '1', members: [], status: 'active', tasksCount: 9, completedTasksCount: 6, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
-
-const demoTasks: Task[] = [
-  { _id: '1', title: 'CRÉE PAMM MAT & NICO', project: '1', projectName: 'FINEA', projectColor: '#22c55e', creator: '1', priority: 'important', status: 'todo', tags: [], subtasks: [], attachments: [], comments: [], order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '2', title: 'PAIEMENT EN PLUSIEURS FOIS', project: '2', projectName: 'BUISPACE', projectColor: '#f97316', creator: '1', priority: 'important', status: 'todo', tags: [], subtasks: [], attachments: [], comments: [], order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '3', title: 'BRANCHER ALGOMATIC', project: '2', projectName: 'BUISPACE', projectColor: '#f97316', creator: '1', priority: 'important', status: 'todo', tags: [], subtasks: [], attachments: [], comments: [], order: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '8', title: 'INTÉGRET OUTILS COMPARAISON', project: '1', projectName: 'FINEA', projectColor: '#22c55e', creator: '1', priority: 'waiting', status: 'todo', tags: [], subtasks: [], attachments: [], comments: [], order: 7, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '9', title: 'PROMO JEU CONCOURS', project: '1', projectName: 'FINEA', projectColor: '#22c55e', creator: '1', priority: 'waiting', status: 'todo', tags: [], subtasks: [], attachments: [], comments: [], order: 8, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
-
-const demoRoutines: Routine[] = [
-  { _id: '1', title: 'Post Instagram', description: 'Publication Instagram', project: '4', projectColor: '#ef4444', creator: '1', days: { monday: true, tuesday: true, wednesday: true, thursday: true, friday: true, saturday: true, sunday: true }, isActive: true, color: '#ef4444', completedDates: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { _id: '2', title: 'Story Review', description: 'Check analytics', project: '4', projectColor: '#8b5cf6', creator: '1', days: { monday: false, tuesday: true, wednesday: true, thursday: true, friday: true, saturday: true, sunday: true }, isActive: true, color: '#8b5cf6', completedDates: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
+// import type { Project, Task, Routine } from '@/types'; // Types non utilisés pour l'instant
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const { 
     projects, 
     tasks, 
     routines, 
     setProjects, 
-    setTasks, 
+    setTasks,
     setRoutines,
     setProjectModalOpen, 
     setTaskModalOpen,
     setCurrentProject,
-    deleteProject
+    deleteProject,
+    updateTask
   } = useAppStore();
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize store with demo data if empty
+  const handleCompleteTask = async (taskId: string) => {
+    const task = tasks.find(t => t._id === taskId);
+    if (!task) return;
+
+    const newStatus = task.status === 'done' ? 'todo' : 'done';
+
+    try {
+      const response = await fetch(`/api/tasks?id=${taskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        updateTask(taskId, { status: newStatus });
+        toast.success(newStatus === 'done' ? 'Tâche terminée !' : 'Tâche rétablie');
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
+  // Initialize store with real data from API
   useEffect(() => {
-    if (projects.length === 0) setProjects(demoProjects);
-    if (tasks.length === 0) setTasks(demoTasks);
-    if (routines.length === 0) setRoutines(demoRoutines);
-  }, [projects.length, tasks.length, routines.length, setProjects, setTasks, setRoutines]);
+    const fetchData = async () => {
+      if (!token) return;
+      
+      try {
+        setIsLoading(true);
+        
+        // Fetch projects
+        const projectsRes = await fetch('/api/projects', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const projectsData = await projectsRes.json();
+        if (projectsData.success) {
+          setProjects(projectsData.data);
+        }
+
+        // Fetch tasks
+        const tasksRes = await fetch('/api/tasks', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const tasksData = await tasksRes.json();
+        if (tasksData.success) {
+          setTasks(tasksData.data);
+        }
+
+        // Fetch routines
+        const routinesRes = await fetch('/api/routines', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const routinesData = await routinesRes.json();
+        if (routinesData.success) {
+          setRoutines(routinesData.data);
+        }
+        
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token, setProjects, setTasks, setRoutines]);
 
   const stats = [
     { label: 'Projets Actifs', value: projects.length, icon: FolderKanban, color: '#6366f1' },
@@ -157,23 +202,59 @@ export default function DashboardPage() {
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {projects.slice(0, 4).map((project) => (
-            <ProjectCard 
-              key={project._id} 
-              project={project}
-              onEdit={(p) => {
-                setCurrentProject(p);
-                setProjectModalOpen(true);
-              }}
-              onDelete={(p) => {
-                if (window.confirm(`Êtes-vous sûr de vouloir supprimer le projet ${p.name} ?`)) {
-                  deleteProject(p._id);
-                }
-              }}
-            />
-          ))}
-        </div>
+        
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="text-center py-12 text-dim bg-white/5 rounded-xl border border-white/5">
+            <FolderKanban className="w-12 h-12 mx-auto mb-3 opacity-50" />
+            <p className="text-lg font-medium text-white mb-1">Aucun projet pour le moment</p>
+            <p className="text-sm">Créez votre premier projet pour commencer</p>
+            <button 
+              onClick={() => setProjectModalOpen(true)}
+              className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600 transition-colors"
+            >
+              Créer un projet
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {projects.slice(0, 4).map((project) => (
+              <ProjectCard 
+                key={project._id} 
+                project={project}
+                onEdit={(p) => {
+                  setCurrentProject(p);
+                  setProjectModalOpen(true);
+                }}
+                onDelete={async (p) => {
+                  if (window.confirm(`Êtes-vous sûr de vouloir supprimer le projet ${p.name} ?`)) {
+                    try {
+                      const response = await fetch(`/api/projects?id=${p._id}`, {
+                        method: 'DELETE',
+                        headers: {
+                          'Authorization': `Bearer ${token}`,
+                        },
+                      });
+                      
+                      const data = await response.json();
+                      if (data.success) {
+                        deleteProject(p._id);
+                        toast.success('Projet supprimé !');
+                      } else {
+                        toast.error(data.error || 'Erreur lors de la suppression');
+                      }
+                    } catch (error) {
+                      toast.error('Erreur de connexion');
+                    }
+                  }
+                }}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Main Grid: Priorities & Calendar/Routines */}
@@ -199,7 +280,7 @@ export default function DashboardPage() {
                 <div className="space-y-4">
                   <AnimatePresence mode="popLayout">
                     {importantTasks.map(task => (
-                      <TaskCard key={task._id} task={task} />
+                      <TaskCard key={task._id} task={task} onComplete={handleCompleteTask} />
                     ))}
                   </AnimatePresence>
                 </div>
@@ -217,7 +298,7 @@ export default function DashboardPage() {
                 <div className="space-y-4">
                   <AnimatePresence mode="popLayout">
                     {otherTasks.map(task => (
-                      <TaskCard key={task._id} task={task} />
+                      <TaskCard key={task._id} task={task} onComplete={handleCompleteTask} />
                     ))}
                   </AnimatePresence>
                   <button 

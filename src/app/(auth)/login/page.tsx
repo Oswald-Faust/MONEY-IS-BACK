@@ -33,7 +33,8 @@ export default function LoginPage() {
       if (data.success) {
         setAuth(data.data.user, data.data.token);
         toast.success('Connexion réussie !');
-        router.push('/dashboard');
+        // Utiliser replace pour éviter les problèmes d'hydratation
+        window.location.replace('/dashboard');
       } else {
         toast.error(data.error || 'Erreur de connexion');
       }

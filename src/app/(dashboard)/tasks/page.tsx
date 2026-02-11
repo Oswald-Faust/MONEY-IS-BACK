@@ -8,11 +8,13 @@ import CreateTaskModal from '@/components/modals/CreateTaskModal';
 import type { TaskPriority } from '@/types';
 
 
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import { useSearchParams, useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function TasksPage() {
-  const { tasks, projects, isTaskModalOpen, setTaskModalOpen } = useAppStore();
+  const { tasks, projects, isTaskModalOpen, setTaskModalOpen, setTasks, updateTask } = useAppStore();
+  const { token } = useAuthStore();
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('project');
@@ -22,9 +24,55 @@ export default function TasksPage() {
   const [filterPriority, setFilterPriority] = useState<TaskPriority | 'all'>('all');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
 
+  const handleCompleteTask = async (taskId: string) => {
+    const task = tasks.find(t => t._id === taskId);
+    if (!task) return;
+
+    const newStatus = task.status === 'done' ? 'todo' : 'done';
+
+    try {
+      const response = await fetch(`/api/tasks?id=${taskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        updateTask(taskId, { status: newStatus });
+        toast.success(newStatus === 'done' ? 'Tâche terminée !' : 'Tâche rétablie');
+      }
+    } catch {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
   React.useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch('/api/tasks', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setTasks(data.data);
+        }
+      } catch {
+        toast.error('Erreur lors du chargement des tâches');
+      }
+    };
+
+    if (token) {
+      fetchTasks();
+    }
+  }, [token, setTasks]);
 
   if (!mounted) return null;
 
@@ -34,7 +82,11 @@ export default function TasksPage() {
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPriority = filterPriority === 'all' || task.priority === filterPriority;
-    const matchesProject = !projectId || task.project === projectId;
+    
+    // Le projet peut être un ID (string) ou un objet peuplé
+    const taskProjectId = typeof task.project === 'object' ? (task.project as { _id: string })?._id : task.project;
+    const matchesProject = !projectId || taskProjectId === projectId;
+    
     return matchesSearch && matchesPriority && matchesProject;
   });
 
@@ -159,7 +211,7 @@ export default function TasksPage() {
             <div className="space-y-3">
               <AnimatePresence>
                 {importantTasks.map((task) => (
-                  <TaskCard key={task._id} task={task} />
+                  <TaskCard key={task._id} task={task} onComplete={handleCompleteTask} />
                 ))}
               </AnimatePresence>
               {importantTasks.length === 0 && (
@@ -180,7 +232,7 @@ export default function TasksPage() {
             <div className="space-y-3">
               <AnimatePresence>
                 {lessImportantTasks.map((task) => (
-                  <TaskCard key={task._id} task={task} />
+                  <TaskCard key={task._id} task={task} onComplete={handleCompleteTask} />
                 ))}
               </AnimatePresence>
               {lessImportantTasks.length === 0 && (
@@ -201,7 +253,7 @@ export default function TasksPage() {
             <div className="space-y-3">
               <AnimatePresence>
                 {waitingTasks.map((task) => (
-                  <TaskCard key={task._id} task={task} />
+                  <TaskCard key={task._id} task={task} onComplete={handleCompleteTask} />
                 ))}
               </AnimatePresence>
               {waitingTasks.length === 0 && (
@@ -223,7 +275,7 @@ export default function TasksPage() {
           <div className="space-y-2">
             <AnimatePresence>
               {filteredTasks.map((task) => (
-                <TaskCard key={task._id} task={task} />
+                <TaskCard key={task._id} task={task} onComplete={handleCompleteTask} />
               ))}
             </AnimatePresence>
             {filteredTasks.length === 0 && (
@@ -233,7 +285,11 @@ export default function TasksPage() {
         </motion.div>
       )}
 
-      <CreateTaskModal isOpen={isTaskModalOpen} onClose={() => setTaskModalOpen(false)} />
+      <CreateTaskModal 
+        isOpen={isTaskModalOpen} 
+        onClose={() => setTaskModalOpen(false)} 
+        defaultProjectId={projectId || undefined}
+      />
     </div>
   );
 }

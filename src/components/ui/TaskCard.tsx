@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { Task } from '@/types';
+import { useRouter } from 'next/navigation';
 import { CheckCircle, Clock, MoreHorizontal, Calendar, MessageSquare, Paperclip } from 'lucide-react';
 
 interface TaskCardProps {
@@ -37,6 +38,7 @@ const priorityConfig = {
 };
 
 export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCardProps) {
+  const router = useRouter();
   const priority = priorityConfig[task.priority];
   const completedSubtasks = task.subtasks?.filter((s) => s.completed).length || 0;
   const totalSubtasks = task.subtasks?.length || 0;
@@ -51,7 +53,7 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
       className="group relative"
-      onClick={() => onClick?.(task)}
+      onClick={() => onClick ? onClick(task) : router.push(`/tasks/${task._id}`)}
       style={{ cursor: 'pointer' }}
     >
       <div

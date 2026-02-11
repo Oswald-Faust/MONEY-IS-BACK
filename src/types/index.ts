@@ -4,7 +4,7 @@ export interface User {
   lastName: string;
   email: string;
   avatar?: string;
-  role: 'admin' | 'editor' | 'visitor';
+  role: 'user' | 'admin';
   preferences: {
     theme: 'dark' | 'light';
     notifications: boolean;
@@ -165,7 +165,7 @@ export interface Idea {
   creator: string | User;
   attachments: Attachment[];
   tags: string[];
-  status: 'draft' | 'active' | 'archived' | 'implemented';
+  status: 'raw' | 'standby' | 'in_progress' | 'implemented' | 'archived';
   votes: string[];
   comments: Comment[];
   createdAt: string;

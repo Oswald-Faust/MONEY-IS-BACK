@@ -77,7 +77,7 @@ const ProjectSchema = new Schema<IProject>(
     settings: {
       isPublic: {
         type: Boolean,
-        default: false,
+        default: true,
       },
       allowComments: {
         type: Boolean,

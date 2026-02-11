@@ -1,102 +1,83 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search, FolderKanban } from 'lucide-react';
 import ProjectCard from '@/components/ui/ProjectCard';
 import CreateProjectModal from '@/components/modals/CreateProjectModal';
 import { useAppStore } from '@/store';
-import type { Project } from '@/types';
 
-// Demo data
-const demoProjects: Project[] = [
-  {
-    _id: '1',
-    name: 'FINEA',
-    description: 'Application de gestion financière',
-    color: '#22c55e',
-    icon: 'folder',
-    workspace: '1',
-    owner: '1',
-    members: [],
-    status: 'active',
-    tasksCount: 12,
-    completedTasksCount: 8,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: '2',
-    name: 'BUISPACE',
-    description: 'Plateforme immobilière',
-    color: '#f97316',
-    icon: 'folder',
-    workspace: '1',
-    owner: '1',
-    members: [],
-    status: 'active',
-    tasksCount: 18,
-    completedTasksCount: 5,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: '3',
-    name: 'AFFI',
-    description: 'Système d\'affiliation',
-    color: '#ef4444',
-    icon: 'folder',
-    workspace: '1',
-    owner: '1',
-    members: [],
-    status: 'active',
-    tasksCount: 7,
-    completedTasksCount: 3,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: '4',
-    name: 'MATHIAS',
-    description: 'Projets personnels',
-    color: '#94a3b8',
-    icon: 'folder',
-    workspace: '1',
-    owner: '1',
-    members: [],
-    status: 'active',
-    tasksCount: 4,
-    completedTasksCount: 2,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: '5',
-    name: 'AGBK',
-    description: 'Business Development',
-    color: '#8b5cf6',
-    icon: 'folder',
-    workspace: '1',
-    owner: '1',
-    members: [],
-    status: 'active',
-    tasksCount: 9,
-    completedTasksCount: 6,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+import toast from 'react-hot-toast';
+import { useAuthStore } from '@/store';
 
 export default function ProjectsPage() {
-  const { projects: storeProjects, setProjectModalOpen, isProjectModalOpen } = useAppStore();
+  const { projects, setProjects, setProjectModalOpen, isProjectModalOpen, setCurrentProject, deleteProject } = useAppStore();
+  const { token } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived' | 'paused'>('all');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Combine store projects with demo projects
-  const allProjects = [...demoProjects, ...storeProjects];
+  const handleDeleteProject = async (id: string, name: string) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le projet ${name} ?`)) {
+      try {
+        const response = await fetch(`/api/projects?id=${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          deleteProject(id);
+          toast.success('Projet supprimé !');
+        } else {
+          toast.error(data.error || 'Erreur lors de la suppression');
+        }
+      } catch (error) {
+        toast.error('Erreur de connexion');
+      }
+    }
+  };
+
+  const handleEditProject = (project: any) => {
+    setCurrentProject(project);
+    setProjectModalOpen(true);
+  };
+
+  // Charger les projets depuis l'API
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/projects', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setProjects(data.data);
+        } else {
+          toast.error(data.error || 'Erreur lors du chargement des projets');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        toast.error('Erreur de connexion au serveur');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchProjects();
+    }
+  }, [token, setProjects]);
 
   // Filter projects
-  const filteredProjects = allProjects.filter((project) => {
+  const filteredProjects = projects.filter((project) => {
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           project.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
@@ -129,7 +110,10 @@ export default function ProjectsPage() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setProjectModalOpen(true)}
+          onClick={() => {
+            setCurrentProject(null);
+            setProjectModalOpen(true);
+          }}
           className="
             px-4 py-2.5 rounded-xl flex items-center gap-2
             bg-gradient-to-r from-indigo-600 to-purple-600
@@ -191,11 +175,19 @@ export default function ProjectsPage() {
       </motion.div>
 
       {/* Projects Grid */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+            <p className="text-gray-400">Chargement des projets...</p>
+          </div>
+        </div>
+      ) : (
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
         {/* Active Projects */}
         {activeProjects.length > 0 && (
           <div className="mb-8">
@@ -210,7 +202,11 @@ export default function ProjectsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <ProjectCard project={project} />
+                  <ProjectCard 
+                    project={project} 
+                    onEdit={handleEditProject}
+                    onDelete={(p) => handleDeleteProject(p._id, p.name)}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -231,7 +227,11 @@ export default function ProjectsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <ProjectCard project={project} />
+                  <ProjectCard 
+                    project={project} 
+                    onEdit={handleEditProject}
+                    onDelete={(p) => handleDeleteProject(p._id, p.name)}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -252,7 +252,11 @@ export default function ProjectsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <ProjectCard project={project} />
+                  <ProjectCard 
+                    project={project} 
+                    onEdit={handleEditProject}
+                    onDelete={(p) => handleDeleteProject(p._id, p.name)}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -269,7 +273,10 @@ export default function ProjectsPage() {
                 : 'Créez votre premier projet pour commencer'}
             </p>
             <button
-              onClick={() => setProjectModalOpen(true)}
+              onClick={() => {
+                setCurrentProject(null);
+                setProjectModalOpen(true);
+              }}
               className="
                 px-4 py-2 rounded-xl
                 bg-gradient-to-r from-indigo-600 to-purple-600
@@ -281,6 +288,7 @@ export default function ProjectsPage() {
           </div>
         )}
       </motion.section>
+      )}
 
       {/* Create Project Modal */}
       <CreateProjectModal

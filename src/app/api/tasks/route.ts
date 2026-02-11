@@ -14,9 +14,32 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const projectId = searchParams.get('project');
     const priority = searchParams.get('priority');
     const status = searchParams.get('status');
+
+    if (id) {
+      const task = await Task.findById(id)
+        .populate('project', 'name color')
+        .populate('assignee', 'firstName lastName avatar')
+        .populate('creator', 'firstName lastName avatar');
+
+      if (!task) {
+        return NextResponse.json({ success: false, error: 'Tâche non trouvée' }, { status: 404 });
+      }
+
+      const taskWithProject = {
+        ...task.toObject(),
+        projectName: (task.project as any)?.name,
+        projectColor: (task.project as any)?.color,
+      };
+
+      return NextResponse.json({
+        success: true,
+        data: taskWithProject,
+      });
+    }
 
     const query: any = {};
     
@@ -141,3 +164,56 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    await connectDB();
+    
+    const auth = await verifyAuth(request);
+    if (!auth.success) {
+      return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID de la tâche requis' }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const task = await Task.findById(id);
+
+    if (!task) {
+      return NextResponse.json({ success: false, error: 'Tâche non trouvée' }, { status: 404 });
+    }
+
+    // Update status and handle project counts
+    if (body.status && body.status !== task.status) {
+      const isNowDone = body.status === 'done';
+      const wasDone = task.status === 'done';
+      
+      if (isNowDone && !wasDone) {
+        await Project.findByIdAndUpdate(task.project, { $inc: { completedTasksCount: 1 } });
+      } else if (!isNowDone && wasDone) {
+        await Project.findByIdAndUpdate(task.project, { $inc: { completedTasksCount: -1 } });
+      }
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(id, body, { new: true })
+      .populate('project', 'name color')
+      .populate('creator', 'firstName lastName avatar');
+
+    return NextResponse.json({
+      success: true,
+      data: updatedTask,
+    });
+  } catch (error: any) {
+    console.error('Update task error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Erreur lors de la mise à jour' },
+      { status: 500 }
+    );
+  }
+}
+

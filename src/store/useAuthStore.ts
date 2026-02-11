@@ -29,12 +29,19 @@ export const useAuthStore = create<AuthState>()(
         isLoading: false,
       }),
       
-      logout: () => set({
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-      }),
+      logout: () => {
+        // Supprimer le cookie
+        if (typeof document !== 'undefined') {
+          document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+        
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      },
       
       setLoading: (loading) => set({ isLoading: loading }),
       
@@ -49,6 +56,12 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        // Définir isLoading à false après la restauration du state
+        if (state) {
+          state.isLoading = false;
+        }
+      },
     }
   )
 );

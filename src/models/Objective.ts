@@ -8,12 +8,10 @@ export interface IObjective extends Document {
   creator: mongoose.Types.ObjectId;
   targetDate?: Date;
   progress: number; // 0-100
-  keyResults: {
+  checkpoints: {
     id: string;
     title: string;
-    target: number;
-    current: number;
-    unit: string;
+    completed: boolean;
   }[];
   status: 'not_started' | 'in_progress' | 'completed' | 'cancelled';
   priority: 'low' | 'medium' | 'high';
@@ -52,7 +50,7 @@ const ObjectiveSchema = new Schema<IObjective>(
       min: 0,
       max: 100,
     },
-    keyResults: [{
+    checkpoints: [{
       id: {
         type: String,
         required: true,
@@ -62,17 +60,9 @@ const ObjectiveSchema = new Schema<IObjective>(
         required: true,
         trim: true,
       },
-      target: {
-        type: Number,
-        required: true,
-      },
-      current: {
-        type: Number,
-        default: 0,
-      },
-      unit: {
-        type: String,
-        default: '',
+      completed: {
+        type: Boolean,
+        default: false,
       },
     }],
     status: {

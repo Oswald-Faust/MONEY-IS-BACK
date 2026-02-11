@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Palette, Loader2 } from 'lucide-react';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
 const colorOptions = [
@@ -27,6 +27,7 @@ interface CreateProjectModalProps {
 
 export default function CreateProjectModal({ isOpen, onClose, workspaceId }: CreateProjectModalProps) {
   const { addProject, updateProject, currentProject } = useAppStore();
+  const { token, user } = useAuthStore();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -73,29 +74,58 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
           updatedAt: new Date().toISOString(),
         });
         toast.success('Projet mis à jour !');
+        onClose();
       } else {
-        // For demo, create project locally
-        const newProject = {
-          _id: Date.now().toString(),
-          name: formData.name,
-          description: formData.description,
-          color: formData.color,
-          icon: 'folder',
-          workspace: workspaceId || '1',
-          owner: '1',
-          members: [],
-          status: 'active' as const,
-          tasksCount: 0,
-          completedTasksCount: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
+        if (!token || !user) {
+          toast.error('Vous devez être connecté');
+          return;
+        }
 
-        addProject(newProject);
-        toast.success('Projet créé avec succès !');
+        // Récupérer le workspace de l'utilisateur
+        const workspaceResponse = await fetch('/api/workspaces', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const workspaceData = await workspaceResponse.json();
+        
+        if (!workspaceData.success || !workspaceData.data || workspaceData.data.length === 0) {
+          toast.error('Workspace non trouvé');
+          return;
+        }
+
+        const workspace = workspaceData.data[0]; // Premier workspace
+
+        // Créer le projet via l'API
+        const response = await fetch('/api/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            description: formData.description,
+            color: formData.color,
+            icon: 'folder',
+            workspace: workspace._id,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Ajouter le projet au store
+          addProject(data.data);
+          toast.success('Projet créé avec succès !');
+          onClose();
+        } else {
+          toast.error(data.error || 'Erreur lors de la création');
+        }
       }
-      onClose();
-    } catch {
+    } catch (error) {
+      console.error('Error:', error);
       toast.error(isEditing ? 'Erreur lors de la mise à jour' : 'Erreur lors de la création');
     } finally {
       setIsSubmitting(false);

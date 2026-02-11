@@ -20,11 +20,8 @@ export async function GET(request: NextRequest) {
     if (workspaceId) query.workspace = workspaceId;
     if (status !== 'all') query.status = status;
 
-    // Get projects user is member of or owner
-    query.$or = [
-      { owner: auth.userId },
-      { 'members.user': auth.userId },
-    ];
+    // Tous les utilisateurs voient tous les projets, sans distinction.
+    // L'ancien filtrage par rôle/membre a été retiré à la demande de l'utilisateur.
 
     const projects = await Project.find(query)
       .populate('owner', 'firstName lastName avatar')
@@ -91,3 +88,45 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    await connectDB();
+    
+    const auth = await verifyAuth(request);
+    if (!auth.success) {
+      return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID du projet requis' }, { status: 400 });
+    }
+
+    // Vérifier que l'utilisateur est le propriétaire
+    const project = await Project.findById(id);
+    if (!project) {
+      return NextResponse.json({ success: false, error: 'Projet non trouvé' }, { status: 404 });
+    }
+
+    if (project.owner.toString() !== auth.userId) {
+      return NextResponse.json({ success: false, error: 'Seul le propriétaire peut supprimer le projet' }, { status: 403 });
+    }
+
+    await Project.findByIdAndDelete(id);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Projet supprimé avec succès',
+    });
+  } catch (error: any) {
+    console.error('Delete project error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Erreur lors de la suppression' },
+      { status: 500 }
+    );
+  }
+}
+

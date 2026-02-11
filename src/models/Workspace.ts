@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import './User'; // S'assurer que le modèle User est enregistré
 
 export interface IWorkspace extends Document {
   _id: mongoose.Types.ObjectId;

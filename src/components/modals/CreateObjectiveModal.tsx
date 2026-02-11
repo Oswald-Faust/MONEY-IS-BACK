@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Target, Plus, Trash2, Loader2 } from 'lucide-react';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
+
+import { useSearchParams } from 'next/navigation';
 
 interface CreateObjectiveModalProps {
   isOpen: boolean;
@@ -13,15 +15,28 @@ interface CreateObjectiveModalProps {
 
 export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiveModalProps) {
   const { projects, addObjective } = useAppStore();
+  const { token } = useAuthStore();
+  const searchParams = useSearchParams();
+  const defaultProjectId = searchParams.get('project');
+  
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    project: '',
+    project: defaultProjectId || '',
     priority: 'medium' as 'low' | 'medium' | 'high',
-    targetDate: '',
-    checkpoints: [{ id: '1', title: '', completed: false }]
+    checkpoints: [{ id: '1', title: '', completed: false }],
+    targetDate: ''
   });
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        project: defaultProjectId || ''
+      }));
+    }
+  }, [isOpen, defaultProjectId]);
 
   const addCheckpoint = () => {
     setFormData(prev => ({
@@ -54,37 +69,46 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
     
     setLoading(true);
     try {
-      const selectedProject = projects.find(p => p._id === formData.project);
-      
-      const newObjective = {
-        _id: Math.random().toString(36).substr(2, 9),
-        title: formData.title,
-        description: formData.description,
-        project: formData.project,
-        projectName: selectedProject?.name,
-        projectColor: selectedProject?.color,
-        creator: '1',
-        progress: 0,
-        checkpoints: formData.checkpoints.filter(cp => cp.title.trim() !== ''),
-        status: 'not_started' as const,
-        priority: formData.priority,
-        targetDate: formData.targetDate,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      if (!token) {
+        toast.error('Vous devez être connecté');
+        return;
+      }
 
-      addObjective(newObjective);
-      toast.success('Objectif créé avec succès');
-      onClose();
-      setFormData({
-        title: '',
-        description: '',
-        project: '',
-        priority: 'medium',
-        targetDate: '',
-        checkpoints: [{ id: '1', title: '', completed: false }]
+      const response = await fetch('/api/objectives', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          project: formData.project,
+          priority: formData.priority,
+          targetDate: formData.targetDate,
+          checkpoints: formData.checkpoints.filter(cp => cp.title.trim() !== ''),
+        }),
       });
-    } catch {
+
+      const data = await response.json();
+
+      if (data.success) {
+        addObjective(data.data);
+        toast.success('Objectif créé avec succès');
+        onClose();
+        setFormData({
+          title: '',
+          description: '',
+          project: '',
+          priority: 'medium',
+          targetDate: '',
+          checkpoints: [{ id: '1', title: '', completed: false }]
+        });
+      } else {
+        toast.error(data.error || 'Erreur lors de la création');
+      }
+    } catch (error) {
+      console.error('Error creating objective:', error);
       toast.error('Erreur lors de la création de l\'objectif');
     } finally {
       setLoading(false);

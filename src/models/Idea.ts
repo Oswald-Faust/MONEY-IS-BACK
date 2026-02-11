@@ -15,7 +15,7 @@ export interface IIdea extends Document {
     uploadedAt: Date;
   }[];
   tags: string[];
-  status: 'draft' | 'active' | 'archived' | 'implemented';
+  status: 'raw' | 'standby' | 'in_progress' | 'implemented' | 'archived';
   votes: mongoose.Types.ObjectId[];
   comments: {
     id: string;
@@ -81,8 +81,8 @@ const IdeaSchema = new Schema<IIdea>(
     }],
     status: {
       type: String,
-      enum: ['draft', 'active', 'archived', 'implemented'],
-      default: 'active',
+      enum: ['raw', 'standby', 'in_progress', 'implemented', 'archived'],
+      default: 'raw',
     },
     votes: [{
       type: Schema.Types.ObjectId,

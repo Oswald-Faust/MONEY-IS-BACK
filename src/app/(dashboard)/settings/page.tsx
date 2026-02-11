@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
   Shield, 
@@ -14,14 +14,17 @@ import {
   Mail,
   Trash2,
   ChevronRight,
+  ChevronLeft,
   Check,
   CreditCard,
   Zap,
-  RotateCcw
+  RotateCcw,
+  Users
 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
+import UsersManagement from '@/components/admin/UsersManagement';
 
 const sidebarItems = [
   { id: 'profile', label: 'Profil Personnel', icon: User },
@@ -30,12 +33,14 @@ const sidebarItems = [
   { id: 'preferences', label: 'Préférences', icon: Palette },
   { id: 'billing', label: 'Abonnement', icon: CreditCard },
   { id: 'devices', label: 'Appareils', icon: Smartphone },
+  { id: 'users', label: 'Gestion des utilisateurs', icon: Users, adminOnly: true },
 ];
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   // Form states
   const [profileData, setProfileData] = useState({
@@ -61,10 +66,63 @@ export default function SettingsPage() {
         <p className="text-dim">Gérez votre profil, vos préférences et la sécurité de votre compte.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="flex flex-col lg:flex-row gap-8">
         {/* Settings Navigation */}
-        <div className="lg:col-span-3 space-y-2">
-          {sidebarItems.map((item) => (
+        <motion.div 
+          initial={false}
+          animate={{ width: isSidebarOpen ? 280 : 80 }}
+          className="hidden lg:block shrink-0 space-y-2"
+        >
+          <div className="flex justify-end mb-2">
+             <button
+              onClick={() => setSidebarOpen(!isSidebarOpen)}
+              className="p-2 rounded-lg hover:bg-white/5 text-dim hover:text-white transition-colors"
+            >
+              {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </button>
+          </div>
+          
+          {sidebarItems
+            .filter(item => !item.adminOnly || user?.role === 'admin')
+            .map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`
+                w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 overflow-hidden whitespace-nowrap
+                ${activeTab === item.id 
+                  ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-lg shadow-indigo-500/5' 
+                  : 'text-dim hover:bg-white/5 hover:text-white border border-transparent'}
+              `}
+            >
+              <item.icon className="w-5 h-5 shrink-0" />
+              <AnimatePresence mode="wait">
+                {isSidebarOpen && (
+                  <motion.span 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="font-medium text-sm"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              {activeTab === item.id && isSidebarOpen && (
+                <motion.div layoutId="active-pill" className="ml-auto">
+                  <ChevronRight className="w-4 h-4" />
+                </motion.div>
+              )}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* Mobile Navigation (Standard Stacked) */}
+        <div className="block lg:hidden space-y-2">
+           {sidebarItems
+            .filter(item => !item.adminOnly || user?.role === 'admin')
+            .map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
@@ -78,7 +136,7 @@ export default function SettingsPage() {
               <item.icon className="w-5 h-5" />
               <span className="font-medium text-sm">{item.label}</span>
               {activeTab === item.id && (
-                <motion.div layoutId="active-pill" className="ml-auto">
+                <motion.div layoutId="active-pill-mobile" className="ml-auto">
                   <ChevronRight className="w-4 h-4" />
                 </motion.div>
               )}
@@ -87,7 +145,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Content Area */}
-        <div className="lg:col-span-9">
+        <div className="flex-1 min-w-0">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, x: 20 }}
@@ -281,6 +339,10 @@ export default function SettingsPage() {
                         </select>
                     </div>
                 </div>
+            )}
+
+            {activeTab === 'users' && user?.role === 'admin' && (
+              <UsersManagement />
             )}
 
             {/* Footer Actions */}
