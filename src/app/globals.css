@@ -22,12 +22,12 @@
   --bg-primary: #0a0a0f;
   --bg-secondary: #0f0f15;
   --bg-tertiary: #14141d;
-  --bg-card: rgba(20, 20, 29, 0.6);
+  --bg-card: #14141d;
 
   /* Glass Effects */
-  --glass-bg: rgba(255, 255, 255, 0.015);
-  --glass-border: rgba(255, 255, 255, 0.03);
-  --glass-hover: rgba(255, 255, 255, 0.04);
+  --glass-bg: rgba(255, 255, 255, 0.01);
+  --glass-border: rgba(255, 255, 255, 0.015);
+  --glass-hover: rgba(255, 255, 255, 0.02);
 
   /* Text Colors */
   --text-main: #ffffff;
@@ -35,9 +35,9 @@
   --text-muted: #64748b;
   
   /* Component Specific */
-  --input-bg: rgba(255, 255, 255, 0.015);
-  --input-border: rgba(255, 255, 255, 0.04);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.05);
+  --input-bg: #0d0d14;
+  --input-border: rgba(255, 255, 255, 0.02);
+  --scrollbar-thumb: #1a1a24;
 }
 
 :root:not(.dark) {

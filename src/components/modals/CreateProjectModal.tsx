@@ -161,7 +161,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-[rgba(255,255,255,0.05)] text-gray-400 hover:text-white transition-colors"
+                  className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -181,8 +181,8 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                     placeholder="Ex: FINEA, BUISPACE..."
                     className="
                       w-full px-4 py-3 text-sm
-                      bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                      rounded-xl text-white placeholder-gray-500
+                      bg-glass-bg border border-glass-border
+                      rounded-xl text-main placeholder-dim
                       focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                       transition-all duration-200
                     "
@@ -201,8 +201,8 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                     rows={3}
                     className="
                       w-full px-4 py-3 text-sm resize-none
-                      bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                      rounded-xl text-white placeholder-gray-500
+                      bg-glass-bg border border-glass-border
+                      rounded-xl text-main placeholder-dim
                       focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                       transition-all duration-200
                     "
@@ -241,9 +241,9 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                     onClick={onClose}
                     className="
                       flex-1 py-3 rounded-xl
-                      bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                      text-gray-300 font-medium text-sm
-                      hover:bg-[rgba(255,255,255,0.06)]
+                      bg-glass-bg border border-glass-border
+                      text-dim font-medium text-sm
+                      hover:bg-glass-hover
                       transition-all duration-200
                     "
                   >

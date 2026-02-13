@@ -106,7 +106,10 @@ export default function AccessControl() {
       }
 
       if (settingsData.success && settingsData.data?.permissions) {
-        setGlobalPermissions(settingsData.data.permissions);
+        setGlobalPermissions(prev => ({
+          ...prev,
+          ...settingsData.data.permissions
+        }));
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -165,7 +168,7 @@ export default function AccessControl() {
       }
   }, [activeSection, selectedUser, fetchUserProjects]);
 
-  const updateSettings = async (updates: any) => {
+  const updateSettings = async (updates: Partial<typeof globalPermissions>) => {
     try {
         const response = await fetch('/api/admin/settings', {
             method: 'POST',
@@ -180,12 +183,12 @@ export default function AccessControl() {
         
         const data = await response.json();
         if (data.success) {
-            setGlobalPermissions(data.data.permissions);
+            setGlobalPermissions(prev => ({ ...prev, ...data.data.permissions }));
             toast.success('Paramètres mis à jour');
         } else {
             throw new Error(data.error);
         }
-    } catch (error) {
+    } catch {
         toast.error('Erreur lors de la mise à jour');
     }
   };
@@ -203,18 +206,18 @@ export default function AccessControl() {
     let ext = newFileType.trim().toLowerCase();
     if (!ext.startsWith('.')) ext = '.' + ext;
     
-    if (globalPermissions.allowedFileTypes.includes(ext)) {
+    if ((globalPermissions.allowedFileTypes || []).includes(ext)) {
         toast.error('Cette extension est déjà autorisée');
         return;
     }
     
-    const newTypes = [...globalPermissions.allowedFileTypes, ext];
+    const newTypes = [...(globalPermissions.allowedFileTypes || []), ext];
     updateSettings({ allowedFileTypes: newTypes });
     setNewFileType('');
   };
 
   const handleFileTypeRemove = (ext: string) => {
-    const newTypes = globalPermissions.allowedFileTypes.filter(t => t !== ext);
+    const newTypes = (globalPermissions.allowedFileTypes || []).filter(t => t !== ext);
     updateSettings({ allowedFileTypes: newTypes });
   };
 
@@ -239,7 +242,7 @@ export default function AccessControl() {
           } else {
               toast.error(data.error || 'Erreur lors de la mise à jour');
           }
-      } catch (error) {
+      } catch {
           toast.error('Erreur de connexion');
       }
   };
@@ -279,7 +282,7 @@ export default function AccessControl() {
           } else {
               toast.error(data.error || 'Une erreur est survenue');
           }
-      } catch (error) {
+      } catch {
           toast.error('Erreur de connexion');
       }
   };
@@ -345,7 +348,7 @@ export default function AccessControl() {
         {['permissions', 'projects', 'drive', 'verifications'].map((tab) => (
              <button
              key={tab}
-             onClick={() => setActiveSection(tab as any)}
+             onClick={() => setActiveSection(tab as 'permissions' | 'projects' | 'drive' | 'verifications')}
              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all capitalize ${
                activeSection === tab 
                  ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
@@ -429,7 +432,7 @@ export default function AccessControl() {
                 </form>
 
                 <div className="flex flex-wrap gap-2">
-                  {globalPermissions.allowedFileTypes.map(ext => (
+                  {(globalPermissions.allowedFileTypes || []).map(ext => (
                     <div key={ext} className="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold">
                       {ext}
                       <button 
@@ -440,7 +443,7 @@ export default function AccessControl() {
                       </button>
                     </div>
                   ))}
-                  {globalPermissions.allowedFileTypes.length === 0 && (
+                  {(globalPermissions.allowedFileTypes || []).length === 0 && (
                     <p className="text-sm text-dim italic">Toutes les extensions sont actuellement autorisées.</p>
                   )}
                 </div>
@@ -587,8 +590,8 @@ export default function AccessControl() {
             <div className="flex-1 overflow-y-auto pl-2">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h4 className="text-base font-bold text-white mb-1">Restrictions d'Accès Drive</h4>
-                        <p className="text-xs text-dim">Contrôlez la visibilité et l'utilisation du Drive pour cet utilisateur.</p>
+                        <h4 className="text-base font-bold text-white mb-1">Restrictions d&apos;Accès Drive</h4>
+                        <p className="text-xs text-dim">Contrôlez la visibilité et l&apos;utilisation du Drive pour cet utilisateur.</p>
                     </div>
                 </div>
 

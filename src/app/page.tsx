@@ -138,7 +138,7 @@ export default function HomePage() {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 px-6 py-5 border-b border-glass-border backdrop-blur-xl bg-primary/20">
+      <nav className="relative z-10 px-6 py-5 backdrop-blur-xl bg-primary/20">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
@@ -259,7 +259,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="relative z-10 px-6 py-16 border-y border-glass-border bg-glass-bg/30">
+      <section className="relative z-10 px-6 py-16 bg-glass-bg/30">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -445,7 +445,7 @@ export default function HomePage() {
                 <p className="text-dim text-lg mb-6 leading-relaxed italic">
                   &ldquo;{testimonial.content}&rdquo;
                 </p>
-                <div className="border-t border-glass-border pt-4">
+                <div className="pt-4">
                   <p className="text-main font-semibold">{testimonial.name}</p>
                   <p className="text-dim text-sm">{testimonial.role}</p>
                 </div>
@@ -489,7 +489,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-glass-border py-12 px-6 bg-primary/20 backdrop-blur-md">
+      <footer className="relative z-10 py-12 px-6 bg-primary/20 backdrop-blur-md">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
@@ -507,7 +507,7 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="mt-8 pt-8 border-t border-glass-border text-center">
+          <div className="mt-8 pt-8 text-center text-dim/50">
             <p className="text-dim text-sm">
               © 2026 MONEY IS BACK. Tous droits réservés. Fait avec ❤️ pour les équipes qui veulent performer.
             </p>

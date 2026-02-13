@@ -79,7 +79,7 @@ export default function RoutineCalendar({
   return (
     <div className="glass-card !p-0 overflow-hidden shadow-2xl">
       {/* Header */}
-      <div className="p-6 border-b border-glass-border flex items-center justify-between bg-glass-bg">
+      <div className="p-6 flex items-center justify-between bg-glass-bg">
         <button
           onClick={prevWeek}
           className="flex items-center gap-2 p-2 rounded-xl hover:bg-glass-hover text-dim hover:text-main transition-all"
@@ -114,7 +114,7 @@ export default function RoutineCalendar({
 
       {/* Week Grid */}
       <div className="overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-7 md:divide-x divide-y md:divide-y-0 divide-glass-border">
+        <div className="grid grid-cols-1 md:grid-cols-7 md:divide-x divide-y md:divide-y-0 divide-glass-border/20">
           {weekDays.map((dayDate, dayIndex) => {
             const dayRoutines = getRoutinesForDay(dayIndex);
             const isToday = isSameDay(dayDate, new Date());
@@ -123,7 +123,7 @@ export default function RoutineCalendar({
               <div key={dayIndex} className="min-h-[350px] flex flex-col">
                 {/* Day Header */}
                 <div className={`
-                  p-5 text-center border-b border-glass-border
+                  p-5 text-center
                   ${isToday ? 'bg-indigo-500/5' : ''}
                 `}>
                   <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${isToday ? 'text-indigo-400' : 'text-dim'}`}>
@@ -155,7 +155,7 @@ export default function RoutineCalendar({
                           onClick={() => onRoutineClick?.(routine, dayDate)}
                            className={`
                              p-3 rounded-xl cursor-pointer
-                             transition-all duration-300 border border-glass-border shadow-sm
+                             transition-all duration-300 shadow-sm
                              ${isCompleted ? 'opacity-30' : 'hover:shadow-lg'}
                            `}
                           style={{

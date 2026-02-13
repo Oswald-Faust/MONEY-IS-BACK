@@ -101,12 +101,12 @@ export default function Sidebar() {
           : { x: 0, width: sidebarCollapsed ? 80 : 280 }
         }
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className={`fixed left-0 top-0 h-screen bg-secondary border-r border-glass-border flex flex-col z-[70] ${
-          isMobile ? 'shadow-2xl' : ''
+        className={`fixed left-0 top-0 h-screen bg-secondary flex flex-col z-[70] ${
+          isMobile ? 'shadow-2xl' : 'border-r border-glass-border/30'
         }`}
       >
         {/* Header */}
-        <div className="p-4 flex items-center justify-between border-b border-glass-border">
+        <div className="p-4 flex items-center justify-between">
           <AnimatePresence mode="wait">
             {(!sidebarCollapsed || isMobile) && (
               <motion.div
@@ -149,7 +149,7 @@ export default function Sidebar() {
             <input
               type="text"
               placeholder="Rechercher..."
-              className="w-full pl-11 pr-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-2xl text-main placeholder-dim focus:bg-glass-hover focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300"
+              className="w-full pl-11 pr-4 py-3 text-sm bg-glass-bg rounded-2xl text-main placeholder-dim focus:bg-glass-hover focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300"
             />
           </div>
         </div>
@@ -274,7 +274,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer - User */}
-      <div className="p-3 border-t border-glass-border">
+      <div className="p-3">
         <div className={`
           flex items-center gap-3 px-3 py-2 rounded-xl
           hover:bg-glass-hover transition-all duration-200 group

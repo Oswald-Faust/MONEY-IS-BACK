@@ -117,7 +117,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 mt-2 w-48 z-50 overflow-hidden rounded-2xl bg-secondary border border-glass-border shadow-2xl backdrop-blur-xl"
+                      className="absolute right-0 mt-2 w-48 z-50 overflow-hidden rounded-2xl bg-secondary shadow-2xl backdrop-blur-xl"
                     >
                       <div className="p-1.5 space-y-1">
                         <button
@@ -132,7 +132,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                           <Edit3 className="w-4 h-4 text-dim group-hover/item:text-indigo-400 transition-colors" />
                           Modifier
                         </button>
-                        <div className="h-px bg-glass-border mx-2" />
+                        <div className="h-px bg-glass-bg mx-2" />
                         <button
                           onClick={(e) => {
                             e.preventDefault();
@@ -184,11 +184,11 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
               <div className="relative pt-2">
                 <div className="flex items-center justify-between text-xs mb-3">
                   <span className="text-muted font-bold uppercase tracking-widest">Progression</span>
-                  <span className="font-black text-main px-2 py-0.5 rounded-md bg-glass-bg border border-glass-border" style={{ color: project.color }}>
+                  <span className="font-black text-main px-2 py-0.5 rounded-md bg-glass-bg" style={{ color: project.color }}>
                     {progress}%
                   </span>
                 </div>
-                <div className="h-2 w-full bg-glass-bg rounded-full overflow-hidden border border-glass-border">
+                <div className="h-2 w-full bg-glass-bg rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}

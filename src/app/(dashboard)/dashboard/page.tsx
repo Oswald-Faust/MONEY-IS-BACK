@@ -141,7 +141,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button
             onClick={() => setTaskModalOpen(true)}
-            className="px-6 py-3 rounded-xl bg-glass-bg border border-glass-border text-main font-semibold hover:bg-glass-hover transition-all flex items-center justify-center gap-2"
+            className="px-6 py-3 rounded-xl bg-glass-bg text-main font-semibold hover:bg-glass-hover transition-all flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Nouvelle tâche
@@ -176,7 +176,7 @@ export default function DashboardPage() {
               </p>
               <p className="text-3xl font-bold text-main">{stat.value}</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-glass-bg border border-glass-border group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-glass-bg group-hover:scale-110 transition-transform">
               <stat.icon className="w-6 h-6" style={{ color: stat.color }} />
             </div>
           </motion.div>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
             <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-12 text-dim bg-glass-bg rounded-xl border border-glass-border">
+          <div className="text-center py-12 text-dim bg-glass-bg rounded-xl">
             <FolderKanban className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p className="text-lg font-medium text-main mb-1">Aucun projet pour le moment</p>
             <p className="text-sm text-dim">Créez votre premier projet pour commencer</p>
@@ -301,7 +301,7 @@ export default function DashboardPage() {
                   </AnimatePresence>
                   <button 
                     onClick={() => setTaskModalOpen(true)}
-                    className="w-full p-10 border-2 border-dashed border-glass-border rounded-2xl flex flex-col items-center justify-center text-center opacity-40 hover:opacity-100 hover:border-indigo-500/50 transition-all group"
+                    className="w-full p-10 bg-glass-bg rounded-2xl flex flex-col items-center justify-center text-center opacity-40 hover:opacity-100 hover:bg-glass-hover transition-all group"
                   >
                     <div className="w-10 h-10 rounded-full bg-glass-bg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                       <Plus className="w-5 h-5 flex-shrink-0 text-main" />
@@ -331,7 +331,7 @@ export default function DashboardPage() {
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: routine.color }} />
                     <span className="text-sm font-medium text-main">{routine.title}</span>
                   </div>
-                  <button className="p-1.5 rounded-lg border border-glass-border text-dim group-hover:text-main transition-colors">
+                  <button className="p-1.5 rounded-lg text-dim group-hover:text-main transition-colors">
                     <CheckCircle className="w-4 h-4" />
                   </button>
                 </div>

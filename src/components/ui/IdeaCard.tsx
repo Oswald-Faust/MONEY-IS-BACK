@@ -89,7 +89,7 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
               {statusInfo.label}
             </span>
           </div>
-          <h3 className="text-lg font-bold text-white group-hover:text-amber-500 transition-colors tracking-tight leading-tight">
+          <h3 className="text-lg font-bold text-main group-hover:text-amber-500 transition-colors tracking-tight leading-tight">
             {idea.title}
           </h3>
         </div>
@@ -99,7 +99,7 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
               e.stopPropagation();
               handleDelete();
             }}
-            className="p-2 rounded-xl hover:bg-red-500/10 text-gray-600 hover:text-red-400 transition-all"
+            className="p-2 rounded-xl hover:bg-red-500/10 text-dim hover:text-red-400 transition-all"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -107,7 +107,7 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
       </div>
 
       <div className="relative z-10">
-        <p className="text-sm text-gray-400 line-clamp-3 leading-relaxed">
+        <p className="text-sm text-dim line-clamp-3 leading-relaxed">
           {idea.content}
         </p>
       </div>
@@ -116,7 +116,7 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
       {idea.attachments && idea.attachments.length > 0 && (
         <div className="grid grid-cols-2 gap-2 relative z-10">
           {idea.attachments.slice(0, 4).map((attachment, idx) => (
-            <div key={attachment.id} className="relative aspect-video rounded-lg overflow-hidden bg-white/5 border border-white/10 group/item">
+            <div key={attachment.id} className="relative aspect-video rounded-lg overflow-hidden bg-glass-bg border border-glass-border group/item">
               {attachment.type.startsWith('image/') ? (
                 <img 
                   src={attachment.url} 
@@ -124,9 +124,9 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
                   className="w-full h-full object-cover transition-transform group-hover/item:scale-110" 
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center p-2 group-hover/item:bg-white/5 transition-colors">
-                  <Paperclip className="w-4 h-4 text-gray-500 mb-1" />
-                  <span className="text-[8px] text-gray-600 text-center truncate w-full px-1">{attachment.name}</span>
+                <div className="w-full h-full flex flex-col items-center justify-center p-2 group-hover/item:bg-glass-hover transition-colors">
+                  <Paperclip className="w-4 h-4 text-dim mb-1" />
+                  <span className="text-[8px] text-dim text-center truncate w-full px-1">{attachment.name}</span>
                 </div>
               )}
               {idx === 3 && idea.attachments.length > 4 && (
@@ -142,7 +142,7 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
       {idea.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 relative z-10">
           {idea.tags.map(tag => (
-            <span key={tag} className="px-2 py-0.5 rounded-lg bg-white/[0.03] border border-white/10 text-[9px] font-medium text-gray-500 italic">
+            <span key={tag} className="px-2 py-0.5 rounded-lg bg-glass-bg border border-glass-border text-[9px] font-medium text-dim italic">
               #{tag}
             </span>
           ))}
@@ -150,12 +150,12 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
       )}
 
       {/* Footer / Stats */}
-      <div className="pt-4 border-t border-white/5 flex items-center justify-between relative z-10">
+      <div className="pt-4 border-t border-glass-border flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-dim uppercase tracking-widest">
             <Paperclip className="w-3 h-3" /> {idea.attachments?.length || 0}
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-dim uppercase tracking-widest">
             <MessageSquare className="w-3 h-3" /> {idea.comments?.length || 0}
           </div>
         </div>

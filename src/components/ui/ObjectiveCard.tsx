@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Target, CheckCircle2, Circle, MoreHorizontal } from 'lucide-react';
+import { Target, CheckCircle2, Circle, MoreHorizontal, Send } from 'lucide-react';
 import type { Objective } from '@/types';
 import { useAppStore, useAuthStore } from '@/store';
 import { useRouter } from 'next/navigation';
@@ -81,14 +81,26 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
               </span>
             )}
           </div>
-          <h3 className="text-xl font-bold text-white mt-2">{objective.title}</h3>
+          <h3 className="text-xl font-bold text-main mt-2">{objective.title}</h3>
         </div>
-        <button 
-          onClick={(e) => e.stopPropagation()}
-          className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors"
-        >
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/messages?shareType=objective&shareId=${objective._id}&shareName=${encodeURIComponent(objective.title)}`);
+            }}
+            className="p-2 rounded-lg hover:bg-indigo-500/10 text-indigo-400 opacity-0 group-hover:opacity-100 transition-all"
+            title="Partager en messagerie"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={(e) => e.stopPropagation()}
+            className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
+          >
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Checkpoints */}
@@ -100,27 +112,27 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
               e.stopPropagation();
               toggleCheckpoint(checkpoint.id);
             }}
-            className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all group/item"
+            className="w-full flex items-center justify-between p-3 rounded-xl bg-glass-bg border border-glass-border hover:bg-glass-hover transition-all group/item"
           >
-            <span className={`text-sm font-medium transition-colors ${checkpoint.completed ? 'text-gray-500 line-through' : 'text-gray-300'}`}>
+            <span className={`text-sm font-medium transition-colors ${checkpoint.completed ? 'text-dim line-through opacity-50' : 'text-main'}`}>
               {checkpoint.title}
             </span>
             {checkpoint.completed ? (
               <CheckCircle2 className="w-5 h-5 text-indigo-400" />
             ) : (
-              <Circle className="w-5 h-5 text-gray-600 group-hover/item:text-gray-400 transition-colors" />
+              <Circle className="w-5 h-5 text-dim/30 group-hover/item:text-dim transition-colors" />
             )}
           </button>
         ))}
       </div>
 
       {/* Progress */}
-      <div className="space-y-3 pt-4 border-t border-white/10">
+      <div className="space-y-3 pt-4 border-t border-glass-border">
         <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider">
-          <span className="text-gray-500">Progression</span>
-          <span className="text-white">{objective.progress}%</span>
+          <span className="text-dim">Progression</span>
+          <span className="text-main">{objective.progress}%</span>
         </div>
-        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+        <div className="h-2 w-full bg-glass-bg rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${objective.progress}%` }}

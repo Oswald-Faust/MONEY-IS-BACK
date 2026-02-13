@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import type { Task } from '@/types';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Clock, MoreHorizontal, Calendar, MessageSquare, Paperclip } from 'lucide-react';
+import { CheckCircle, Clock, MoreHorizontal, Calendar, MessageSquare, Send } from 'lucide-react';
 
 interface TaskCardProps {
   task: Task;
@@ -59,9 +59,8 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
       <div
         className={`
           relative overflow-hidden rounded-2xl p-6
-          bg-glass-bg border border-glass-border
-          hover:bg-glass-hover hover:border-indigo-500/20
-          hover:shadow-xl transition-all duration-300
+          bg-glass-bg
+          hover:bg-glass-hover hover:shadow-xl transition-all duration-300
           ${isCompleted ? 'opacity-50' : ''}
         `}
       >
@@ -149,20 +148,36 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
             </div>
           </div>
 
-          {/* More Options - Cleaned up */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit?.(task);
-            }}
-            className="
-              opacity-0 group-hover:opacity-100
-              p-2 rounded-xl hover:bg-glass-hover
-              transition-all duration-200
-            "
-          >
-            <MoreHorizontal className="w-5 h-5 text-dim" />
-          </button>
+          {/* Actions */}
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/messages?shareType=task&shareId=${task._id}&shareName=${encodeURIComponent(task.title)}`);
+              }}
+              className="
+                opacity-0 group-hover:opacity-100
+                p-2 rounded-xl hover:bg-glass-hover text-indigo-400
+                transition-all duration-200
+              "
+              title="Partager en messagerie"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(task);
+              }}
+              className="
+                opacity-0 group-hover:opacity-100
+                p-2 rounded-xl hover:bg-glass-hover text-dim
+                transition-all duration-200
+              "
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>
