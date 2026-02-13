@@ -7,6 +7,7 @@ export interface IRoutine extends Document {
   project: mongoose.Types.ObjectId;
   projectColor?: string;
   creator: mongoose.Types.ObjectId;
+  assignee?: mongoose.Types.ObjectId;
   days: {
     monday: boolean;
     tuesday: boolean;
@@ -50,6 +51,10 @@ const RoutineSchema = new Schema<IRoutine>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    assignee: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
     days: {
       monday: { type: Boolean, default: false },

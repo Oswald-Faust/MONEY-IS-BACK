@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Idea from '@/models/Idea';
+import User from '@/models/User';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
     if (id) {
       const idea = await Idea.findById(id)
         .populate('creator', 'firstName lastName avatar')
+        .populate('assignee', 'firstName lastName avatar')
         .populate('project', 'name color');
       
       if (!idea) {
@@ -38,6 +40,7 @@ export async function GET(request: NextRequest) {
 
     const ideas = await Idea.find(query)
       .populate('creator', 'firstName lastName avatar')
+      .populate('assignee', 'firstName lastName avatar')
       .populate('project', 'name color')
       .sort({ createdAt: -1 });
 
@@ -70,7 +73,8 @@ export async function POST(request: NextRequest) {
       project: projectId, 
       status = 'raw',
       tags = [],
-      attachments = []
+      attachments = [],
+      assignee
     } = body;
 
     if (!title || !content) {
@@ -89,10 +93,12 @@ export async function POST(request: NextRequest) {
       tags,
       attachments,
       votes: [],
-      comments: []
+      comments: [],
+      assignee
     });
 
     await idea.populate('creator', 'firstName lastName avatar');
+    await idea.populate('assignee', 'firstName lastName avatar');
     if (projectId) {
       await idea.populate('project', 'name color');
     }
@@ -131,6 +137,7 @@ export async function PATCH(request: NextRequest) {
     
     const updatedIdea = await Idea.findByIdAndUpdate(id, body, { new: true })
       .populate('creator', 'firstName lastName avatar')
+      .populate('assignee', 'firstName lastName avatar')
       .populate('project', 'name color');
 
     if (!updatedIdea) {

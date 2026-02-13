@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, FolderKanban, Clock } from 'lucide-react';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import type { RoutineDays, Project } from '@/types';
+import UserSelector from '@/components/ui/UserSelector';
 
 interface CreateRoutineModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ const dayOptions: { key: keyof RoutineDays; label: string }[] = [
 
 export default function CreateRoutineModal({ isOpen, onClose, projects }: CreateRoutineModalProps) {
   const { addRoutine, projects: storeProjects } = useAppStore();
+  const { token } = useAuthStore();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -40,6 +42,7 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
       saturday: false,
       sunday: false,
     } as RoutineDays,
+    assignee: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -65,44 +68,63 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
       return;
     }
 
+    if (!formData.project) {
+        toast.error('Le projet est requis');
+        return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const newRoutine = {
-        _id: Date.now().toString(),
-        title: formData.title,
-        description: formData.description,
-        project: formData.project,
-        projectColor: selectedProject?.color || '#6366f1',
-        creator: '1',
-        days: formData.days,
-        time: formData.time || undefined,
-        isActive: true,
-        color: selectedProject?.color || '#6366f1',
-        completedDates: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      if (!token) {
+        toast.error('Vous devez être connecté');
+        return;
+      }
 
-      addRoutine(newRoutine);
-      toast.success('Routine créée avec succès !');
-      setFormData({
-        title: '',
-        description: '',
-        project: '',
-        time: '',
-        days: {
-          monday: true,
-          tuesday: true,
-          wednesday: true,
-          thursday: true,
-          friday: true,
-          saturday: false,
-          sunday: false,
+      const response = await fetch('/api/routines', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          project: formData.project,
+          time: formData.time,
+          days: formData.days,
+          color: selectedProject?.color,
+          assignee: formData.assignee || undefined
+        }),
       });
-      onClose();
-    } catch {
+
+      const data = await response.json();
+
+      if (data.success) {
+        addRoutine(data.data);
+        toast.success('Routine créée avec succès !');
+        setFormData({
+          title: '',
+          description: '',
+          project: '',
+          time: '',
+          days: {
+            monday: true,
+            tuesday: true,
+            wednesday: true,
+            thursday: true,
+            friday: true,
+            saturday: false,
+            sunday: false,
+          },
+          assignee: ''
+        });
+        onClose();
+      } else {
+        toast.error(data.error || 'Erreur lors de la création');
+      }
+    } catch (error) {
+      console.error(error);
       toast.error('Erreur lors de la création de la routine');
     } finally {
       setIsSubmitting(false);
@@ -152,20 +174,28 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
-                    <FolderKanban className="w-4 h-4" /> Projet associé
+                    <FolderKanban className="w-4 h-4" /> Projet associé *
                   </label>
                   <select
                     value={formData.project}
                     onChange={(e) => setFormData({ ...formData, project: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 appearance-none bg-[#1a1a24]"
                   >
-                    <option value="" className="bg-bg-primary text-white">Aucun projet</option>
+                    <option value="" className="bg-[#1a1a24] text-gray-400">Sélectionner un projet</option>
                     {projectList.map((p) => (
-                      <option key={p._id} value={p._id} className="bg-bg-primary text-white">
+                      <option key={p._id} value={p._id} className="bg-[#1a1a24] text-white">
                         {p.name}
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* Assignee */}
+                <div>
+                  <UserSelector 
+                    value={formData.assignee}
+                    onChange={(userId) => setFormData({ ...formData, assignee: userId })}
+                  />
                 </div>
 
                 <div>
@@ -212,9 +242,9 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 py-4 rounded-xl bg-indigo-500 text-white font-bold hover:bg-indigo-400 transition-all disabled:opacity-50"
+                    className="flex-1 py-4 rounded-xl bg-indigo-500 text-white font-bold hover:bg-indigo-400 transition-all disabled:opacity-50 flex items-center justify-center"
                   >
-                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'CRÉER'}
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'CRÉER'}
                   </button>
                 </div>
               </form>

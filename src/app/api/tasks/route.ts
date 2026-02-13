@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Task from '@/models/Task';
 import Project from '@/models/Project';
+import User from '@/models/User';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -23,7 +24,8 @@ export async function GET(request: NextRequest) {
       const task = await Task.findById(id)
         .populate('project', 'name color')
         .populate('assignee', 'firstName lastName avatar')
-        .populate('creator', 'firstName lastName avatar');
+        .populate('creator', 'firstName lastName avatar')
+        .populate('comments.user', 'firstName lastName avatar');
 
       if (!task) {
         return NextResponse.json({ success: false, error: 'Tâche non trouvée' }, { status: 404 });
@@ -202,7 +204,8 @@ export async function PATCH(request: NextRequest) {
 
     const updatedTask = await Task.findByIdAndUpdate(id, body, { new: true })
       .populate('project', 'name color')
-      .populate('creator', 'firstName lastName avatar');
+      .populate('creator', 'firstName lastName avatar')
+      .populate('comments.user', 'firstName lastName avatar');
 
     return NextResponse.json({
       success: true,
@@ -212,6 +215,50 @@ export async function PATCH(request: NextRequest) {
     console.error('Update task error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Erreur lors de la mise à jour' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    await connectDB();
+    
+    const auth = await verifyAuth(request);
+    if (!auth.success) {
+      return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
+    }
+    
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID de la tâche requis' }, { status: 400 });
+    }
+    
+    const task = await Task.findById(id);
+    if (!task) {
+      return NextResponse.json({ success: false, error: 'Tâche non trouvée' }, { status: 404 });
+    }
+    
+    // Update project counts
+    const updateQuery: any = { $inc: { tasksCount: -1 } };
+    if (task.status === 'done') {
+      updateQuery.$inc.completedTasksCount = -1;
+    }
+    
+    await Project.findByIdAndUpdate(task.project, updateQuery);
+    
+    await Task.findByIdAndDelete(id);
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Tâche supprimée avec succès'
+    });
+  } catch (error: any) {
+    console.error('Delete task error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Erreur lors de la suppression' },
       { status: 500 }
     );
   }

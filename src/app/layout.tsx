@@ -10,16 +10,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Project Hub | Gestion de Projets",
+  title: "MONEY IS BACK | Gestion de Projets",
   description: "Plateforme de gestion de projets ultra-personnalisée pour centraliser vos business",
-  keywords: ["gestion de projet", "saas", "productivité", "tâches", "collaboration"],
+  keywords: ["gestion de projet", "saas", "productivity", "tâches", "collaboration"],
   authors: [{ name: "Mathias MERCIER" }],
   openGraph: {
-    title: "Project Hub | Gestion de Projets",
+    title: "MONEY IS BACK | Gestion de Projets",
     description: "Plateforme de gestion de projets ultra-personnalisée",
     type: "website",
   },
 };
+
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -27,21 +29,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={inter.variable}>
+    <html lang="fr" className={inter.variable} suppressHydrationWarning>
       <body className="antialiased">
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#1a1a24',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '12px',
-            },
-          }}
-        />
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#1a1a24',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+              },
+            }}
+          />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

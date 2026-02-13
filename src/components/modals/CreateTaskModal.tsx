@@ -6,6 +6,7 @@ import { X, Loader2, Calendar, Flag, FolderKanban } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import type { TaskPriority, Project } from '@/types';
+import UserSelector from '@/components/ui/UserSelector';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -32,9 +33,19 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
     project: defaultProjectId || '',
     priority: 'less_important' as TaskPriority,
     dueDate: '',
+    assignee: '',
     tags: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        project: defaultProjectId || prev.project || '',
+      }));
+    }
+  }, [isOpen, defaultProjectId]);
 
   const projectList = propProjects?.length ? propProjects : storeProjects;
   
@@ -72,6 +83,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
           project: formData.project,
           priority: formData.priority,
           dueDate: formData.dueDate || undefined,
+          assignee: formData.assignee || undefined,
           tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
         }),
       });
@@ -87,6 +99,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
           project: defaultProjectId || '',
           priority: 'less_important',
           dueDate: '',
+          assignee: '',
           tags: '',
         });
         onClose();
@@ -236,6 +249,15 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Assignee */}
+                <div>
+                   <UserSelector 
+                      value={formData.assignee}
+                      onChange={(userId) => setFormData({ ...formData, assignee: userId })}
+                      className="mb-4"
+                   />
                 </div>
 
                 {/* Due Date */}

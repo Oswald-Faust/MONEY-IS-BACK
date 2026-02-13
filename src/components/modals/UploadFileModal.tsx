@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Loader2, File as FileIcon } from 'lucide-react';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
 interface UploadFileModalProps {
@@ -12,45 +12,55 @@ interface UploadFileModalProps {
 }
 
 export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProps) {
-  const { driveFolders, projects, addDriveFile } = useAppStore();
+  const { token } = useAuthStore();
+  const { driveFolders, projects, addDriveFile, uploadProjectId, uploadFolderId } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [projectId, setProjectId] = useState('');
   const [folderId, setFolderId] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setProjectId(uploadProjectId || '');
+      setFolderId(uploadFolderId || '');
+    }
+  }, [isOpen, uploadProjectId, uploadFolderId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) return toast.error('Veuillez sélectionner un fichier');
+    if (!selectedFile || !token) return toast.error('Veuillez sélectionner un fichier');
     
     setLoading(true);
-    // Simulate upload delay
-    setTimeout(() => {
-      try {
-        const newFile = {
-          _id: Math.random().toString(36).substr(2, 9),
-          name: selectedFile.name,
-          type: selectedFile.type || 'application/octet-stream',
-          size: selectedFile.size,
-          url: URL.createObjectURL(selectedFile),
-          project: projectId || undefined,
-          folderId: folderId || undefined,
-          owner: '1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      if (projectId) formData.append('projectId', projectId);
+      if (folderId) formData.append('folderId', folderId);
 
-        addDriveFile(newFile);
-        toast.success('Fichier ajouté avec succès');
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        addDriveFile(data.file);
+        toast.success('Fichier uploadé avec succès');
         onClose();
         setSelectedFile(null);
         setProjectId('');
         setFolderId('');
-      } catch {
-        toast.error('Erreur lors de l\'ajout');
-      } finally {
-        setLoading(false);
+      } else {
+        toast.error(data.error || 'Erreur lors de l\'upload');
       }
-    }, 1500);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Erreur de connexion lors de l\'upload');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;

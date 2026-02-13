@@ -5,19 +5,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Target, Plus, Trash2, Loader2 } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
+import UserSelector from '@/components/ui/UserSelector';
 
 import { useSearchParams } from 'next/navigation';
+
+import type { Objective } from '@/types';
 
 interface CreateObjectiveModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: Objective | null;
+  defaultProjectId?: string;
 }
 
-export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiveModalProps) {
-  const { projects, addObjective } = useAppStore();
+export default function CreateObjectiveModal({ isOpen, onClose, initialData, defaultProjectId: propProjectId }: CreateObjectiveModalProps) {
+  const { projects, addObjective, updateObjective } = useAppStore();
   const { token } = useAuthStore();
   const searchParams = useSearchParams();
-  const defaultProjectId = searchParams.get('project');
+  const searchProjectId = searchParams.get('project');
+  const defaultProjectId = propProjectId || searchProjectId;
   
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,17 +32,35 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
     project: defaultProjectId || '',
     priority: 'medium' as 'low' | 'medium' | 'high',
     checkpoints: [{ id: '1', title: '', completed: false }],
-    targetDate: ''
+    targetDate: '',
+    assignee: ''
   });
 
   React.useEffect(() => {
     if (isOpen) {
-      setFormData(prev => ({
-        ...prev,
-        project: defaultProjectId || ''
-      }));
+      if (initialData) {
+        setFormData({
+          title: initialData.title,
+          description: initialData.description || '',
+          project: typeof initialData.project === 'object' && initialData.project ? (initialData.project as any)._id : (initialData.project as string) || '',
+          priority: initialData.priority as 'low' | 'medium' | 'high',
+          checkpoints: initialData.checkpoints || [],
+          targetDate: initialData.targetDate ? new Date(initialData.targetDate).toISOString().split('T')[0] : '',
+          assignee: typeof initialData.assignee === 'object' && initialData.assignee ? (initialData.assignee as any)._id : (initialData.assignee as string) || ''
+        });
+      } else {
+        setFormData({
+            title: '',
+            description: '',
+            project: defaultProjectId || '',
+            priority: 'medium' as 'low' | 'medium' | 'high',
+            checkpoints: [{ id: '1', title: '', completed: false }],
+            targetDate: '',
+            assignee: ''
+        });
+      }
     }
-  }, [isOpen, defaultProjectId]);
+  }, [isOpen, defaultProjectId, initialData]);
 
   const addCheckpoint = () => {
     setFormData(prev => ({
@@ -74,8 +98,11 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
         return;
       }
 
-      const response = await fetch('/api/objectives', {
-        method: 'POST',
+      const url = initialData ? `/api/objectives?id=${initialData._id}` : '/api/objectives';
+      const method = initialData ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -86,6 +113,7 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
           project: formData.project,
           priority: formData.priority,
           targetDate: formData.targetDate,
+          assignee: formData.assignee || undefined,
           checkpoints: formData.checkpoints.filter(cp => cp.title.trim() !== ''),
         }),
       });
@@ -93,8 +121,13 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
       const data = await response.json();
 
       if (data.success) {
-        addObjective(data.data);
-        toast.success('Objectif créé avec succès');
+        if (initialData) {
+            updateObjective(data.data._id, data.data);
+            toast.success('Objectif mis à jour avec succès');
+        } else {
+            addObjective(data.data);
+            toast.success('Objectif créé avec succès');
+        }
         onClose();
         setFormData({
           title: '',
@@ -102,14 +135,15 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
           project: '',
           priority: 'medium',
           targetDate: '',
+          assignee: '',
           checkpoints: [{ id: '1', title: '', completed: false }]
         });
       } else {
         toast.error(data.error || 'Erreur lors de la création');
       }
     } catch (error) {
-      console.error('Error creating objective:', error);
-      toast.error('Erreur lors de la création de l\'objectif');
+      console.error('Error saving objective:', error);
+      toast.error('Erreur lors de la sauvegarde de l\'objectif');
     } finally {
       setLoading(false);
     }
@@ -140,7 +174,7 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
               <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
                 <Target className="w-6 h-6" />
               </div>
-              <h2 className="text-xl font-bold text-white">Nouvel Objectif</h2>
+              <h2 className="text-xl font-bold text-white">{initialData ? 'Modifier l\'Objectif' : 'Nouvel Objectif'}</h2>
             </div>
             <button
               onClick={onClose}
@@ -189,6 +223,14 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
                 rows={3}
                 className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-white placeholder-gray-600 focus:border-indigo-500/50 outline-none transition-all resize-none"
               />
+            </div>
+
+            {/* Assignee */}
+            <div>
+               <UserSelector 
+                  value={formData.assignee}
+                  onChange={(userId) => setFormData({ ...formData, assignee: userId })}
+               />
             </div>
 
             {/* Priority & Date */}
@@ -276,7 +318,7 @@ export default function CreateObjectiveModal({ isOpen, onClose }: CreateObjectiv
               disabled={loading}
               className="px-8 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-bold hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-lg shadow-indigo-500/20"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Créer l\'objectif'}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (initialData ? 'Enregistrer' : 'Créer l\'objectif')}
             </button>
           </div>
         </motion.div>

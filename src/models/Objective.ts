@@ -6,6 +6,7 @@ export interface IObjective extends Document {
   description?: string;
   project?: mongoose.Types.ObjectId;
   creator: mongoose.Types.ObjectId;
+  assignee?: mongoose.Types.ObjectId;
   targetDate?: Date;
   progress: number; // 0-100
   checkpoints: {
@@ -40,6 +41,10 @@ const ObjectiveSchema = new Schema<IObjective>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    assignee: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
     targetDate: {
       type: Date,

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Lock, 
@@ -18,6 +19,8 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore, useAuthStore } from '@/store';
+import { Project } from '@/types';
 
 interface SecureId {
   _id: string;
@@ -33,6 +36,8 @@ interface SecureId {
 export default function SecureIdsPage() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get('project');
+  const { projects } = useAppStore();
+  const { token } = useAuthStore();
   const router = useRouter();
 
   // State
@@ -56,42 +61,12 @@ export default function SecureIdsPage() {
     category: 'Général'
   });
 
-  // Fetch initial list if unlocked (or check session)
-  useEffect(() => {
-    // Ideally check if session already has unlock permission, but for now we rely on local state
-    // If refreshed, user must re-enter password. This is safer.
-  }, []);
-
-  const handleUnlock = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
+  const fetchSecureIds = React.useCallback(async () => {
+    if (!projectId || !token) return;
     try {
-      const res = await fetch('/api/auth/verify-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword }),
+      const res = await fetch(`/api/secure-ids?project=${projectId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setIsUnlocked(true);
-        fetchSecureIds();
-      } else {
-        setError(data.error || 'Mot de passe incorrect');
-      }
-    } catch (err) {
-      setError('Erreur de connexion');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchSecureIds = async () => {
-    try {
-      const res = await fetch(`/api/secure-ids?project=${projectId}`);
       
       if (res.status === 403) {
           setError('Accès refusé. Vous devez être administrateur du projet.');
@@ -102,11 +77,47 @@ export default function SecureIdsPage() {
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setSecureIds(data);
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+        console.error(error);
         setError('Erreur lors du chargement des données.');
     }
-  };
+  }, [projectId, token]);
+
+  // Fetch initial list if unlocked (or check session)
+  useEffect(() => {
+    if (isUnlocked && projectId) {
+      fetchSecureIds();
+    }
+  }, [isUnlocked, projectId, fetchSecureIds]);
+
+  const handleUnlock = React.useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/verify-password', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ password: adminPassword }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setIsUnlocked(true);
+      } else {
+        setError(data.error || 'Mot de passe incorrect');
+      }
+    } catch {
+      setError('Erreur de connexion');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [adminPassword, token]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +126,10 @@ export default function SecureIdsPage() {
     try {
       const res = await fetch('/api/secure-ids', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ ...newItem, projectId }),
       });
 
@@ -138,7 +152,8 @@ export default function SecureIdsPage() {
     
     try {
         const res = await fetch(`/api/secure-ids/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
             setSecureIds(prev => prev.filter(i => i._id !== id));
@@ -157,7 +172,9 @@ export default function SecureIdsPage() {
     } else {
       // Show (Fetch)
       try {
-        const res = await fetch(`/api/secure-ids/${id}`);
+        const res = await fetch(`/api/secure-ids/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         if (res.ok) {
            const data = await res.json();
            setRevealedIds(prev => ({ ...prev, [id]: data.password }));
@@ -172,15 +189,6 @@ export default function SecureIdsPage() {
     navigator.clipboard.writeText(text);
     // Could add toast notification here
   };
-
-  if (!projectId) {
-      return (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] text-dim">
-              Projet non spécifié.
-              <button onClick={() => router.back()} className="mt-4 text-indigo-400">Retour</button>
-          </div>
-      );
-  }
 
   if (!isUnlocked) {
     return (
@@ -245,6 +253,62 @@ export default function SecureIdsPage() {
             <ArrowLeft className="w-4 h-4" /> Retour
           </button>
         </motion.div>
+      </div>
+    );
+  }
+
+  if (!projectId) {
+    return (
+      <div className="page-fade pb-20 space-y-10">
+        <div className="flex flex-col items-center text-center space-y-4 max-w-2xl mx-auto pt-10">
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
+            <Unlock className="w-8 h-8 text-red-500" />
+          </div>
+          <h1 className="text-3xl font-bold text-white">Sélecteur de Projet Secouru</h1>
+          <p className="text-dim">
+            Les accès sécurisés sont cloisonnés par projet. Veuillez sélectionner un projet pour accéder à ses identifiants confidentiels.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project: Project) => (
+            <Link key={project._id} href={`/secure-ids?project=${project._id}`}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="glass-card p-6 flex items-center gap-4 hover:border-red-500/30 transition-all cursor-pointer group"
+              >
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold"
+                  style={{ backgroundColor: `${project.color}20`, color: project.color }}
+                >
+                  {project.name.substring(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-white truncate group-hover:text-red-400 transition-colors">{project.name}</h3>
+                  <p className="text-xs text-dim">Accéder au coffre-fort</p>
+                </div>
+                <ArrowLeft className="w-4 h-4 text-dim group-hover:text-red-500 rotate-180 transition-all" />
+              </motion.div>
+            </Link>
+          ))}
+          
+          {projects.length === 0 && (
+            <div className="col-span-full py-20 glass-card flex flex-col items-center justify-center text-center space-y-4 border-dashed border-2">
+              <ShieldAlert className="w-12 h-12 text-dim" />
+              <div>
+                <p className="text-white font-bold">Aucun projet trouvé</p>
+                <p className="text-dim text-sm">Créez d&apos;abord un projet pour y stocker des accès sécurisés.</p>
+              </div>
+              <button 
+                onClick={() => router.push('/projects')}
+                className="text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                Gérer les projets
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -459,7 +523,7 @@ export default function SecureIdsPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-dim uppercase">Nom d'utilisateur / ID</label>
+                            <label className="text-xs font-bold text-dim uppercase">Nom d&apos;utilisateur / ID</label>
                             <input 
                                 type="text" 
                                 value={newItem.username}

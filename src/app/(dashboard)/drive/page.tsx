@@ -10,12 +10,12 @@ import {
   ChevronLeft,
   Grid3X3, 
   List as ListIcon,
-  HardDrive
+  HardDrive,
+  Loader2
 } from 'lucide-react';
 import { FileCard, FolderCard } from '@/components/ui';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import { useSearchParams, useRouter } from 'next/navigation';
-import type { DriveFile, DriveFolder } from '@/types';
 
 export default function DrivePage() {
   const { 
@@ -24,42 +24,58 @@ export default function DrivePage() {
     projects,
     setUploadModalOpen,
     setCreateFolderModalOpen,
-    addDriveFile,
-    addDriveFolder
+    setDriveFiles,
+    setDriveFolders
   } = useAppStore();
   
+  const { token } = useAuthStore();
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('project');
   
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [apiPath, setApiPath] = useState<{ _id: string; name: string }[]>([]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    // Demo data if empty
-    if (mounted && driveFiles.length === 0 && driveFolders.length === 0) {
-      const demoFolders: DriveFolder[] = [
-        { _id: 'f1', name: 'Documents Légaux', project: '1', owner: '1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: 'f2', name: 'Assets Graphiques', project: '2', owner: '1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: 'f3', name: 'Factures 2024', project: '1', owner: '1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      ];
-      
-      const demoFiles: DriveFile[] = [
-        { _id: '1', name: 'Contrat_FINA_v1.pdf', type: 'application/pdf', size: 1024 * 450, url: '#', project: '1', folderId: 'f1', owner: '1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '2', name: 'Logo_BUISPACE.png', type: 'image/png', size: 1024 * 850, url: '#', project: '2', folderId: 'f2', owner: '1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '3', name: 'Plan_Marketing.docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: 1024 * 120, url: '#', project: '1', owner: '1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      ];
-      
-      demoFolders.forEach(f => addDriveFolder(f));
-      demoFiles.forEach(f => addDriveFile(f));
+    const fetchDrive = async () => {
+      if (!token) return;
+      setLoading(true);
+      try {
+        let url = `/api/drive?`;
+        if (projectId) url += `project=${projectId}&`;
+        if (currentFolderId) url += `folderId=${currentFolderId}&`;
+        if (searchQuery) url += `search=${searchQuery}`;
+
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.folders) setDriveFolders(data.folders);
+        if (data.files) setDriveFiles(data.files);
+        if (data.path) setApiPath(data.path);
+      } catch (err) {
+        console.error('Failed to fetch drive:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (mounted) {
+      const timer = setTimeout(() => {
+        fetchDrive();
+      }, searchQuery ? 500 : 0); // Debounce search
+      return () => clearTimeout(timer);
     }
-  }, [mounted, driveFiles.length, driveFolders.length, addDriveFile, addDriveFolder]);
+  }, [mounted, token, projectId, currentFolderId, searchQuery, setDriveFiles, setDriveFolders]);
 
   if (!mounted) return null;
 
@@ -69,27 +85,21 @@ export default function DrivePage() {
   const filteredFolders = driveFolders.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesProject = !projectId || f.project === projectId;
-    const matchesParent = f.parentId === (currentFolderId || undefined);
+    const matchesParent = searchQuery ? true : ((f.parentId || null) === (currentFolderId || null));
     return matchesSearch && matchesProject && matchesParent;
   });
 
   const filteredFiles = driveFiles.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesProject = !projectId || f.project === projectId;
-    const matchesParent = f.folderId === (currentFolderId || undefined);
+    const matchesParent = searchQuery ? true : ((f.folderId || null) === (currentFolderId || null));
     return matchesSearch && matchesProject && matchesParent;
   });
 
   // Breadcrumbs logic
   const getBreadcrumbs = () => {
     const crumbs: { id: string | null; name: string }[] = [{ id: null, name: 'Drive' }];
-    if (currentFolderId) {
-      const folder = driveFolders.find(f => f._id === currentFolderId);
-      if (folder) {
-        // Simple 1-level for now, could be recursive
-        crumbs.push({ id: folder._id, name: folder.name });
-      }
-    }
+    apiPath.forEach(p => crumbs.push({ id: p._id, name: p.name }));
     return crumbs;
   };
 
@@ -125,7 +135,7 @@ export default function DrivePage() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setCreateFolderModalOpen(true)}
+            onClick={() => setCreateFolderModalOpen(true, projectId || undefined, currentFolderId || undefined)}
             className="px-4 py-2.5 rounded-xl flex items-center gap-2 bg-white/[0.03] border border-white/10 text-white font-medium text-sm hover:bg-white/[0.08] transition-all"
           >
             <FolderPlus className="w-4 h-4" />
@@ -134,7 +144,7 @@ export default function DrivePage() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setUploadModalOpen(true)}
+            onClick={() => setUploadModalOpen(true, projectId || undefined, currentFolderId || undefined)}
             className="px-4 py-2.5 rounded-xl flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-sm hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg shadow-indigo-500/20"
           >
             <Upload className="w-4 h-4" />
@@ -190,7 +200,11 @@ export default function DrivePage() {
       </div>
 
       {/* Folders Section */}
-      {filteredFolders.length > 0 && (
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+        </div>
+      ) : filteredFolders.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Dossiers</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -204,21 +218,23 @@ export default function DrivePage() {
       )}
 
       {/* Files Section */}
-      <div className="space-y-4">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Fichiers récents</h2>
-        <div className={viewMode === 'grid' 
-          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-          : "space-y-2"
-        }>
-          <AnimatePresence mode="popLayout">
-            {filteredFiles.map(file => (
-              <FileCard key={file._id} file={file} />
-            ))}
-          </AnimatePresence>
+      {!loading && (
+        <div className="space-y-4">
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Fichiers récents</h2>
+          <div className={viewMode === 'grid' 
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            : "space-y-2"
+          }>
+            <AnimatePresence mode="popLayout">
+              {filteredFiles.map(file => (
+                <FileCard key={file._id} file={file} />
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
+      )}
 
-      {filteredFiles.length === 0 && filteredFolders.length === 0 && (
+      {!loading && filteredFiles.length === 0 && filteredFolders.length === 0 && (
         <div className="text-center py-32 bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
           <HardDrive className="w-16 h-16 text-gray-600 mx-auto mb-6 opacity-20" />
           <p className="text-gray-500 font-medium tracking-wide">Ce dossier est vide</p>

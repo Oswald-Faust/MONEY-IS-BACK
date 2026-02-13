@@ -1,61 +1,175 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
   Shield, 
-  Bell, 
-  Lock, 
-  Smartphone, 
-  Globe, 
-  Palette,
+  Lock,
   Camera,
   Mail,
   Trash2,
   ChevronRight,
   ChevronLeft,
   Check,
-  CreditCard,
-  Zap,
   RotateCcw,
-  Users
+  Users,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
-import Image from 'next/image';
 import UsersManagement from '@/components/admin/UsersManagement';
+import AccessControl from '@/components/admin/AccessControl';
+import Avatar from '@/components/ui/Avatar';
 
 const sidebarItems = [
   { id: 'profile', label: 'Profil Personnel', icon: User },
   { id: 'security', label: 'Sécurité & Accès', icon: Shield },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'preferences', label: 'Préférences', icon: Palette },
-  { id: 'billing', label: 'Abonnement', icon: CreditCard },
-  { id: 'devices', label: 'Appareils', icon: Smartphone },
+  { id: 'access', label: 'Accès & Vérifications', icon: ShieldCheck, adminOnly: true },
   { id: 'users', label: 'Gestion des utilisateurs', icon: Users, adminOnly: true },
 ];
 
+const PRESET_COLORS = [
+  'bg-gradient-to-br from-indigo-500 to-purple-600',
+  'bg-gradient-to-br from-emerald-500 to-teal-600',
+  'bg-gradient-to-br from-orange-500 to-red-600',
+  'bg-gradient-to-br from-pink-500 to-rose-600',
+  'bg-gradient-to-br from-blue-500 to-cyan-600',
+  'bg-gradient-to-br from-yellow-500 to-amber-600',
+  'bg-gradient-to-br from-violet-500 to-fuchsia-600',
+  'bg-gradient-to-br from-slate-500 to-zinc-600',
+];
+
 export default function SettingsPage() {
-  const { user } = useAuthStore();
+  const { user, updateUser, token } = useAuthStore();
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Form states
   const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || 'Mathias',
-    lastName: user?.lastName || 'MERCIER',
-    email: user?.email || 'admin@projecthub.com',
-    bio: 'Entrepreneur & Designer. Passionné par la productivité et les nouveaux business.',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    bio: user?.bio || '',
+    avatar: user?.avatar || null,
+    profileColor: user?.profileColor || PRESET_COLORS[0],
   });
 
-  const handleSave = () => {
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Le fichier est trop volumineux (Max 5MB)');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const toastId = toast.loading('Upload en cours...');
+
+    try {
+      const response = await fetch('/api/upload?type=avatar', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setProfileData(prev => ({ ...prev, avatar: data.url }));
+        toast.success('Avatar chargé ! N\'oubliez pas d\'enregistrer.', { id: toastId });
+      } else {
+        toast.error(data.error || 'Erreur upload', { id: toastId });
+      }
+    } catch {
+      toast.error('Erreur lors de l\'upload', { id: toastId });
+    }
+  };
+
+  const handleSave = async () => {
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      toast.success('Paramètres enregistrés avec succès');
-    }, 1000);
+    const token = useAuthStore.getState().token;
+
+    try {
+      if (activeTab === 'profile') {
+         const response = await fetch('/api/users/me', {
+             method: 'PATCH',
+             headers: {
+                 'Content-Type': 'application/json',
+                 'Authorization': `Bearer ${token}`
+             },
+             body: JSON.stringify(profileData)
+         });
+         
+         const data = await response.json();
+         if (data.success) {
+             updateUser(data.data);
+             toast.success('Profil mis à jour avec succès');
+         } else {
+             throw new Error(data.error);
+         }
+
+      } else if (activeTab === 'security') {
+        // Validation des mots de passe
+        if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+            toast.error('Veuillez remplir tous les champs du mot de passe');
+            setIsSaving(false);
+            return;
+        }
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            toast.error('Les nouveaux mots de passe ne correspondent pas');
+            setIsSaving(false);
+            return;
+        }
+
+        if (passwordData.newPassword.length < 8) {
+            toast.error('Le nouveau mot de passe doit contenir au moins 8 caractères');
+            setIsSaving(false);
+            return;
+        }
+        
+        const response = await fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error);
+        }
+
+        toast.success(data.message || 'Mot de passe modifié avec succès');
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }
+    } catch (error) {
+        console.error('Save error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+        toast.error(errorMessage);
+    } finally {
+        setIsSaving(false);
+    }
   };
 
   return (
@@ -155,29 +269,65 @@ export default function SettingsPage() {
           >
             {activeTab === 'profile' && (
               <div className="space-y-8">
-                <div className="flex items-center gap-6">
+                {/* Avatar Section */}
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-8 border-b border-white/5 pb-8">
                   <div className="relative group">
-                    <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white shadow-2xl overflow-hidden relative">
-                      {user?.avatar ? (
-                        <Image src={user.avatar} alt="Profile" fill className="object-cover" />
-                      ) : (
-                        'M'
-                      )}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                        <Camera className="w-6 h-6 text-white" />
-                      </div>
+                    <Avatar 
+                        src={profileData.avatar} 
+                        fallback={profileData.firstName || user?.firstName || '?'} 
+                        color={profileData.profileColor}
+                        size="xl" // 24x24 approx
+                        className="w-24 h-24 rounded-3xl text-3xl shadow-2xl"
+                    />
+                    <div 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer rounded-3xl"
+                    >
+                      <Camera className="w-6 h-6 text-white" />
                     </div>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleFileChange} 
+                    />
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-white">Photo de profil</h3>
-                    <p className="text-sm text-dim">JPG, GIF ou PNG. Max 2MB.</p>
-                    <div className="flex gap-2 mt-3">
-                      <button className="px-4 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-bold hover:bg-indigo-500/20 transition-colors">
-                        Changer
+                  
+                  <div className="space-y-4 flex-1">
+                    <div>
+                        <h3 className="text-lg font-bold text-white">Photo de profil</h3>
+                        <p className="text-sm text-dim">Personnalisez votre apparence sur la plateforme.</p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                         {/* Color Picker */}
+                         <div className="flex items-center gap-2 p-1 rounded-lg bg-white/5 border border-white/5">
+                            {PRESET_COLORS.map((color) => (
+                                <button
+                                    key={color}
+                                    onClick={() => setProfileData({...profileData, profileColor: color})}
+                                    className={`w-6 h-6 rounded-full ${color} transition-transform hover:scale-110 ${profileData.profileColor === color ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'}`}
+                                />
+                            ))}
+                         </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-bold hover:bg-indigo-500/20 transition-colors"
+                      >
+                        Uploader une photo
                       </button>
-                      <button className="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-colors">
-                        Supprimer
-                      </button>
+                      {(profileData.avatar || profileData.profileColor) && (
+                          <button 
+                            onClick={() => setProfileData({...profileData, avatar: null, profileColor: PRESET_COLORS[0]})}
+                            className="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-colors"
+                          >
+                            Réinitialiser
+                          </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -189,7 +339,7 @@ export default function SettingsPage() {
                       type="text" 
                       value={profileData.firstName}
                       onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
-                      className="w-full"
+                      className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -198,7 +348,7 @@ export default function SettingsPage() {
                       type="text" 
                       value={profileData.lastName}
                       onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
-                      className="w-full"
+                      className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
@@ -209,7 +359,7 @@ export default function SettingsPage() {
                         type="email" 
                         value={profileData.email}
                         onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                        className="w-full pl-12"
+                        className="w-full pl-12 bg-white/5 border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -219,7 +369,8 @@ export default function SettingsPage() {
                       rows={4} 
                       value={profileData.bio}
                       onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                      className="w-full"
+                      className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                      placeholder="Dites-en un peu plus sur vous..."
                     />
                   </div>
                 </div>
@@ -236,15 +387,30 @@ export default function SettingsPage() {
                   <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-wider text-muted">Mot de passe actuel</label>
-                      <input type="password" className="w-full" />
+                      <input 
+                        type="password" 
+                        className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-wider text-muted">Nouveau mot de passe</label>
-                      <input type="password" className="w-full" />
+                      <input 
+                        type="password" 
+                        className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-wider text-muted">Confirmer nouveau mot de passe</label>
-                      <input type="password" className="w-full" />
+                      <input 
+                        type="password" 
+                        className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      />
                     </div>
                   </div>
                 </div>
@@ -261,84 +427,8 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {activeTab === 'billing' && (
-                <div className="space-y-8">
-                    <div className="p-8 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-                            <Zap className="w-32 h-32 text-white" />
-                        </div>
-                        <div className="relative z-10 space-y-6">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest w-fit">
-                                Actuel
-                            </div>
-                            <div className="space-y-2">
-                                <h3 className="text-3xl font-black text-white">Project Hub Pro</h3>
-                                <p className="text-indigo-100/80">Prochaine facturation : 12 mars 2026</p>
-                            </div>
-                            <div className="flex items-end gap-1">
-                                <span className="text-4xl font-black text-white">49€</span>
-                                <span className="text-indigo-100/60 font-bold mb-1">/ mois</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h3 className="font-bold text-white tracking-wide uppercase text-xs">Historique des factures</h3>
-                        <div className="space-y-2">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
-                                            <CreditCard className="w-5 h-5 text-dim" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-white">Facture #{2026 - i}-00{i}</p>
-                                            <p className="text-xs text-dim">0{i} fév. 2026</p>
-                                        </div>
-                                    </div>
-                                    <button className="p-2 rounded-lg bg-white/5 hover:text-indigo-400 transition-colors">
-                                        <Globe className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'preferences' && (
-                <div className="space-y-8">
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-bold text-white">Apparence</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {['Clair', 'Sombre', 'Système'].map((theme) => (
-                                <button 
-                                    key={theme}
-                                    className={`
-                                        p-4 rounded-2xl border transition-all text-center space-y-3
-                                        ${theme === 'Sombre' 
-                                            ? 'bg-indigo-500/10 border-indigo-500/40' 
-                                            : 'bg-white/5 border-white/10 hover:border-white/20'}
-                                    `}
-                                >
-                                    <div className={`h-20 w-full rounded-lg ${theme === 'Clair' ? 'bg-white' : 'bg-[#0c0c12]'} border border-white/5 flex items-center justify-center`}>
-                                        <div className="w-1/2 h-1 bg-white/10 rounded-full" />
-                                    </div>
-                                    <span className="text-sm font-bold text-white">{theme}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-bold text-white">Langue</h3>
-                        <select className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white">
-                            <option>Français (FR)</option>
-                            <option>English (US)</option>
-                            <option>Español (ES)</option>
-                        </select>
-                    </div>
-                </div>
+            {activeTab === 'access' && user?.role === 'admin' && (
+              <AccessControl />
             )}
 
             {activeTab === 'users' && user?.role === 'admin' && (

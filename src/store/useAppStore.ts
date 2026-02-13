@@ -78,13 +78,21 @@ interface AppState {
   isUploadModalOpen: boolean;
   isCreateFolderModalOpen: boolean;
   isIdeaModalOpen: boolean;
+  isCreateUserModalOpen: boolean;
+  taskProjectId?: string;
+  objectiveProjectId?: string;
+  uploadProjectId?: string;
+  uploadFolderId?: string;
+  createFolderProjectId?: string;
+  createFolderParentId?: string;
   setProjectModalOpen: (open: boolean) => void;
-  setTaskModalOpen: (open: boolean) => void;
+  setTaskModalOpen: (open: boolean, projectId?: string) => void;
   setRoutineModalOpen: (open: boolean) => void;
-  setObjectiveModalOpen: (open: boolean) => void;
-  setUploadModalOpen: (open: boolean) => void;
-  setCreateFolderModalOpen: (open: boolean) => void;
+  setObjectiveModalOpen: (open: boolean, projectId?: string) => void;
+  setUploadModalOpen: (open: boolean, projectId?: string, folderId?: string) => void;
+  setCreateFolderModalOpen: (open: boolean, projectId?: string, parentId?: string) => void;
   setIdeaModalOpen: (open: boolean) => void;
+  setCreateUserModalOpen: (open: boolean) => void;
   
   // Loading states
   isLoading: boolean;
@@ -197,13 +205,29 @@ export const useAppStore = create<AppState>()(
       isUploadModalOpen: false,
       isCreateFolderModalOpen: false,
       isIdeaModalOpen: false,
+      isCreateUserModalOpen: false,
+      taskProjectId: undefined,
+      objectiveProjectId: undefined,
+      uploadProjectId: undefined,
+      uploadFolderId: undefined,
+      createFolderProjectId: undefined,
+      createFolderParentId: undefined,
       setProjectModalOpen: (open) => set({ isProjectModalOpen: open }),
-      setTaskModalOpen: (open) => set({ isTaskModalOpen: open }),
+      setTaskModalOpen: (open, projectId) => set({ isTaskModalOpen: open, taskProjectId: projectId }),
       setRoutineModalOpen: (open) => set({ isRoutineModalOpen: open }),
-      setObjectiveModalOpen: (open) => set({ isObjectiveModalOpen: open }),
-      setUploadModalOpen: (open) => set({ isUploadModalOpen: open }),
-      setCreateFolderModalOpen: (open) => set({ isCreateFolderModalOpen: open }),
+      setObjectiveModalOpen: (open, projectId) => set({ isObjectiveModalOpen: open, objectiveProjectId: projectId }),
+      setUploadModalOpen: (open, projectId, folderId) => set({ 
+        isUploadModalOpen: open, 
+        uploadProjectId: projectId, 
+        uploadFolderId: folderId 
+      }),
+      setCreateFolderModalOpen: (open, projectId, parentId) => set({ 
+        isCreateFolderModalOpen: open, 
+        createFolderProjectId: projectId, 
+        createFolderParentId: parentId 
+      }),
       setIdeaModalOpen: (open) => set({ isIdeaModalOpen: open }),
+      setCreateUserModalOpen: (open) => set({ isCreateUserModalOpen: open }),
       
       // Loading
       isLoading: false,

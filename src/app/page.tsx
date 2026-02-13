@@ -19,6 +19,7 @@ import {
 import Link from 'next/link';
 import { useAuthStore } from '@/store';
 import { useState, useEffect } from 'react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const features = [
   {
@@ -93,7 +94,7 @@ const testimonials = [
   {
     name: 'Marie Dubois',
     role: 'CEO, FINEA',
-    content: 'Project Hub a transformé notre façon de travailler. Nos équipes sont 3x plus productives.',
+    content: 'MONEY IS BACK a transformé notre façon de travailler. Nos équipes sont 3x plus productives.',
     rating: 5,
   },
   {
@@ -128,7 +129,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
+    <div className="min-h-screen bg-primary transition-colors duration-300 relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[150px]" />
@@ -137,22 +138,23 @@ export default function HomePage() {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 px-6 py-5 border-b border-white/5 backdrop-blur-xl">
+      <nav className="relative z-10 px-6 py-5 border-b border-glass-border backdrop-blur-xl bg-primary/20">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <span className="text-white font-bold">PH</span>
+              <span className="text-white font-bold">MB</span>
             </div>
-            <span className="text-white font-semibold text-lg">Project Hub</span>
+            <span className="text-main font-semibold text-lg">MONEY IS BACK</span>
           </div>
           
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {!isMounted ? (
               // Show default state during SSR to prevent hydration mismatch
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
+                  className="px-4 py-2 text-sm text-dim hover:text-main transition-colors"
                 >
                   Connexion
                 </Link>
@@ -201,10 +203,10 @@ export default function HomePage() {
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8">
               <Clock className="w-4 h-4" />
-              Rejoignez +10 000 équipes qui collaborent sur Project Hub
+              Rejoignez +10 000 équipes qui collaborent sur MONEY IS BACK
             </span>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-main mb-6 leading-tight">
               La plateforme qui transforme
               <br />
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -212,7 +214,7 @@ export default function HomePage() {
               </span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
+            <p className="text-xl md:text-2xl text-dim max-w-3xl mx-auto mb-12 leading-relaxed">
               Gérez vos projets, organisez vos todo-lists d&apos;équipe et collaborez 
               en temps réel. Une solution tout-en-un pour booster la productivité de vos équipes.
             </p>
@@ -230,7 +232,7 @@ export default function HomePage() {
               
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white/5 border border-white/10 text-white font-medium text-lg hover:bg-white/10 hover:border-white/20 transition-all duration-200"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-glass-bg border border-glass-border text-main font-medium text-lg hover:bg-glass-hover transition-all duration-200"
               >
                 Voir une démo
                 <ChevronRight className="w-5 h-5" />
@@ -257,7 +259,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="relative z-10 px-6 py-16 border-y border-white/5">
+      <section className="relative z-10 px-6 py-16 border-y border-glass-border bg-glass-bg/30">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -294,7 +296,7 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-main mb-4">
               Tout ce dont votre équipe a besoin
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -310,13 +312,13 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="glass-card p-8 group hover:border-indigo-500/30 transition-all duration-300 hover:scale-105"
+                className="glass-card p-8 group hover:border-indigo-500/30 transition-all duration-300 hover:scale-102"
               >
                 <div className="w-14 h-14 mb-6 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <feature.icon className="w-7 h-7 text-indigo-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-semibold text-main mb-3">{feature.title}</h3>
+                <p className="text-dim leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -324,7 +326,7 @@ export default function HomePage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="relative z-10 px-6 py-24 bg-white/[0.02]">
+      <section className="relative z-10 px-6 py-24 bg-glass-bg/50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -333,8 +335,8 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Pourquoi choisir Project Hub ?
+            <h2 className="text-4xl md:text-5xl font-bold text-main mb-4">
+              Pourquoi choisir MONEY IS BACK ?
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
               Une plateforme pensée pour maximiser l&apos;efficacité de vos équipes
@@ -355,8 +357,8 @@ export default function HomePage() {
                   <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/30">
                     <benefit.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-4">{benefit.title}</h3>
-                  <p className="text-gray-400 text-lg leading-relaxed">{benefit.description}</p>
+                  <h3 className="text-2xl font-bold text-main mb-4">{benefit.title}</h3>
+                  <p className="text-dim text-lg leading-relaxed">{benefit.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -374,7 +376,7 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-main mb-4">
               Commencez en 3 étapes simples
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -390,7 +392,7 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2, duration: 0.6 }}
-                className="glass-card p-8 md:p-10 flex flex-col md:flex-row items-start gap-6 hover:border-indigo-500/30 transition-colors"
+                className="glass-card p-8 md:p-10 flex flex-col md:flex-row items-start gap-6 hover:border-indigo-500/30 transition-all duration-300"
               >
                 <div className="flex-shrink-0">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-xl shadow-indigo-500/30">
@@ -398,8 +400,8 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-white mb-3">{step.title}</h3>
-                  <p className="text-gray-400 text-lg leading-relaxed">{step.description}</p>
+                  <h3 className="text-2xl font-bold text-main mb-3">{step.title}</h3>
+                  <p className="text-dim text-lg leading-relaxed">{step.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -408,7 +410,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="relative z-10 px-6 py-24 bg-white/[0.02]">
+      <section className="relative z-10 px-6 py-24 bg-glass-bg/50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -417,7 +419,7 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-main mb-4">
               Ce que disent nos utilisateurs
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -440,12 +442,12 @@ export default function HomePage() {
                     <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
                   ))}
                 </div>
-                <p className="text-gray-300 text-lg mb-6 leading-relaxed italic">
+                <p className="text-dim text-lg mb-6 leading-relaxed italic">
                   &ldquo;{testimonial.content}&rdquo;
                 </p>
-                <div className="border-t border-white/10 pt-4">
-                  <p className="text-white font-semibold">{testimonial.name}</p>
-                  <p className="text-gray-500 text-sm">{testimonial.role}</p>
+                <div className="border-t border-glass-border pt-4">
+                  <p className="text-main font-semibold">{testimonial.name}</p>
+                  <p className="text-dim text-sm">{testimonial.role}</p>
                 </div>
               </motion.div>
             ))}
@@ -465,11 +467,11 @@ export default function HomePage() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 pointer-events-none" />
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-main mb-6">
                 Prêt à transformer votre collaboration ?
               </h2>
-              <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                Rejoignez des milliers d&apos;équipes qui ont déjà optimisé leur gestion de projets avec Project Hub
+              <p className="text-xl text-dim mb-8 max-w-2xl mx-auto">
+                Rejoignez des milliers d&apos;équipes qui ont déjà optimisé leur gestion de projets avec MONEY IS BACK
               </p>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
@@ -487,27 +489,27 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 py-12 px-6">
+      <footer className="relative z-10 border-t border-glass-border py-12 px-6 bg-primary/20 backdrop-blur-md">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold">PH</span>
+                <span className="text-white font-bold">MB</span>
               </div>
-              <span className="text-white font-semibold">Project Hub</span>
+              <span className="text-main font-semibold">MONEY IS BACK</span>
             </div>
             
-            <div className="flex items-center gap-8 text-gray-500">
-              <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
-              <a href="#" className="hover:text-white transition-colors">Conditions</a>
-              <a href="#" className="hover:text-white transition-colors">Contact</a>
-              <a href="#" className="hover:text-white transition-colors">Support</a>
+            <div className="flex items-center gap-8 text-dim">
+              <a href="#" className="hover:text-main transition-colors">Confidentialité</a>
+              <a href="#" className="hover:text-main transition-colors">Conditions</a>
+              <a href="#" className="hover:text-main transition-colors">Contact</a>
+              <a href="#" className="hover:text-main transition-colors">Support</a>
             </div>
           </div>
           
-          <div className="mt-8 pt-8 border-t border-white/5 text-center">
-            <p className="text-gray-500 text-sm">
-              © 2026 Project Hub. Tous droits réservés. Fait avec ❤️ pour les équipes qui veulent performer.
+          <div className="mt-8 pt-8 border-t border-glass-border text-center">
+            <p className="text-dim text-sm">
+              © 2026 MONEY IS BACK. Tous droits réservés. Fait avec ❤️ pour les équipes qui veulent performer.
             </p>
           </div>
         </div>

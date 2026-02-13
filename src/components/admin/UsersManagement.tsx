@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Search, Crown, UserCheck, Calendar, Mail, Shield, Trash2, AlertTriangle } from 'lucide-react';
-import { useAuthStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
 interface UserData {
@@ -130,6 +130,14 @@ export default function UsersManagement() {
             <p className="text-sm text-dim">{users.length} utilisateur{users.length > 1 ? 's' : ''} au total</p>
           </div>
         </div>
+        
+        <button
+          onClick={() => useAppStore.getState().setCreateUserModalOpen(true)}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-bold hover:bg-indigo-400 shadow-lg shadow-indigo-500/20 transition-all border border-indigo-400/20 active:scale-95"
+        >
+          <UserCheck className="w-4 h-4" />
+          Créer un utilisateur
+        </button>
       </div>
 
       {/* Search Bar */}

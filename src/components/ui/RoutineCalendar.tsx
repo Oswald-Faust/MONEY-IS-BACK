@@ -79,10 +79,10 @@ export default function RoutineCalendar({
   return (
     <div className="glass-card !p-0 overflow-hidden shadow-2xl">
       {/* Header */}
-      <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+      <div className="p-6 border-b border-glass-border flex items-center justify-between bg-glass-bg">
         <button
           onClick={prevWeek}
-          className="flex items-center gap-2 p-2 rounded-xl hover:bg-white/5 text-dim hover:text-white transition-all"
+          className="flex items-center gap-2 p-2 rounded-xl hover:bg-glass-hover text-dim hover:text-main transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="hidden sm:inline text-sm font-medium">Précédent</span>
@@ -94,7 +94,7 @@ export default function RoutineCalendar({
             key={weekStart.toString()}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-xs sm:text-sm font-bold text-white whitespace-nowrap"
+            className="text-xs sm:text-sm font-bold text-main whitespace-nowrap"
           >
             {isMobile 
               ? `${format(weekStart, 'dd/MM')} — ${format(weekEnd, 'dd/MM')}`
@@ -105,7 +105,7 @@ export default function RoutineCalendar({
         
         <button
           onClick={nextWeek}
-          className="flex items-center gap-2 p-2 rounded-xl hover:bg-white/5 text-dim hover:text-white transition-all"
+          className="flex items-center gap-2 p-2 rounded-xl hover:bg-glass-hover text-dim hover:text-main transition-all"
         >
           <span className="hidden sm:inline text-sm font-medium">Suivant</span>
           <ChevronRight className="w-5 h-5" />
@@ -114,7 +114,7 @@ export default function RoutineCalendar({
 
       {/* Week Grid */}
       <div className="overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-7 md:divide-x divide-y md:divide-y-0 divide-white/5">
+        <div className="grid grid-cols-1 md:grid-cols-7 md:divide-x divide-y md:divide-y-0 divide-glass-border">
           {weekDays.map((dayDate, dayIndex) => {
             const dayRoutines = getRoutinesForDay(dayIndex);
             const isToday = isSameDay(dayDate, new Date());
@@ -123,7 +123,7 @@ export default function RoutineCalendar({
               <div key={dayIndex} className="min-h-[350px] flex flex-col">
                 {/* Day Header */}
                 <div className={`
-                  p-5 text-center border-b border-white/5
+                  p-5 text-center border-b border-glass-border
                   ${isToday ? 'bg-indigo-500/5' : ''}
                 `}>
                   <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${isToday ? 'text-indigo-400' : 'text-dim'}`}>
@@ -131,14 +131,14 @@ export default function RoutineCalendar({
                   </p>
                   <p className={`
                     text-lg font-black
-                    ${isToday ? 'text-white' : 'text-dim/70'}
+                    ${isToday ? 'text-main' : 'text-dim/70'}
                   `}>
                     {format(dayDate, 'd')}
                   </p>
                 </div>
 
                 {/* Routines Container */}
-                <div className="p-4 flex-1 space-y-3 bg-white/[0.01]">
+                <div className="p-4 flex-1 space-y-3 bg-glass-bg">
                   <AnimatePresence mode="popLayout">
                     {dayRoutines.map((routine) => {
                       const isCompleted = isRoutineCompleted(routine, dayDate);
@@ -151,20 +151,20 @@ export default function RoutineCalendar({
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
-                          whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.06)' }}
+                           whileHover={{ scale: 1.02, backgroundColor: 'var(--glass-hover)' }}
                           onClick={() => onRoutineClick?.(routine, dayDate)}
-                          className={`
-                            p-3 rounded-xl cursor-pointer
-                            transition-all duration-300 border border-white/5 shadow-sm
-                            ${isCompleted ? 'opacity-30' : 'hover:shadow-lg'}
-                          `}
+                           className={`
+                             p-3 rounded-xl cursor-pointer
+                             transition-all duration-300 border border-glass-border shadow-sm
+                             ${isCompleted ? 'opacity-30' : 'hover:shadow-lg'}
+                           `}
                           style={{
                             backgroundColor: `${color}10`,
                             borderLeft: `4px solid ${color}`,
                           }}
                         >
                           <p className={`
-                            text-xs font-bold text-white mb-1 leading-tight line-clamp-2
+                            text-xs font-bold text-main mb-1 leading-tight line-clamp-2
                             ${isCompleted ? 'line-through' : ''}
                           `}>
                             {routine.title}

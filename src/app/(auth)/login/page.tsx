@@ -66,10 +66,10 @@ export default function LoginPage() {
             animate={{ scale: 1 }}
             className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4"
           >
-            <span className="text-2xl font-bold text-white">PH</span>
+            <span className="text-2xl font-bold text-white">MB</span>
           </motion.div>
           <h1 className="text-2xl font-bold text-white mb-2">Bon retour !</h1>
-          <p className="text-gray-400">Connectez-vous à Project Hub</p>
+          <p className="text-gray-400">Connectez-vous à MONEY IS BACK</p>
         </div>
 
         {/* Login Form */}

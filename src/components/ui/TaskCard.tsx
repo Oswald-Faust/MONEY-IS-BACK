@@ -59,10 +59,9 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
       <div
         className={`
           relative overflow-hidden rounded-2xl p-6
-          bg-white/[0.03] border border-white/[0.08]
-          hover:bg-white/[0.06] hover:border-white/[0.12]
-          hover:shadow-xl hover:shadow-black/20
-          transition-all duration-300
+          bg-glass-bg border border-glass-border
+          hover:bg-glass-hover hover:border-indigo-500/20
+          hover:shadow-xl transition-all duration-300
           ${isCompleted ? 'opacity-50' : ''}
         `}
       >
@@ -87,7 +86,7 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
               transition-all duration-300
               ${isCompleted
                 ? 'bg-green-500 border-green-500 shadow-[0_0_12px_rgba(34,197,94,0.3)]'
-                : 'border-white/20 hover:border-white/40 group-hover:scale-110'
+                : 'border-glass-border hover:border-main group-hover:scale-110'
               }
             `}
           >
@@ -111,7 +110,7 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
             {/* Title - Better typography */}
             <h4
               className={`
-                text-base font-semibold text-white leading-tight mb-3
+                text-base font-semibold text-main leading-tight mb-3
                 ${isCompleted ? 'line-through text-dim/50' : ''}
               `}
             >
@@ -121,7 +120,7 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
             {/* Meta Info - Well spaced */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-dim">
               {task.dueDate && (
-                <div className="flex items-center gap-1.5 py-1 px-2 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-1.5 py-1 px-2 bg-glass-bg rounded-lg">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{new Date(task.dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
                 </div>
@@ -158,7 +157,7 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
             }}
             className="
               opacity-0 group-hover:opacity-100
-              p-2 rounded-xl hover:bg-white/10
+              p-2 rounded-xl hover:bg-glass-hover
               transition-all duration-200
             "
           >

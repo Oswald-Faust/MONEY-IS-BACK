@@ -98,11 +98,11 @@ export default function ProjectsPage() {
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-main flex items-center gap-3">
             <FolderKanban className="w-8 h-8 text-indigo-400" />
             Mes Projets
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-dim mt-1">
             {filteredProjects.length} projets
           </p>
         </div>
@@ -144,8 +144,8 @@ export default function ProjectsPage() {
             placeholder="Rechercher un projet..."
             className="
               w-full pl-12 pr-4 py-3 text-sm
-              bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-              rounded-xl text-white placeholder-gray-500
+              bg-glass-bg border border-glass-border
+              rounded-xl text-main placeholder-dim
               focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
               transition-all duration-200
             "
@@ -162,7 +162,7 @@ export default function ProjectsPage() {
                 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
                 ${statusFilter === status
                   ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                  : 'bg-[rgba(255,255,255,0.03)] text-gray-400 border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.05)]'}
+                  : 'bg-glass-bg text-dim border border-glass-border hover:bg-glass-hover'}
               `}
             >
               {status === 'all' && 'Tous'}
@@ -179,7 +179,7 @@ export default function ProjectsPage() {
         <div className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-            <p className="text-gray-400">Chargement des projets...</p>
+            <p className="text-dim">Chargement des projets...</p>
           </div>
         </div>
       ) : (
@@ -191,7 +191,7 @@ export default function ProjectsPage() {
         {/* Active Projects */}
         {activeProjects.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider">
+            <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
               Projets actifs ({activeProjects.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -216,7 +216,7 @@ export default function ProjectsPage() {
         {/* Paused Projects */}
         {pausedProjects.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider">
+            <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
               En pause ({pausedProjects.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -241,7 +241,7 @@ export default function ProjectsPage() {
         {/* Archived Projects */}
         {archivedProjects.length > 0 && (
           <div>
-            <h2 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider">
+            <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
               Archivés ({archivedProjects.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -265,9 +265,9 @@ export default function ProjectsPage() {
 
         {filteredProjects.length === 0 && (
           <div className="glass-card p-12 text-center">
-            <FolderKanban className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-white font-medium mb-2">Aucun projet trouvé</h3>
-            <p className="text-gray-500 text-sm mb-4">
+            <FolderKanban className="w-12 h-12 text-dim mx-auto mb-4 opacity-20" />
+            <h3 className="text-main font-medium mb-2">Aucun projet trouvé</h3>
+            <p className="text-dim text-sm mb-4">
               {searchQuery
                 ? 'Essayez une autre recherche'
                 : 'Créez votre premier projet pour commencer'}

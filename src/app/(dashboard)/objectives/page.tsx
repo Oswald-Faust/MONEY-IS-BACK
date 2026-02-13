@@ -98,7 +98,7 @@ export default function ObjectivesPage() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setObjectiveModalOpen(true)}
+          onClick={() => setObjectiveModalOpen(true, projectId || undefined)}
           className="
             px-4 py-2.5 rounded-xl flex items-center gap-2
             bg-gradient-to-r from-indigo-600 to-purple-600

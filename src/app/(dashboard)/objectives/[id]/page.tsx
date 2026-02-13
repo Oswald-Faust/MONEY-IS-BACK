@@ -15,11 +15,12 @@ import {
   Check
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store';
+import { useAuthStore, useAppStore } from '@/store';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import CreateObjectiveModal from '@/components/modals/CreateObjectiveModal';
 
 interface Checkpoint {
   _id: string;
@@ -48,6 +49,7 @@ interface Objective {
   };
   targetDate?: string;
   createdAt: string;
+  assignee?: string | { _id: string; firstName: string; lastName: string; avatar?: string };
 }
 
 const statusConfig = {
@@ -66,8 +68,10 @@ export default function ObjectiveDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuthStore();
+  const { deleteObjective: deleteStoreObjective } = useAppStore();
   const [objective, setObjective] = useState<Objective | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchObjective = async () => {
@@ -95,6 +99,30 @@ export default function ObjectiveDetailPage() {
 
     fetchObjective();
   }, [id, token, router]);
+
+  const handleDelete = async () => {
+    if (!token || !objective) return;
+    
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet objectif ?')) {
+        try {
+            const response = await fetch(`/api/objectives?id=${objective._id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                deleteStoreObjective(objective._id);
+                toast.success('Objectif supprimé');
+                router.back();
+            } else {
+                toast.error(data.error || 'Erreur lors de la suppression');
+            }
+        } catch {
+            toast.error('Erreur lors de la suppression');
+        }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -159,7 +187,11 @@ export default function ObjectiveDetailPage() {
                   objective.creator?.firstName?.[0] || '?'
                 )}
               </div>
-              <span>Défini par {objective.creator ? `${objective.creator.firstName} ${objective.creator.lastName}` : 'Utilisateur inconnu'}</span>
+              <span>
+                {objective.creator && typeof objective.creator === 'object' && 'firstName' in objective.creator
+                  ? `Défini par ${objective.creator.firstName} ${objective.creator.lastName}`
+                  : 'Défini par Utilisateur inconnu'}
+              </span>
             </div>
             {objective.targetDate && (
               <div className="flex items-center gap-2">
@@ -246,11 +278,17 @@ export default function ObjectiveDetailPage() {
         <div className="space-y-6">
           {/* Actions */}
           <div className="glass-card p-4 space-y-2">
-            <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-dim hover:text-white transition-colors text-sm font-medium">
+            <button 
+              onClick={() => setIsEditModalOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-dim hover:text-white transition-colors text-sm font-medium"
+            >
               <Edit className="w-4 h-4" />
               Modifier l&apos;objectif
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors text-sm font-medium">
+            <button 
+              onClick={handleDelete}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors text-sm font-medium"
+            >
               <Trash2 className="w-4 h-4" />
               Supprimer
             </button>
@@ -267,6 +305,23 @@ export default function ObjectiveDetailPage() {
 
         </div>
       </div>
+      <CreateObjectiveModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => {
+            setIsEditModalOpen(false);
+            // Refresh data on close if needed, but optimally update via store or just reload page part
+            // For simplicity, we can reload the page data:
+            if (!isEditModalOpen) return; // Prevent loop
+             fetch(`/api/objectives?id=${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              })
+              .then(res => res.json())
+              .then(data => {
+                  if (data.success) setObjective(data.data);
+              });
+        }} 
+        initialData={objective as any} 
+      />
     </div>
   );
 }

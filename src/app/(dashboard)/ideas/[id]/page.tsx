@@ -139,7 +139,11 @@ export default function IdeaDetailPage() {
                   idea.creator?.firstName?.[0] || '?'
                 )}
               </div>
-              <span>{idea.creator ? `${idea.creator.firstName} ${idea.creator.lastName}` : 'Utilisateur inconnu'}</span>
+              <span>
+                {idea.creator && typeof idea.creator === 'object' && 'firstName' in idea.creator
+                  ? `${idea.creator.firstName} ${idea.creator.lastName}`
+                  : 'Utilisateur inconnu'}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />

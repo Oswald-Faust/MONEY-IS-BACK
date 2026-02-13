@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Target, CheckSquare } from 'lucide-react';
 import {
   format,
   startOfMonth,
@@ -17,69 +17,26 @@ import {
   isToday,
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import type { Task } from '@/types';
+import { useAppStore, useAuthStore } from '@/store';
+import type { Task, Objective } from '@/types';
+import toast from 'react-hot-toast';
 
-// Demo tasks
-const demoTasks: Task[] = [
-  {
-    _id: '1',
-    title: 'Meeting FINEA',
-    project: '1',
-    projectName: 'FINEA',
-    projectColor: '#22c55e',
-    creator: '1',
-    priority: 'important',
-    status: 'todo',
-    dueDate: new Date().toISOString(),
-    tags: [],
-    subtasks: [],
-    attachments: [],
-    comments: [],
-    order: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: '2',
-    title: 'Review BUISPACE',
-    project: '2',
-    projectName: 'BUISPACE',
-    projectColor: '#f97316',
-    creator: '1',
-    priority: 'less_important',
-    status: 'todo',
-    dueDate: addDays(new Date(), 2).toISOString(),
-    tags: [],
-    subtasks: [],
-    attachments: [],
-    comments: [],
-    order: 1,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: '3',
-    title: 'Call avec Gabriel',
-    project: '2',
-    projectName: 'BUISPACE',
-    projectColor: '#f97316',
-    creator: '1',
-    priority: 'important',
-    status: 'todo',
-    dueDate: addDays(new Date(), 5).toISOString(),
-    tags: [],
-    subtasks: [],
-    attachments: [],
-    comments: [],
-    order: 2,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+type CalendarEvent = 
+  | (Task & { type: 'task' }) 
+  | (Objective & { type: 'objective' });
 
 export default function CalendarPage() {
+  const { token } = useAuthStore();
+  const { 
+    tasks, 
+    setTasks, 
+    objectives, 
+    setObjectives 
+  } = useAppStore();
+
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
 
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
@@ -97,19 +54,62 @@ export default function CalendarPage() {
     day = addDays(day, 1);
   }
 
-  // Get tasks for a specific date
-  const getTasksForDate = (date: Date) => {
-    return demoTasks.filter((task) => {
+  // Fetch data
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!token) return;
+      
+      try {
+        setIsLoading(true);
+        
+        // Fetch tasks
+        const tasksRes = await fetch('/api/tasks', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const tasksData = await tasksRes.json();
+        if (tasksData.success) {
+          setTasks(tasksData.data);
+        }
+
+        // Fetch objectives
+        const objectivesRes = await fetch('/api/objectives', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const objectivesData = await objectivesRes.json();
+        if (objectivesData.success) {
+          setObjectives(objectivesData.data);
+        }
+      } catch (error) {
+        console.error('Error fetching calendar data:', error);
+        toast.error('Erreur lors du chargement des données');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token, setTasks, setObjectives]);
+
+  // Get events for a specific date
+  const getEventsForDate = (date: Date): CalendarEvent[] => {
+    const dayTasks = tasks.filter((task) => {
       if (!task.dueDate) return false;
       return isSameDay(new Date(task.dueDate), date);
-    });
+    }).map(t => ({ ...t, type: 'task' as const }));
+
+    const dayObjectives = objectives.filter((obj) => {
+      if (!obj.targetDate) return false;
+      return isSameDay(new Date(obj.targetDate), date);
+    }).map(o => ({ ...o, type: 'objective' as const }));
+
+    return [...dayTasks, ...dayObjectives];
   };
 
   // Days of week header (starting Monday)
   const daysOfWeek = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
-  // Get tasks for selected date
-  const selectedDateTasks = selectedDate ? getTasksForDate(selectedDate) : [];
+  // Get events for selected date
+  const selectedDateEvents = selectedDate ? getEventsForDate(selectedDate) : [];
 
   return (
     <div className="space-y-6">
@@ -125,24 +125,21 @@ export default function CalendarPage() {
             Calendrier Global
           </h1>
           <p className="text-gray-500 mt-1">
-            Vue d'ensemble de toutes vos tâches
+            Vue d&apos;ensemble de vos tâches et objectifs
           </p>
         </div>
         
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="
-            px-4 py-2.5 rounded-xl flex items-center gap-2
-            bg-gradient-to-r from-indigo-600 to-purple-600
-            text-white font-medium text-sm
-            hover:from-indigo-500 hover:to-purple-500
-            transition-all duration-200
-          "
-        >
-          <Plus className="w-4 h-4" />
-          Ajouter un événement
-        </motion.button>
+        {/* Legend */}
+        <div className="flex items-center gap-4 text-sm bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+            <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-gray-300">Tâches</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full border border-red-500" />
+                <span className="text-gray-300">Objectifs</span>
+            </div>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -195,10 +192,9 @@ export default function CalendarPage() {
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-2">
               {days.map((dayDate, index) => {
-                const dayTasks = getTasksForDate(dayDate);
+                const dayEvents = getEventsForDate(dayDate);
                 const isCurrentMonth = isSameMonth(dayDate, currentMonth);
                 const isSelected = selectedDate && isSameDay(dayDate, selectedDate);
-                const hasTasks = dayTasks.length > 0;
 
                 return (
                   <motion.button
@@ -222,23 +218,28 @@ export default function CalendarPage() {
                       {format(dayDate, 'd')}
                     </span>
                     
-                    {/* Task indicators */}
+                    {/* Event indicators */}
                     <div className="flex-1 space-y-1 overflow-hidden">
-                      {dayTasks.slice(0, 3).map((task) => (
+                      {dayEvents.slice(0, 3).map((event) => (
                         <div
-                          key={task._id}
-                          className="text-xs truncate px-1.5 py-0.5 rounded"
+                          key={event._id}
+                          className={`
+                            text-xs truncate px-1.5 py-0.5 rounded flex items-center gap-1
+                            ${event.type === 'objective' ? 'border border-current bg-transparent' : ''}
+                          `}
                           style={{
-                            backgroundColor: `${task.projectColor}25`,
-                            color: task.projectColor,
+                            backgroundColor: event.type === 'task' ? `${event.projectColor || '#6366f1'}25` : 'transparent',
+                            color: event.projectColor || (event.type === 'objective' ? '#ef4444' : '#6366f1'),
+                            borderColor: event.type === 'objective' ? (event.projectColor || '#ef4444') : 'transparent'
                           }}
                         >
-                          {task.title}
+                          <span className={`w-1 h-1 rounded-full flex-shrink-0 ${event.type === 'objective' ? 'bg-current' : ''}`} style={{ backgroundColor: event.type === 'task' ? 'currentColor' : undefined }} />
+                          {event.title}
                         </div>
                       ))}
-                      {dayTasks.length > 3 && (
+                      {dayEvents.length > 3 && (
                         <div className="text-xs text-gray-500 px-1">
-                          +{dayTasks.length - 3} autres
+                          +{dayEvents.length - 3} autres
                         </div>
                       )}
                     </div>
@@ -263,31 +264,46 @@ export default function CalendarPage() {
                 : "Sélectionnez une date"}
             </h3>
 
-            {selectedDate && (
+            {isLoading ? (
+               <div className="flex justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+               </div>
+            ) : selectedDate && (
               <>
-                {selectedDateTasks.length > 0 ? (
+                {selectedDateEvents.length > 0 ? (
                   <div className="space-y-3">
-                    {selectedDateTasks.map((task) => (
+                    {selectedDateEvents.map((event) => (
                       <div
-                        key={task._id}
-                        className="p-3 rounded-xl border"
+                        key={event._id}
+                        className="p-3 rounded-xl border relative overflow-hidden group"
                         style={{
-                          backgroundColor: `${task.projectColor}10`,
-                          borderColor: `${task.projectColor}30`,
+                          backgroundColor: `${event.projectColor || '#6366f1'}10`,
+                          borderColor: `${event.projectColor || '#6366f1'}30`,
                         }}
                       >
-                        <p className="text-sm font-medium text-white mb-1">
-                          {task.title}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: task.projectColor }}
-                          />
-                          <span className="text-xs text-gray-500">
-                            {task.projectName}
-                          </span>
-                        </div>
+                         <div className="flex items-start justify-between gap-2">
+                             <div className="flex-1">
+                                <p className="text-sm font-medium text-white mb-1">
+                                    {event.title}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                <div
+                                    className="w-2 h-2 rounded-full"
+                                    style={{ backgroundColor: event.projectColor || '#6366f1' }}
+                                />
+                                <span className="text-xs text-gray-500">
+                                    {event.projectName || 'Sans projet'}
+                                </span>
+                                </div>
+                             </div>
+                             
+                             {/* Icon showing type */}
+                             {event.type === 'task' ? (
+                                <CheckSquare className="w-4 h-4 text-emerald-500/50" />
+                             ) : (
+                                <Target className="w-4 h-4 text-red-500/50" />
+                             )}
+                         </div>
                       </div>
                     ))}
                   </div>
@@ -295,11 +311,8 @@ export default function CalendarPage() {
                   <div className="text-center py-8">
                     <CalendarIcon className="w-10 h-10 text-gray-600 mx-auto mb-3" />
                     <p className="text-gray-500 text-sm">
-                      Aucune tâche prévue
+                      Aucun événement prévu
                     </p>
-                    <button className="mt-3 text-sm text-indigo-400 hover:text-indigo-300">
-                      + Ajouter une tâche
-                    </button>
                   </div>
                 )}
               </>

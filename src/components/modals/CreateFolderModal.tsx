@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, FolderPlus, Loader2 } from 'lucide-react';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
 interface CreateFolderModalProps {
@@ -12,31 +12,50 @@ interface CreateFolderModalProps {
 }
 
 export default function CreateFolderModal({ isOpen, onClose }: CreateFolderModalProps) {
-  const { projects, addDriveFolder } = useAppStore();
+  const { token } = useAuthStore();
+  const { projects, addDriveFolder, createFolderProjectId, createFolderParentId } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
   const [projectId, setProjectId] = useState('');
+  const [parentId, setParentId] = useState('');
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setProjectId(createFolderProjectId || '');
+      setParentId(createFolderParentId || '');
+    }
+  }, [isOpen, createFolderProjectId, createFolderParentId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast.error('Le nom du dossier est requis');
+    if (!name || !token) return toast.error('Le nom du dossier est requis');
     
     setLoading(true);
     try {
-      const newFolder = {
-        _id: Math.random().toString(36).substr(2, 9),
-        name,
-        project: projectId || undefined,
-        owner: '1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const res = await fetch('/api/drive/folders', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ 
+          name, 
+          projectId: projectId || null, 
+          parentId: parentId || null 
+        }),
+      });
 
-      addDriveFolder(newFolder);
-      toast.success('Dossier créé');
-      onClose();
-      setName('');
-      setProjectId('');
+      const data = await res.json();
+
+      if (res.ok) {
+        addDriveFolder(data);
+        toast.success('Dossier créé');
+        onClose();
+        setName('');
+        setProjectId('');
+      } else {
+        toast.error(data.error || 'Erreur lors de la création');
+      }
     } catch {
       toast.error('Erreur lors de la création');
     } finally {

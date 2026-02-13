@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Objective from '@/models/Objective';
 import Project from '@/models/Project';
+import User from '@/models/User';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -22,7 +23,8 @@ export async function GET(request: NextRequest) {
     if (id) {
       const objective = await Objective.findById(id)
         .populate('project', 'name color')
-        .populate('creator', 'firstName lastName avatar');
+        .populate('creator', 'firstName lastName avatar')
+        .populate('assignee', 'firstName lastName avatar');
 
       if (!objective) {
         return NextResponse.json({ success: false, error: 'Objectif non trouvé' }, { status: 404 });
@@ -60,6 +62,7 @@ export async function GET(request: NextRequest) {
     const objectives = await Objective.find(query)
       .populate('project', 'name color')
       .populate('creator', 'firstName lastName avatar')
+      .populate('assignee', 'firstName lastName avatar')
       .sort({ createdAt: -1 });
 
     // Add project info to objectives to match frontend type
@@ -99,6 +102,7 @@ export async function POST(request: NextRequest) {
       priority = 'medium',
       status = 'not_started',
       targetDate,
+      assignee,
       checkpoints = [],
     } = body;
 
@@ -129,11 +133,13 @@ export async function POST(request: NextRequest) {
       status,
       targetDate: targetDate ? new Date(targetDate) : undefined,
       checkpoints,
+      assignee,
       progress: 0,
     });
 
     await objective.populate('project', 'name color');
     await objective.populate('creator', 'firstName lastName avatar');
+    await objective.populate('assignee', 'firstName lastName avatar');
 
     // Add explicit project info for frontend convenience
     const objectiveResponse = {
@@ -190,7 +196,8 @@ export async function PATCH(request: NextRequest) {
 
     const updatedObjective = await Objective.findByIdAndUpdate(id, body, { new: true })
       .populate('project', 'name color')
-      .populate('creator', 'firstName lastName avatar');
+      .populate('creator', 'firstName lastName avatar')
+      .populate('assignee', 'firstName lastName avatar');
 
     if (!updatedObjective) {
         return NextResponse.json({ success: false, error: 'Objectif non trouvé' }, { status: 404 });

@@ -17,10 +17,11 @@ import {
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Task, Routine } from '@/types';
+import type { Task, Routine, Objective } from '@/types';
 
 interface CustomCalendarProps {
   tasks?: Task[];
+  objectives?: Objective[];
   routines?: Routine[];
   onDateClick?: (date: Date) => void;
   selectedDate?: Date;
@@ -28,7 +29,7 @@ interface CustomCalendarProps {
 
 export default function CustomCalendar({
   tasks = [],
-  routines = [],
+  objectives = [],
   onDateClick,
   selectedDate,
 }: CustomCalendarProps) {
@@ -50,12 +51,22 @@ export default function CustomCalendar({
     day = addDays(day, 1);
   }
 
-  // Get tasks for a specific date
-  const getTasksForDate = (date: Date) => {
-    return tasks.filter((task) => {
+  // Get events for a specific date
+  const getEventsForDate = (date: Date) => {
+    const dayTasks = tasks.filter((task) => {
       if (!task.dueDate) return false;
       return isSameDay(new Date(task.dueDate), date);
     });
+
+    const dayObjectives = objectives.filter((obj) => {
+      if (!obj.targetDate) return false;
+      return isSameDay(new Date(obj.targetDate), date);
+    });
+
+    return [
+      ...dayTasks.map(t => ({ ...t, type: 'task' as const })),
+      ...dayObjectives.map(o => ({ ...o, type: 'objective' as const }))
+    ];
   };
 
   // Days of week header
@@ -107,10 +118,10 @@ export default function CustomCalendar({
       <div className="grid grid-cols-7 gap-1">
         <AnimatePresence mode="wait">
           {days.map((dayDate, index) => {
-            const dayTasks = getTasksForDate(dayDate);
+            const dayEvents = getEventsForDate(dayDate);
             const isCurrentMonth = isSameMonth(dayDate, currentMonth);
             const isSelected = selectedDate && isSameDay(dayDate, selectedDate);
-            const hasTasks = dayTasks.length > 0;
+            const hasEvents = dayEvents.length > 0;
 
             return (
               <motion.button
@@ -135,14 +146,17 @@ export default function CustomCalendar({
                   {format(dayDate, 'd')}
                 </span>
                 
-                {/* Task indicators */}
-                {hasTasks && (
+                {/* Event indicators */}
+                {hasEvents && (
                   <div className="flex gap-0.5 mt-1">
-                    {dayTasks.slice(0, 3).map((task, i) => (
+                    {dayEvents.slice(0, 3).map((event, i) => (
                       <div
                         key={i}
-                        className="w-1 h-1 rounded-full"
-                        style={{ backgroundColor: task.projectColor || '#6366f1' }}
+                        className={`w-1 h-1 rounded-full ${event.type === 'objective' ? 'ring-1 ring-offset-0 ring-current' : ''}`}
+                        style={{ 
+                          backgroundColor: event.type === 'task' ? (event.projectColor || '#6366f1') : 'transparent',
+                          color: event.projectColor || '#ef4444'
+                        }}
                       />
                     ))}
                   </div>
@@ -157,11 +171,15 @@ export default function CustomCalendar({
       <div className="mt-4 pt-4 border-t border-[rgba(255,255,255,0.06)] flex items-center gap-4 text-xs text-gray-500">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-indigo-500" />
-          <span>Aujourd'hui</span>
+          <span>Aujourd&apos;hui</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500" />
           <span>Tâches</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full border border-red-500" />
+          <span>Objectifs</span>
         </div>
       </div>
     </div>

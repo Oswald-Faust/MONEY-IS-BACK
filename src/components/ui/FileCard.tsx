@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { File, FileText, FileImage, FileCode, Trash2, Download, ExternalLink } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { File, FileText, FileImage, FileCode, Trash2, Download, ExternalLink, MoreVertical, Edit2, Link as LinkIcon, Loader2 } from 'lucide-react';
 import type { DriveFile } from '@/types';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
+import toast from 'react-hot-toast';
 
 interface FileCardProps {
   file: DriveFile;
@@ -26,34 +27,125 @@ const formatSize = (bytes: number) => {
 };
 
 export default function FileCard({ file }: FileCardProps) {
-  const { deleteDriveFile } = useAppStore();
+  const { deleteDriveFile, updateDriveFile } = useAppStore();
+  const { token } = useAuthStore();
+  const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleDelete = async () => {
+    if (!token) return;
+    if (!confirm('Supprimer définitivement ce fichier ?')) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/drive/files/${file._id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        deleteDriveFile(file._id);
+        toast.success('Fichier supprimé');
+      } else {
+        toast.error(data.error || 'Erreur lors de la suppression');
+      }
+    } catch {
+      toast.error('Erreur réseau');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRename = async () => {
+    const newName = prompt('Nouveau nom du fichier :', file.name);
+    if (!newName || newName === file.name || !token) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/drive/files/${file._id}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ name: newName })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        updateDriveFile(file._id, { name: data.name });
+        toast.success('Fichier renommé');
+      } else {
+        toast.error('Erreur lors du renommage');
+      }
+    } catch {
+      toast.error('Erreur réseau');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(file.url);
+    toast.success('Lien copié');
+    setMenuOpen(false);
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ y: -4 }}
-      className="glass-card group p-5 flex flex-col gap-4 relative overflow-hidden"
+      className="glass-card group p-5 flex flex-col gap-4 relative"
     >
+      {loading && (
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-3xl">
+          <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
+        </div>
+      )}
+
       {/* Type Badge */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between relative">
         <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
           {getFileIcon(file.type)}
         </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white transition-all">
-            <Download className="w-5 h-5" />
-          </button>
+        
+        <div>
           <button 
-            onClick={() => {
-              if (confirm('Supprimer ce fichier ?')) {
-                deleteDriveFile(file._id);
-              }
-            }}
-            className="p-2 rounded-xl hover:bg-red-500/10 text-gray-600 hover:text-red-400 transition-all"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white transition-all"
           >
-            <Trash2 className="w-5 h-5" />
+            <MoreVertical className="w-5 h-5" />
           </button>
+
+          <AnimatePresence>
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  className="absolute right-0 top-full mt-2 min-w-[180px] glass-card border-white/10 z-30 p-1.5 shadow-2xl overflow-hidden"
+                >
+                  <button onClick={handleRename} className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-bold text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-widest">
+                    <Edit2 className="w-4 h-4" /> Renommer
+                  </button>
+                  <button onClick={copyLink} className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-bold text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-widest">
+                    <LinkIcon className="w-4 h-4" /> Copier le lien
+                  </button>
+                  <a href={file.url} download={file.name} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-bold text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-widest">
+                    <Download className="w-4 h-4" /> Télécharger
+                  </a>
+                  <div className="h-px bg-white/5 my-1.5 mx-2" />
+                  <button onClick={handleDelete} className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-bold text-red-500/70 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all uppercase tracking-widest">
+                    <Trash2 className="w-4 h-4" /> Supprimer
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -73,9 +165,14 @@ export default function FileCard({ file }: FileCardProps) {
         <span className="text-[9px] font-bold text-gray-600 uppercase tracking-tighter">
           {new Date(file.createdAt).toLocaleDateString()}
         </span>
-        <button className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-wider transition-colors">
+        <a 
+          href={file.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-wider transition-colors"
+        >
           Ouvrir <ExternalLink className="w-3 h-3" />
-        </button>
+        </a>
       </div>
     </motion.div>
   );

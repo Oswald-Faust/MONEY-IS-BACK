@@ -6,6 +6,8 @@ export { default as Routine } from './Routine';
 export { default as SecureId } from './SecureId';
 export { default as Objective } from './Objective';
 export { default as Idea } from './Idea';
+export { default as DriveFolder } from './DriveFolder';
+export { default as DriveFile } from './DriveFile';
 
 export type { IUser, UserRole } from './User';
 export type { IWorkspace } from './Workspace';
@@ -15,3 +17,5 @@ export type { IRoutine } from './Routine';
 export type { ISecureId } from './SecureId';
 export type { IObjective } from './Objective';
 export type { IIdea } from './Idea';
+export type { IDriveFolder } from './DriveFolder';
+export type { IDriveFile } from './DriveFile';

@@ -10,6 +10,8 @@ export interface IUser extends Document {
   email: string;
   password: string;
   avatar?: string;
+  bio?: string;
+  profileColor?: string;
   role: UserRole;
   workspaces: mongoose.Types.ObjectId[];
   preferences: {
@@ -17,6 +19,7 @@ export interface IUser extends Document {
     notifications: boolean;
     language: string;
   };
+  driveAccess: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -54,6 +57,15 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: null,
     },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'La bio ne peut pas dépasser 500 caractères'],
+    },
+    profileColor: {
+      type: String, // Hex color or Tailwind class
+      default: 'from-indigo-500 to-purple-600',
+    },
     role: {
       type: String,
       enum: ['user', 'admin'],
@@ -77,6 +89,10 @@ const UserSchema = new Schema<IUser>(
         type: String,
         default: 'fr',
       },
+    },
+    driveAccess: {
+      type: Boolean,
+      default: true,
     },
   },
   {

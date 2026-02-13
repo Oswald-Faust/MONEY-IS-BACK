@@ -27,11 +27,12 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Projet non trouvé' }, { status: 404 });
     }
 
-    // Check if user is a member/owner
+    // Check if user is a member/owner OR global admin
+    const isGlobalAdmin = auth.role === 'admin';
     const isOwner = project.owner.toString() === auth.userId;
     const member = project.members.find((m: any) => m.user.toString() === auth.userId);
     
-    if (!isOwner && (!member || member.role !== 'admin')) {
+    if (!isGlobalAdmin && !isOwner && (!member || member.role !== 'admin')) {
         return NextResponse.json({ error: 'Accès refusé - Admin requis' }, { status: 403 });
     }
 
@@ -67,10 +68,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Projet non trouvé' }, { status: 404 });
         }
 
+        // Check if user is a member/owner OR global admin
+        const isGlobalAdmin = auth.role === 'admin';
         const isOwner = project.owner.toString() === auth.userId;
         const member = project.members.find((m: any) => m.user.toString() === auth.userId);
         
-        if (!isOwner && (!member || member.role !== 'admin')) {
+        if (!isGlobalAdmin && !isOwner && (!member || member.role !== 'admin')) {
             return NextResponse.json({ error: 'Accès refusé - Admin requis' }, { status: 403 });
         }
 

@@ -23,6 +23,7 @@ import {
   Search,
   User,
   X,
+  MessageCircle,
 } from 'lucide-react';
 
 const mainNavItems = [
@@ -31,6 +32,7 @@ const mainNavItems = [
   { icon: CheckSquare, label: 'To Do Global', href: '/tasks', view: 'tasks' as const },
   { icon: Calendar, label: 'Calendrier', href: '/calendar', view: 'calendar' as const },
   { icon: RotateCcw, label: 'Routines', href: '/routines', view: 'routines' as const },
+  { icon: MessageCircle, label: 'Messagerie', href: '/messages', view: 'messages' as const },
 ];
 
 const secondaryNavItems = [
@@ -39,6 +41,8 @@ const secondaryNavItems = [
   { icon: Key, label: 'IDs Sécurisés', href: '/secure-ids', view: 'ids' as const },
   { icon: HardDrive, label: 'Drive', href: '/drive', view: 'drive' as const },
 ];
+
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 import Image from 'next/image';
 
@@ -97,12 +101,12 @@ export default function Sidebar() {
           : { x: 0, width: sidebarCollapsed ? 80 : 280 }
         }
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className={`fixed left-0 top-0 h-screen bg-[#0c0c12] border-r border-[rgba(255,255,255,0.06)] flex flex-col z-[70] ${
+        className={`fixed left-0 top-0 h-screen bg-secondary border-r border-glass-border flex flex-col z-[70] ${
           isMobile ? 'shadow-2xl' : ''
         }`}
       >
         {/* Header */}
-        <div className="p-4 flex items-center justify-between border-b border-[rgba(255,255,255,0.06)]">
+        <div className="p-4 flex items-center justify-between border-b border-glass-border">
           <AnimatePresence mode="wait">
             {(!sidebarCollapsed || isMobile) && (
               <motion.div
@@ -112,26 +116,29 @@ export default function Sidebar() {
                 className="flex items-center gap-3"
               >
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">PH</span>
+                  <span className="text-white font-bold text-sm">MB</span>
                 </div>
                 <div>
-                  <h1 className="font-semibold text-white text-sm">Project Hub</h1>
-                  <p className="text-xs text-gray-500">Workspace</p>
+                  <h1 className="font-semibold text-main text-sm">MONEY IS BACK</h1>
+                  <p className="text-xs text-dim">Workspace</p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
           
-          <button
-            onClick={isMobile ? () => setMobileMenuOpen(false) : toggleSidebar}
-            className="p-2 rounded-lg hover:bg-[rgba(255,255,255,0.05)] text-gray-500 hover:text-gray-300 transition-colors"
-          >
-            {isMobile ? (
-              <X className="w-4 h-4" />
-            ) : (
-              sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />
-            )}
-          </button>
+          <div className="flex items-center gap-1">
+            {!isMobile && !sidebarCollapsed && <ThemeToggle />}
+            <button
+              onClick={isMobile ? () => setMobileMenuOpen(false) : toggleSidebar}
+              className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
+            >
+              {isMobile ? (
+                <X className="w-4 h-4" />
+              ) : (
+                sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
       {/* Search */}
@@ -142,7 +149,7 @@ export default function Sidebar() {
             <input
               type="text"
               placeholder="Rechercher..."
-              className="w-full pl-11 pr-4 py-3 text-sm bg-white/[0.02] border border-white/10 rounded-2xl text-white placeholder-gray-600 focus:bg-white/[0.04] focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300"
+              className="w-full pl-11 pr-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-2xl text-main placeholder-dim focus:bg-glass-hover focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300"
             />
           </div>
         </div>
@@ -164,7 +171,7 @@ export default function Sidebar() {
                     transition-all duration-200 cursor-pointer
                     ${isActive 
                       ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' 
-                      : 'text-gray-400 hover:bg-[rgba(255,255,255,0.04)] hover:text-gray-200'}
+                      : 'text-dim hover:bg-glass-hover hover:text-main'}
                   `}
                 >
                   <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-indigo-400' : ''}`} />
@@ -195,7 +202,7 @@ export default function Sidebar() {
               </span>
               <button
                 onClick={() => setProjectModalOpen(true)}
-                className="p-1 rounded-md hover:bg-[rgba(255,255,255,0.05)] text-gray-500 hover:text-gray-300 transition-colors"
+                className="p-1 rounded-md hover:bg-glass-hover text-dim hover:text-main transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -205,7 +212,7 @@ export default function Sidebar() {
                 <Link key={project._id} href={`/projects/${project._id}`}>
                   <motion.div
                     whileHover={{ x: 4 }}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl text-gray-400 hover:bg-[rgba(255,255,255,0.04)] hover:text-gray-200 transition-all duration-200 cursor-pointer"
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl text-dim hover:bg-glass-hover hover:text-main transition-all duration-200 cursor-pointer"
                   >
                     <div
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -220,13 +227,15 @@ export default function Sidebar() {
         )}
 
         {/* Secondary Navigation */}
-        {(!sidebarCollapsed || isMobile) && (
+{/* Secondary Navigation */}
           <div className="mt-6">
-            <div className="px-3 mb-2">
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Outils
-              </span>
-            </div>
+            {(!sidebarCollapsed || isMobile) && (
+              <div className="px-3 mb-2">
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Outils
+                </span>
+              </div>
+            )}
             <div className="space-y-1">
               {secondaryNavItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -234,30 +243,41 @@ export default function Sidebar() {
                   <Link key={item.href} href={item.href}>
                     <motion.div
                       whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.98 }}
                       className={`
                         flex items-center gap-3 px-3 py-2 rounded-xl
                         transition-all duration-200 cursor-pointer
                         ${isActive 
-                          ? 'bg-indigo-500/10 text-indigo-400' 
-                          : 'text-gray-400 hover:bg-[rgba(255,255,255,0.04)] hover:text-gray-200'}
+                          ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' 
+                          : 'text-dim hover:bg-glass-hover hover:text-main'}
                       `}
                     >
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-sm font-medium">{item.label}</span>
+                      <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-indigo-400' : ''}`} />
+                      <AnimatePresence mode="wait">
+                        {(!sidebarCollapsed || isMobile) && (
+                          <motion.span
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: 'auto' }}
+                            exit={{ opacity: 0, width: 0 }}
+                            className="text-sm font-medium whitespace-nowrap"
+                          >
+                            {item.label}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   </Link>
                 );
               })}
             </div>
           </div>
-        )}
       </nav>
 
       {/* Footer - User */}
-      <div className="p-3 border-t border-[rgba(255,255,255,0.06)]">
+      <div className="p-3 border-t border-glass-border">
         <div className={`
           flex items-center gap-3 px-3 py-2 rounded-xl
-          hover:bg-[rgba(255,255,255,0.04)] transition-all duration-200 group
+          hover:bg-glass-hover transition-all duration-200 group
         `}>
           <Link href="/settings" className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center flex-shrink-0 relative overflow-hidden ring-2 ring-transparent group-hover:ring-indigo-500/50 transition-all">
@@ -281,11 +301,11 @@ export default function Sidebar() {
                   exit={{ opacity: 0 }}
                   className="flex-1 min-w-0"
                 >
-                  <p className="text-sm font-medium text-white truncate group-hover:text-indigo-400 transition-colors">
+                  <p className="text-sm font-medium text-main truncate group-hover:text-indigo-400 transition-colors">
                     {user ? `${user.firstName} ${user.lastName}` : 'Mathias MERCIER'}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    {user?.email || 'admin@projecthub.com'}
+                    {user?.email || 'admin@moneyisback.com'}
                   </p>
                 </motion.div>
               )}
@@ -295,13 +315,13 @@ export default function Sidebar() {
           {(!sidebarCollapsed || isMobile) && (
             <div className="flex items-center gap-1">
               <Link href="/settings">
-                <button className="p-1.5 rounded-lg hover:bg-indigo-500/10 text-gray-500 hover:text-indigo-400 transition-colors">
+                <button className="p-1.5 rounded-lg hover:bg-indigo-500/10 text-dim hover:text-indigo-400 transition-colors">
                   <Settings className="w-4 h-4" />
                 </button>
               </Link>
               <button
                 onClick={logout}
-                className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
               </button>

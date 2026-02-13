@@ -5,3 +5,5 @@ export { default as CreateObjectiveModal } from './CreateObjectiveModal';
 export { default as CreateFolderModal } from './CreateFolderModal';
 export { default as UploadFileModal } from './UploadFileModal';
 export { default as CreateIdeaModal } from './CreateIdeaModal';
+export { default as EditTaskModal } from './EditTaskModal';
+export { default as CreateUserModal } from './CreateUserModal';

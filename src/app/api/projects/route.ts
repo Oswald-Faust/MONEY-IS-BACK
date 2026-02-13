@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Project from '@/models/Project';
+import GlobalSettings from '@/models/GlobalSettings';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -52,6 +53,17 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { name, description, color, icon, workspace } = body;
+
+    // Check Global Permissions
+    if (auth.role !== 'admin') {
+      const settings = await GlobalSettings.findOne();
+      if (settings && settings.permissions.createProject === false) {
+        return NextResponse.json(
+          { success: false, error: 'La création de projet est temporairement désactivée pour les utilisateurs standard.' },
+          { status: 403 }
+        );
+      }
+    }
 
     if (!name || !workspace) {
       return NextResponse.json(

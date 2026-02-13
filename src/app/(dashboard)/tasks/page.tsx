@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Filter, Grid3X3, List, CheckCircle, ChevronLeft } from 'lucide-react';
 import TaskCard from '@/components/ui/TaskCard';
-import CreateTaskModal from '@/components/modals/CreateTaskModal';
 import type { TaskPriority } from '@/types';
 
 
@@ -13,7 +12,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function TasksPage() {
-  const { tasks, projects, isTaskModalOpen, setTaskModalOpen, setTasks, updateTask } = useAppStore();
+  const { tasks, projects, setTaskModalOpen, setTasks, updateTask } = useAppStore();
   const { token } = useAuthStore();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -126,7 +125,7 @@ export default function TasksPage() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setTaskModalOpen(true)}
+          onClick={() => setTaskModalOpen(true, projectId || undefined)}
           className="px-4 py-2.5 rounded-xl flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-sm hover:from-indigo-500 hover:to-purple-500 transition-all duration-200"
         >
           <Plus className="w-4 h-4" />
@@ -285,11 +284,6 @@ export default function TasksPage() {
         </motion.div>
       )}
 
-      <CreateTaskModal 
-        isOpen={isTaskModalOpen} 
-        onClose={() => setTaskModalOpen(false)} 
-        defaultProjectId={projectId || undefined}
-      />
     </div>
   );
 }

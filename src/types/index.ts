@@ -4,6 +4,8 @@ export interface User {
   lastName: string;
   email: string;
   avatar?: string;
+  bio?: string;
+  profileColor?: string;
   role: 'user' | 'admin';
   preferences: {
     theme: 'dark' | 'light';
@@ -90,6 +92,7 @@ export interface Routine {
   project: string;
   projectColor?: string;
   creator: string;
+  assignee?: string | User;
   days: RoutineDays;
   time?: string;
   duration?: number;
@@ -134,6 +137,7 @@ export interface Objective {
   projectName?: string;
   projectColor?: string;
   creator: string;
+  assignee?: string | User;
   targetDate?: string;
   progress: number;
   checkpoints: ObjectiveCheckpoint[];
@@ -163,6 +167,7 @@ export interface Idea {
   content: string;
   project?: string;
   creator: string | User;
+  assignee?: string | User;
   attachments: Attachment[];
   tags: string[];
   status: 'raw' | 'standby' | 'in_progress' | 'implemented' | 'archived';
@@ -228,3 +233,26 @@ export interface PaginatedResponse<T> {
     totalPages: number;
   };
 }
+
+export interface MessageAttachment {
+  type: 'task' | 'objective' | 'file' | 'folder';
+  id: string;
+  name: string;
+}
+
+export interface Message {
+  _id: string;
+  sender: string;
+  recipient: string;
+  content: string;
+  attachments: MessageAttachment[];
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Contact extends User {
+  lastMessage?: Message;
+  unreadCount: number;
+}
+

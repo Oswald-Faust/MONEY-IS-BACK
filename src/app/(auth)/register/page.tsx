@@ -93,10 +93,10 @@ export default function RegisterPage() {
             animate={{ scale: 1 }}
             className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4"
           >
-            <span className="text-2xl font-bold text-white">PH</span>
+            <span className="text-2xl font-bold text-white">MB</span>
           </motion.div>
           <h1 className="text-2xl font-bold text-white mb-2">Créer un compte</h1>
-          <p className="text-gray-400">Rejoignez Project Hub</p>
+          <p className="text-gray-400">Rejoignez MONEY IS BACK</p>
         </div>
 
         {/* Register Form */}
@@ -154,79 +154,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Account Type Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-3">
-                Type de compte
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, accountType: 'user' })}
-                  className={`
-                    relative p-4 rounded-xl border-2 transition-all duration-200
-                    ${formData.accountType === 'user'
-                      ? 'border-indigo-500 bg-indigo-500/10'
-                      : 'border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] hover:border-[rgba(255,255,255,0.15)]'
-                    }
-                  `}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <div className={`
-                      w-10 h-10 rounded-full flex items-center justify-center
-                      ${formData.accountType === 'user' ? 'bg-indigo-500' : 'bg-gray-700'}
-                    `}>
-                      <User className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-medium text-white text-sm">Utilisateur</p>
-                      <p className="text-xs text-gray-400 mt-1">Accès standard</p>
-                    </div>
-                  </div>
-                  {formData.accountType === 'user' && (
-                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, accountType: 'admin' })}
-                  className={`
-                    relative p-4 rounded-xl border-2 transition-all duration-200
-                    ${formData.accountType === 'admin'
-                      ? 'border-purple-500 bg-purple-500/10'
-                      : 'border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] hover:border-[rgba(255,255,255,0.15)]'
-                    }
-                  `}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <div className={`
-                      w-10 h-10 rounded-full flex items-center justify-center
-                      ${formData.accountType === 'admin' ? 'bg-purple-500' : 'bg-gray-700'}
-                    `}>
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    </div>
-                    <div className="text-center">
-                      <p className="font-medium text-white text-sm">Administrateur</p>
-                      <p className="text-xs text-gray-400 mt-1">Accès complet</p>
-                    </div>
-                  </div>
-                  {formData.accountType === 'admin' && (
-                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  )}
-                </button>
-              </div>
-            </div>
 
             {/* Email */}
             <div>

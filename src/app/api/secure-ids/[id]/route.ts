@@ -26,10 +26,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
              return NextResponse.json({ error: 'Projet associé non trouvé' }, { status: 404 });
         }
 
+        const isGlobalAdmin = auth.role === 'admin';
         const isOwner = project.owner.toString() === auth.userId;
         const member = project.members.find((m: any) => m.user.toString() === auth.userId);
         
-        if (!isOwner && (!member || member.role !== 'admin')) {
+        if (!isGlobalAdmin && !isOwner && (!member || member.role !== 'admin')) {
              return NextResponse.json({ error: 'Accès refusé - Admin requis' }, { status: 403 });
         }
         
@@ -62,7 +63,24 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
         await connectToDatabase();
         
-        const secureId = await SecureId.findByIdAndDelete(params.id);
+        const secureId = await SecureId.findById(params.id);
+        
+        if (!secureId) {
+            return NextResponse.json({ error: 'Element non trouvé' }, { status: 404 });
+        }
+
+        const project = await Project.findById(secureId.project);
+        if (project) {
+            const isGlobalAdmin = auth.role === 'admin';
+            const isOwner = project.owner.toString() === auth.userId;
+            const member = project.members.find((m: any) => m.user.toString() === auth.userId);
+            
+            if (!isGlobalAdmin && !isOwner && (!member || member.role !== 'admin')) {
+                 return NextResponse.json({ error: 'Accès refusé - Admin requis' }, { status: 403 });
+            }
+        }
+
+        await SecureId.findByIdAndDelete(params.id);
         
         if (!secureId) {
             return NextResponse.json({ error: 'Element non trouvé' }, { status: 404 });
@@ -87,6 +105,22 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const { title, password, username, link, notes, category } = body;
 
         await connectToDatabase();
+
+        const secureIdToUpdate = await SecureId.findById(params.id);
+        if (!secureIdToUpdate) {
+            return NextResponse.json({ error: 'Element non trouvé' }, { status: 404 });
+        }
+
+        const project = await Project.findById(secureIdToUpdate.project);
+        if (project) {
+            const isGlobalAdmin = auth.role === 'admin';
+            const isOwner = project.owner.toString() === auth.userId;
+            const member = project.members.find((m: any) => m.user.toString() === auth.userId);
+            
+            if (!isGlobalAdmin && !isOwner && (!member || member.role !== 'admin')) {
+                 return NextResponse.json({ error: 'Accès refusé - Admin requis' }, { status: 403 });
+            }
+        }
 
         const updateData: any = {
             title, username, link, notes, category

@@ -6,6 +6,7 @@ import { X, Lightbulb, Loader2, Plus, Paperclip, Image as ImageIcon, File as Fil
 import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import type { Attachment } from '@/types';
+import UserSelector from '@/components/ui/UserSelector';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -27,6 +28,7 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
     project: '', 
     status: 'raw' as 'raw' | 'standby' | 'in_progress' | 'implemented' | 'archived',
     tags: [] as string[],
+    assignee: ''
   });
 
   // Pre-select project when modal opens or projectId changes
@@ -96,7 +98,8 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
           project: formData.project,
           status: formData.status,
           tags: formData.tags,
-          attachments: processedAttachments
+          attachments: processedAttachments,
+          assignee: formData.assignee || undefined
         }),
       });
 
@@ -112,6 +115,7 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
           project: '',
           status: 'raw',
           tags: [],
+          assignee: '',
         });
         setAttachments([]);
       } else {
@@ -195,6 +199,14 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
                   placeholder="Décrivez votre idée en quelques mots..."
                   rows={4}
                   className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-white outline-none focus:border-amber-500/50 resize-none"
+                />
+              </div>
+
+              {/* Assignee */}
+              <div>
+                <UserSelector 
+                  value={formData.assignee}
+                  onChange={(userId) => setFormData({ ...formData, assignee: userId })}
                 />
               </div>
 
