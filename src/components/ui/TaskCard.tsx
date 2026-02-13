@@ -58,19 +58,20 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
     >
       <div
         className={`
-          relative overflow-hidden rounded-2xl p-6
-          bg-glass-bg
-          hover:bg-glass-hover hover:shadow-xl transition-all duration-300
+          glass-card relative overflow-hidden p-6
+          border-t-2 transition-all duration-300
           ${isCompleted ? 'opacity-50' : ''}
         `}
+        style={{
+          borderTopColor: task.projectColor || priority.color,
+          boxShadow: `0 10px 40px -20px ${(task.projectColor || priority.color)}40`,
+        }}
       >
-        {/* Project Color Accent - More subtle */}
-        {task.projectColor && (
-          <div
-            className="absolute left-0 top-0 bottom-0 w-1.5"
-            style={{ backgroundColor: task.projectColor }}
-          />
-        )}
+        {/* Hover Glow Effect */}
+        <div 
+          className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 rounded-[inherit] pointer-events-none"
+          style={{ backgroundColor: task.projectColor || priority.color }}
+        />
 
         <div className="flex items-start gap-5">
           {/* Checkbox - Clean and larger */}
@@ -88,6 +89,9 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
                 : 'border-glass-border hover:border-main group-hover:scale-110'
               }
             `}
+            style={{
+                borderColor: !isCompleted ? (task.projectColor || priority.color) : undefined
+            }}
           >
             {isCompleted && <CheckCircle className="w-3.5 h-3.5 text-white" />}
           </button>
@@ -95,16 +99,16 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
           {/* Content */}
           <div className="flex-1 min-w-0">
             {/* Project Tag - More visible */}
-            {task.projectName && (
-              <div className="flex items-center gap-2 mb-2">
-                <span 
-                  className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md"
-                  style={{ backgroundColor: `${task.projectColor}15`, color: task.projectColor }}
-                >
-                  {task.projectName}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-2 mb-2">
+                {task.projectName && (
+                  <span 
+                    className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md"
+                    style={{ backgroundColor: `${task.projectColor || priority.color}15`, color: task.projectColor || priority.color }}
+                  >
+                    {task.projectName}
+                  </span>
+                )}
+            </div>
 
             {/* Title - Better typography */}
             <h4

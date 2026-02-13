@@ -1,8 +1,6 @@
-'use client';
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Check, Target, File, Folder, LayoutDashboard } from 'lucide-react';
+import { X, Search, Check, Target, File, Folder, LayoutDashboard, Lightbulb } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { Task, Objective, DriveFile, DriveFolder, MessageAttachment } from '@/types';
 
@@ -13,18 +11,21 @@ interface ResourcePickerProps {
 }
 
 export default function ResourcePicker({ isOpen, onClose, onSelect }: ResourcePickerProps) {
-  const { tasks, objectives, driveFiles, driveFolders } = useAppStore();
+  const { tasks, objectives, ideas, driveFiles, driveFolders } = useAppStore();
   const [activeTab, setActiveTab] = useState<MessageAttachment['type']>('task');
   const [searchQuery, setSearchQuery] = useState('');
 
-  if (!isOpen) return null;
-
+  // No longer returning null early to allow AnimatePresence to work efficiently from parent if needed, 
+  // but here we use it interally for the conditional rendering of the motion div.
+  
   const getFilteredItems = () => {
     switch (activeTab) {
       case 'task':
         return tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()));
       case 'objective':
         return objectives.filter(o => o.title.toLowerCase().includes(searchQuery.toLowerCase()));
+      case 'idea':
+        return ideas.filter(i => i.title.toLowerCase().includes(searchQuery.toLowerCase()));
       case 'file':
         return driveFiles.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
       case 'folder':
@@ -37,86 +38,106 @@ export default function ResourcePicker({ isOpen, onClose, onSelect }: ResourcePi
   const filteredItems = getFilteredItems();
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-secondary border border-glass-border rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
-      >
-        <div className="p-6 border-b border-glass-border flex items-center justify-between">
-          <h2 className="text-xl font-bold text-main">Partager une ressource</h2>
-          <button onClick={onClose} className="p-2 text-dim hover:text-main transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="flex border-b border-glass-border">
-          {[
-            { id: 'task', label: 'Tâches', icon: LayoutDashboard },
-            { id: 'objective', label: 'Objectifs', icon: Target },
-            { id: 'file', label: 'Fichiers', icon: File },
-            { id: 'folder', label: 'Dossiers', icon: Folder },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as MessageAttachment['type'])}
-              className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === tab.id 
-                  ? 'border-indigo-500 text-indigo-400' 
-                  : 'border-transparent text-dim hover:text-main hover:bg-glass-hover'
-              }`}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="absolute bottom-4 left-4 right-4 md:left-auto md:right-8 md:bottom-24 z-50 w-full md:w-[500px] h-[500px] bg-[#1c1c1e] border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+        >
+          {/* Header */}
+          <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#1c1c1e]/50 backdrop-blur-md sticky top-0 z-10">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                    <LayoutDashboard className="w-4 h-4" />
+                </span>
+                Partager une ressource
+            </h2>
+            <button 
+                onClick={onClose} 
+                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
             >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
+              <X className="w-5 h-5" />
             </button>
-          ))}
-        </div>
-
-        <div className="p-4">
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dim" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Rechercher un(e) ${activeTab}...`}
-              className="w-full pl-10 pr-4 py-2 bg-glass-bg border border-glass-border rounded-xl text-sm text-main placeholder-dim focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-            />
           </div>
 
-          <div className="max-h-60 overflow-y-auto space-y-1">
-            {filteredItems.length === 0 ? (
-              <div className="text-center py-8 text-dim text-sm italic">
-                Aucun résultat trouvé
-              </div>
-            ) : (
-              filteredItems.map((item: any) => (
-                <button
-                  key={item._id}
-                  onClick={() => {
-                    onSelect(activeTab, item._id, item.title || item.name);
-                    onClose();
-                  }}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-glass-hover transition-colors text-left"
-                >
-                  <div className={`w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400`}>
-                    {activeTab === 'task' && <LayoutDashboard className="w-4 h-4" />}
-                    {activeTab === 'objective' && <Target className="w-4 h-4" />}
-                    {activeTab === 'file' && <File className="w-4 h-4" />}
-                    {activeTab === 'folder' && <Folder className="w-4 h-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-main truncate">{item.title || item.name}</p>
-                    {item.projectName && <p className="text-[10px] text-dim">{item.projectName}</p>}
-                  </div>
-                  <Check className="w-4 h-4 text-indigo-500 opacity-0 group-hover:opacity-100" />
-                </button>
-              ))
-            )}
+          {/* Tabs */}
+          <div className="flex border-b border-white/10 overflow-x-auto bg-[#1c1c1e]">
+            {[
+              { id: 'task', label: 'Tâches', icon: LayoutDashboard },
+              { id: 'objective', label: 'Objectifs', icon: Target },
+              { id: 'idea', label: 'Idées', icon: Lightbulb },
+              { id: 'file', label: 'Fichiers', icon: File },
+              { id: 'folder', label: 'Dossiers', icon: Folder },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as MessageAttachment['type'])}
+                className={`flex-1 min-w-[80px] flex flex-col items-center justify-center gap-1 py-3 text-xs font-medium transition-colors border-b-2 ${
+                  activeTab === tab.id 
+                    ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5' 
+                    : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
-        </div>
-      </motion.div>
-    </div>
+
+          {/* Search & List */}
+          <div className="flex-1 flex flex-col p-4 overflow-hidden bg-[#141416]">
+            <div className="relative mb-4 shrink-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={`Rechercher un(e) ${activeTab}...`}
+                className="w-full pl-10 pr-4 py-2.5 bg-black/20 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+              {filteredItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-3">
+                    <Search className="w-8 h-8 opacity-20" />
+                  <p className="text-sm italic">Aucun résultat trouvé</p>
+                </div>
+              ) : (
+                filteredItems.map((item: any) => (
+                  <button
+                    key={item._id}
+                    onClick={() => {
+                      onSelect(activeTab, item._id, item.title || item.name);
+                      onClose();
+                    }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-indigo-500/10 hover:border-indigo-500/20 border border-transparent transition-all text-left group"
+                  >
+                    <div className={`w-10 h-10 rounded-xl bg-[#1c1c1e] border border-white/5 flex items-center justify-center text-gray-400 group-hover:text-indigo-400 group-hover:border-indigo-500/30 transition-colors`}>
+                      {activeTab === 'task' && <LayoutDashboard className="w-5 h-5" />}
+                      {activeTab === 'objective' && <Target className="w-5 h-5" />}
+                      {activeTab === 'idea' && <Lightbulb className="w-5 h-5" />}
+                      {activeTab === 'file' && <File className="w-5 h-5" />}
+                      {activeTab === 'folder' && <Folder className="w-5 h-5" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-200 group-hover:text-white truncate transition-colors">{item.title || item.name}</p>
+                      {item.projectName && <p className="text-[11px] text-gray-500">{item.projectName}</p>}
+                    </div>
+                    <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
+                         <Check className="w-4 h-4 text-indigo-400" />
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

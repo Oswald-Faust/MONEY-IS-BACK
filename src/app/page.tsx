@@ -19,7 +19,7 @@ import {
 import Link from 'next/link';
 import { useAuthStore } from '@/store';
 import { useState, useEffect } from 'react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+
 
 const features = [
   {
@@ -148,7 +148,6 @@ export default function HomePage() {
           </div>
           
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             {!isMounted ? (
               // Show default state during SSR to prevent hydration mismatch
               <>

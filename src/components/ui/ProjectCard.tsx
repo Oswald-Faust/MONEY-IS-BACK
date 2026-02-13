@@ -117,7 +117,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 mt-2 w-48 z-50 overflow-hidden rounded-2xl bg-secondary shadow-2xl backdrop-blur-xl"
+                      className="absolute right-0 mt-2 w-48 z-50 overflow-hidden rounded-2xl bg-[#1a1a24] border border-white/10 shadow-2xl backdrop-blur-xl"
                     >
                       <div className="p-1.5 space-y-1">
                         <button
@@ -127,7 +127,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                             setShowMenu(false);
                             onEdit?.(project);
                           }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-dim hover:text-main hover:bg-glass-hover rounded-xl transition-all group/item"
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-200 hover:text-white hover:bg-glass-hover rounded-xl transition-all group/item"
                         >
                           <Edit3 className="w-4 h-4 text-dim group-hover/item:text-indigo-400 transition-colors" />
                           Modifier

@@ -17,7 +17,7 @@ import {
 import React from 'react';
 import { Menu } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard';
-import { ThemeToggle } from '@/components/ThemeToggle';
+
 
 export default function DashboardLayout({
   children,
@@ -102,7 +102,7 @@ export default function DashboardLayout({
             </div>
             
             <div className="flex items-center gap-2">
-              <ThemeToggle />
+              {/* ThemeToggle removed */}
             </div>
           </div>
         )}

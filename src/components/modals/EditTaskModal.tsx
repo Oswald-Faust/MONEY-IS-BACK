@@ -224,8 +224,8 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
                         className={`
                           flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border transition-all duration-200
                           ${formData.priority === option.value
-                            ? 'border-white/20'
-                            : 'border-white/5 hover:border-white/10'}
+                            ? 'border-indigo-500/50'
+                            : 'border-glass-border hover:border-glass-hover'}
                         `}
                         style={{
                           backgroundColor: formData.priority === option.value 

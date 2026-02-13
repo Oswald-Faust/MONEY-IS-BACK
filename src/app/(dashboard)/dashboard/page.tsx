@@ -141,7 +141,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button
             onClick={() => setTaskModalOpen(true)}
-            className="px-6 py-3 rounded-xl bg-glass-bg text-main font-semibold hover:bg-glass-hover transition-all flex items-center justify-center gap-2"
+            className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-main font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Nouvelle tâche
@@ -152,7 +152,7 @@ export default function DashboardPage() {
               setCurrentProject(null);
               setProjectModalOpen(true);
             }}
-            className="btn-primary flex items-center justify-center gap-2 px-6"
+            className="btn-primary flex items-center justify-center gap-2 px-6 rounded-2xl"
           >
             <Plus className="w-4 h-4" />
             Nouveau projet
@@ -195,7 +195,7 @@ export default function DashboardPage() {
               Mes Business
             </h2>
           </div>
-          <Link href="/projects" className="px-4 py-2 rounded-lg text-sm font-semibold text-indigo-400 hover:text-main hover:bg-indigo-500/10 flex items-center gap-2 transition-all group/link">
+          <Link href="/projects" className="px-4 py-2 rounded-2xl text-sm font-semibold text-indigo-400 hover:text-main hover:bg-indigo-500/10 flex items-center gap-2 transition-all group/link">
             Gérer tout 
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
@@ -212,7 +212,7 @@ export default function DashboardPage() {
             <p className="text-sm text-dim">Créez votre premier projet pour commencer</p>
             <button 
               onClick={() => setProjectModalOpen(true)}
-              className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600 transition-colors"
+              className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-2xl text-sm hover:bg-indigo-600 transition-colors"
             >
               Créer un projet
             </button>
@@ -267,13 +267,14 @@ export default function DashboardPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Important Column */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between px-1">
+              {/* Important Column */}
+              <div className="glass-card p-6 space-y-6">
+                <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-red-500 font-bold text-sm uppercase tracking-wider">
                     <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
                     Crucial
                   </span>
-                  <span className="text-xs text-dim bg-glass-bg px-2 py-0.5 rounded-full">{importantTasks.length} tâches</span>
+                  <span className="text-xs text-dim bg-glass-bg px-2 py-0.5 rounded-full border border-glass-border">{importantTasks.length} tâches</span>
                 </div>
                 <div className="space-y-4">
                   <AnimatePresence mode="popLayout">
@@ -281,17 +282,22 @@ export default function DashboardPage() {
                       <TaskCard key={task._id} task={task} onComplete={handleCompleteTask} />
                     ))}
                   </AnimatePresence>
+                  {importantTasks.length === 0 && (
+                    <div className="text-center py-8 text-dim text-sm italic">
+                      Aucune tâche cruciale
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Waiting/Less Important Column - Merged for clarity */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between px-1">
+              <div className="glass-card p-6 space-y-6">
+                <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-indigo-400 font-bold text-sm uppercase tracking-wider">
                     <span className="w-2 h-2 rounded-full bg-indigo-400" />
                     Prochainement
                   </span>
-                  <span className="text-xs text-dim bg-glass-bg px-2 py-0.5 rounded-full">{otherTasks.length} tâches</span>
+                  <span className="text-xs text-dim bg-glass-bg px-2 py-0.5 rounded-full border border-glass-border">{otherTasks.length} tâches</span>
                 </div>
                 <div className="space-y-4">
                   <AnimatePresence mode="popLayout">
@@ -299,14 +305,17 @@ export default function DashboardPage() {
                       <TaskCard key={task._id} task={task} onComplete={handleCompleteTask} />
                     ))}
                   </AnimatePresence>
+                  {otherTasks.length === 0 && (
+                    <div className="text-center py-8 text-dim text-sm italic">
+                      Aucune tâche à venir
+                    </div>
+                  )}
                   <button 
                     onClick={() => setTaskModalOpen(true)}
-                    className="w-full p-10 bg-glass-bg rounded-2xl flex flex-col items-center justify-center text-center opacity-40 hover:opacity-100 hover:bg-glass-hover transition-all group"
+                    className="w-full p-4 rounded-2xl bg-glass-bg border border-glass-border border-dashed flex items-center justify-center gap-2 text-dim hover:text-main hover:bg-glass-hover hover:border-indigo-500/30 transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-full bg-glass-bg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                      <Plus className="w-5 h-5 flex-shrink-0 text-main" />
-                    </div>
-                    <p className="text-xs font-medium">Libérer mon esprit</p>
+                    <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-medium">Ajouter une tâche</span>
                   </button>
                 </div>
               </div>

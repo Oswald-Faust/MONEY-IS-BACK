@@ -73,8 +73,8 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
           onClick={() => setIsOpen(!isOpen)}
           className={`
             w-full flex items-center justify-between px-4 py-3 
-            bg-white/5 border border-white/10 rounded-xl 
-            text-white hover:bg-white/10 transition-all
+            bg-glass-bg border border-glass-border rounded-xl 
+            text-main hover:bg-glass-hover transition-all
             ${isOpen ? 'ring-2 ring-indigo-500/20 border-indigo-500/50' : ''}
           `}
         >
@@ -114,7 +114,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 right-0 mt-2 p-2 bg-[#1a1a24] border border-white/10 rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto custom-scrollbar"
+                className="absolute top-full left-0 right-0 mt-2 p-2 bg-secondary border border-glass-border rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto custom-scrollbar"
               >
                 <div className="px-2 pb-2">
                   <input
@@ -122,7 +122,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                     placeholder="Rechercher..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500/50"
+                    className="w-full px-3 py-2 bg-glass-bg border border-glass-border rounded-lg text-sm text-main focus:outline-none focus:border-indigo-500/50"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
@@ -134,7 +134,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                       onChange('');
                       setIsOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-glass-hover transition-colors text-left"
                   >
                     <div className="w-8 h-8 rounded-full border border-dashed border-gray-600 flex items-center justify-center">
                       <UserIcon className="w-4 h-4 text-gray-500" />
@@ -151,7 +151,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                         onChange(user._id);
                         setIsOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-glass-hover transition-colors text-left group"
                     >
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                         {user.avatar ? (

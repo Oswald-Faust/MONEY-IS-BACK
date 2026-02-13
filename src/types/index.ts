@@ -235,7 +235,7 @@ export interface PaginatedResponse<T> {
 }
 
 export interface MessageAttachment {
-  type: 'task' | 'objective' | 'file' | 'folder';
+  type: 'task' | 'objective' | 'file' | 'folder' | 'idea';
   id: string;
   name: string;
 }

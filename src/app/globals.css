@@ -1,23 +1,28 @@
 @import "tailwindcss";
 
+@theme {
+  --color-glass-border: var(--glass-border);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-hover: var(--glass-hover);
+  
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-card: var(--bg-card);
+  
+  --color-text-main: var(--text-main);
+  --color-text-dim: var(--text-dim);
+  --color-text-muted: var(--text-muted);
+  
+  --color-input-bg: var(--input-bg);
+  --color-input-border: var(--input-border);
+}
+
 /* ========================================
    PROJECT HUB - Clean Premium Dark Theme
    ======================================== */
 
 :root {
-  /* Spacing & Radii (Shared) */
-  --sidebar-w: 280px;
-  --sidebar-coll: 80px;
-  --radius-xl: 16px;
-  --radius-lg: 12px;
-
-  /* Accent Colors (Shared) */
-  --accent-primary: #6366f1;
-  --accent-secondary: #8b5cf6;
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-}
-
-.dark {
   /* Core Colors */
   --bg-primary: #0a0a0f;
   --bg-secondary: #0f0f15;
@@ -38,29 +43,17 @@
   --input-bg: #0d0d14;
   --input-border: rgba(255, 255, 255, 0.02);
   --scrollbar-thumb: #1a1a24;
-}
 
-:root:not(.dark) {
-  /* Core Colors */
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.9);
+  /* Spacing & Radii (Shared) */
+  --sidebar-w: 280px;
+  --sidebar-coll: 80px;
+  --radius-xl: 16px;
+  --radius-lg: 12px;
 
-  /* Glass Effects */
-  --glass-bg: rgba(0, 0, 0, 0.02);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-hover: rgba(0, 0, 0, 0.04);
-
-  /* Text Colors */
-  --text-main: #0f172a;
-  --text-dim: #475569;
-  --text-muted: #64748b;
-
-  /* Component Specific */
-  --input-bg: #ffffff;
-  --input-border: #e2e8f0;
-  --scrollbar-thumb: rgba(0, 0, 0, 0.1);
+  /* Accent Colors (Shared) */
+  --accent-primary: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
 }
 
 /* ========================================

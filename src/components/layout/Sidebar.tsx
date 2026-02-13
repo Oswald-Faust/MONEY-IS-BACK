@@ -42,8 +42,6 @@ const secondaryNavItems = [
   { icon: HardDrive, label: 'Drive', href: '/drive', view: 'drive' as const },
 ];
 
-import { ThemeToggle } from '@/components/ThemeToggle';
-
 import Image from 'next/image';
 
 interface PartialProject {
@@ -68,6 +66,7 @@ export default function Sidebar() {
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
+  const [projectsExpanded, setProjectsExpanded] = React.useState(true);
 
   React.useEffect(() => {
     setMounted(true);
@@ -102,7 +101,7 @@ export default function Sidebar() {
         }
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
         className={`fixed left-0 top-0 h-screen bg-secondary flex flex-col z-[70] ${
-          isMobile ? 'shadow-2xl' : 'border-r border-glass-border/30'
+          isMobile ? 'shadow-2xl' : 'border-r border-indigo-500/30'
         }`}
       >
         {/* Header */}
@@ -127,7 +126,6 @@ export default function Sidebar() {
           </AnimatePresence>
           
           <div className="flex items-center gap-1">
-            {!isMobile && !sidebarCollapsed && <ThemeToggle />}
             <button
               onClick={isMobile ? () => setMobileMenuOpen(false) : toggleSidebar}
               className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
@@ -149,7 +147,7 @@ export default function Sidebar() {
             <input
               type="text"
               placeholder="Rechercher..."
-              className="w-full pl-11 pr-4 py-3 text-sm bg-glass-bg rounded-2xl text-main placeholder-dim focus:bg-glass-hover focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300"
+              className="w-full pl-11 pr-4 py-3 text-sm bg-white/5 border border-white/10 rounded-2xl text-main placeholder-dim focus:bg-glass-hover focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300"
             />
           </div>
         </div>
@@ -197,9 +195,20 @@ export default function Sidebar() {
         {(!sidebarCollapsed || isMobile) && (
           <div className="mt-6">
             <div className="flex items-center justify-between px-3 mb-2">
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Projets
-              </span>
+              <button
+                onClick={() => setProjectsExpanded(!projectsExpanded)}
+                className="flex items-center gap-1 group/header"
+              >
+                <div className={`
+                  p-0.5 rounded transition-colors duration-200 
+                  text-gray-500 group-hover/header:text-main
+                `}>
+                  <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${projectsExpanded ? 'rotate-90' : ''}`} />
+                </div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider group-hover/header:text-main transition-colors">
+                  Projets
+                </span>
+              </button>
               <button
                 onClick={() => setProjectModalOpen(true)}
                 className="p-1 rounded-md hover:bg-glass-hover text-dim hover:text-main transition-colors"
@@ -207,22 +216,35 @@ export default function Sidebar() {
                 <Plus className="w-4 h-4" />
               </button>
             </div>
-            <div className="space-y-1">
-              {(projects.length > 0 ? projects : demoProjects).map((project) => (
-                <Link key={project._id} href={`/projects/${project._id}`}>
-                  <motion.div
-                    whileHover={{ x: 4 }}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl text-dim hover:bg-glass-hover hover:text-main transition-all duration-200 cursor-pointer"
-                  >
-                    <div
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: project.color }}
-                    />
-                    <span className="text-sm font-medium">{project.name}</span>
-                  </motion.div>
-                </Link>
-              ))}
-            </div>
+            
+            <AnimatePresence>
+              {projectsExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="space-y-1">
+                    {(projects.length > 0 ? projects : demoProjects).map((project) => (
+                      <Link key={project._id} href={`/projects/${project._id}`}>
+                        <motion.div
+                          whileHover={{ x: 4 }}
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl text-dim hover:bg-glass-hover hover:text-main transition-all duration-200 cursor-pointer"
+                        >
+                          <div
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: project.color }}
+                          />
+                          <span className="text-sm font-medium">{project.name}</span>
+                        </motion.div>
+                      </Link>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
 
