@@ -8,6 +8,8 @@ import { useAppStore, useAuthStore } from '@/store';
 import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
+import { CreateObjectiveModal } from '@/components/modals';
+
 export default function ObjectivesPage() {
   const { objectives, projects, setObjectiveModalOpen, setObjectives } = useAppStore();
   const searchParams = useSearchParams();
@@ -16,9 +18,27 @@ export default function ObjectivesPage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+  const [editingObjective, setEditingObjective] = useState<any>(null);
 
   const { token } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
+
+  // Handle URL params for direct objective access
+  useEffect(() => {
+    const objectiveId = searchParams.get('objectiveId');
+    if (objectiveId && token) {
+        fetch(`/api/objectives?id=${objectiveId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                setEditingObjective(data.data);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+  }, [searchParams, token]);
 
   useEffect(() => {
     setMounted(true);
@@ -172,6 +192,17 @@ export default function ObjectivesPage() {
           <p className="text-gray-500">Aucun objectif trouvé</p>
         </div>
       ) : null}
+
+      <CreateObjectiveModal 
+        isOpen={!!editingObjective} 
+        onClose={() => {
+            setEditingObjective(null);
+            const url = new URL(window.location.href);
+            url.searchParams.delete('objectiveId');
+            window.history.replaceState({}, '', url);
+        }} 
+        initialData={editingObjective}
+      />
     </div>
   );
 }

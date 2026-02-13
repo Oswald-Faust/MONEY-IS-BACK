@@ -6,3 +6,4 @@ export { default as RoutineCalendar } from './RoutineCalendar';
 export { default as FileCard } from './FileCard';
 export { default as FolderCard } from './FolderCard';
 export { default as IdeaCard } from './IdeaCard';
+export { default as UserHoverCard } from './UserHoverCard';

@@ -5,8 +5,9 @@ import connectToDatabase from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { encrypt, decrypt } from '@/lib/encryption';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const auth = await verifyAuth(req);
         if (!auth.success) {
             return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
         await connectToDatabase();
         
-        const secureId = await SecureId.findById(params.id).select('+password');
+        const secureId = await SecureId.findById(id).select('+password');
 
         if (!secureId) {
              return NextResponse.json({ error: 'Element non trouvé' }, { status: 404 });
@@ -54,8 +55,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
      try {
+        const { id } = await params;
         const auth = await verifyAuth(req);
         if (!auth.success) {
             return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
@@ -63,7 +65,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
         await connectToDatabase();
         
-        const secureId = await SecureId.findById(params.id);
+        const secureId = await SecureId.findById(id);
         
         if (!secureId) {
             return NextResponse.json({ error: 'Element non trouvé' }, { status: 404 });
@@ -80,7 +82,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
             }
         }
 
-        await SecureId.findByIdAndDelete(params.id);
+        await SecureId.findByIdAndDelete(id);
         
         if (!secureId) {
             return NextResponse.json({ error: 'Element non trouvé' }, { status: 404 });
@@ -94,8 +96,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const auth = await verifyAuth(req);
         if (!auth.success) {
             return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
@@ -106,7 +109,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
         await connectToDatabase();
 
-        const secureIdToUpdate = await SecureId.findById(params.id);
+        const secureIdToUpdate = await SecureId.findById(id);
         if (!secureIdToUpdate) {
             return NextResponse.json({ error: 'Element non trouvé' }, { status: 404 });
         }
@@ -130,7 +133,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             updateData.password = encrypt(password);
         }
 
-        const secureId = await SecureId.findByIdAndUpdate(params.id, updateData, { new: true });
+        const secureId = await SecureId.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!secureId) {
             return NextResponse.json({ error: 'Element non trouvé' }, { status: 404 });

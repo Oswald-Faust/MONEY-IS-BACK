@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Send, MoreVertical, Search, Check, CheckCheck, 
-  LayoutDashboard, Target, File, Folder, X, ChevronLeft, Lightbulb
+  LayoutDashboard, Target, File, Folder, X, ChevronLeft, Lightbulb, Trash2
 } from 'lucide-react';
 import { Contact, Message, MessageAttachment } from '@/types';
 
@@ -20,6 +20,8 @@ interface ChatWindowProps {
   onRemoveAttachment: (id: string) => void;
   onOpenResourcePicker: () => void;
   onBack?: () => void;
+  onDeleteMessage: () => void; // Callback to refresh messages
+  token: string;
 }
 
 export default function ChatWindow({
@@ -35,12 +37,41 @@ export default function ChatWindow({
   onRemoveAttachment,
   onOpenResourcePicker,
   onBack,
+  onDeleteMessage,
+  token,
 }: ChatWindowProps) {
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Delete State
+  const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleDeleteMessage = async (deleteForEveryone: boolean) => {
+    if (!messageToDelete) return;
+    
+    try {
+        const response = await fetch(`/api/messages/${messageToDelete._id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ deleteForEveryone }),
+        });
+        
+        if (response.ok) {
+             onDeleteMessage();
+        } else {
+            console.error('Failed to delete');
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    
+    setShowDeleteModal(false);
+    setMessageToDelete(null);
   };
 
   // Search State
@@ -244,64 +275,86 @@ export default function ChatWindow({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
                 key={msg._id || index} 
-                className={`flex w-full ${isOwn ? 'justify-end' : 'justify-start'} ${isHighlighted ? 'bg-indigo-500/10 -mx-4 px-4 py-2 rounded-lg transition-colors duration-500' : ''}`}
+                className={`flex w-full group/msg ${isOwn ? 'justify-end' : 'justify-start'} ${isHighlighted ? 'bg-indigo-500/10 -mx-4 px-4 py-2 rounded-lg transition-colors duration-500' : ''}`}
               >
                 <div className={`flex flex-col max-w-[70%] ${isOwn ? 'items-end' : 'items-start'}`}>
                   <div 
-                    className={`relative px-5 py-3.5 shadow-sm space-y-1 ${
+                    className={`relative px-5 py-3.5 shadow-sm space-y-1 group ${
                       isOwn 
                         ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm shadow-[0_4px_15px_rgba(79,70,229,0.3)]' 
                         : 'bg-[#1c1c1e] border border-white/10 text-gray-100 rounded-2xl rounded-tl-sm'
                     }`}
                   >
-                    {msg.content && (
-                      <p className="text-[15px] leading-relaxed whitespace-pre-wrap">
-                        {renderMessageContent(msg.content)}
-                      </p>
+                    {!msg.deletedForEveryone && (
+                        <button
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              setMessageToDelete(msg);
+                              setShowDeleteModal(true);
+                          }}
+                          className={`absolute -top-2 ${isOwn ? '-left-2' : '-right-2'} p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-all shadow-lg scale-75 hover:scale-100 z-10`}
+                          title="Supprimer"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                     )}
-                    
-                    {/* Attachments */}
-                    {msg.attachments && msg.attachments.length > 0 && (
-                       <div className={`${msg.content ? `mt-3 pt-3 border-t ${isOwn ? 'border-white/20' : 'border-white/5'}` : ''} space-y-2`}>
-                        {msg.attachments.map((att) => (
-                          <div 
-                            key={att.id} 
-                            onClick={() => {
-                              switch(att.type) {
-                                case 'task': return router.push(`/projects?taskId=${att.id}`);
-                                case 'objective': return router.push(`/objectives?objectiveId=${att.id}`);
-                                case 'idea': return router.push(`/ideas?ideaId=${att.id}`);
-                                // File/Folder navigation can be added later or just opened
-                                case 'folder': return router.push(`/drive?folderId=${att.id}`);
-                              }
-                            }}
-                            className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors group/att ${
-                              isOwn ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 hover:bg-white/10'
-                            }`}
-                          >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                              isOwn ? 'bg-white/20' : 'bg-indigo-500/20 text-indigo-400'
-                            }`}>
-                              {att.type === 'task' && <LayoutDashboard className="w-4 h-4" />}
-                              {att.type === 'objective' && <Target className="w-4 h-4" />}
-                              {att.type === 'idea' && <Lightbulb className="w-4 h-4" />}
-                              {att.type === 'file' && <File className="w-4 h-4" />}
-                              {att.type === 'folder' && <Folder className="w-4 h-4" />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-xs truncate">{att.name}</p>
-                              <p className="text-[10px] opacity-70 uppercase font-medium">{att.type}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+
+                    {msg.deletedForEveryone ? (
+                        <p className="text-[13px] italic opacity-60 flex items-center gap-2 py-1">
+                            <Trash2 className="w-3 h-3" /> 
+                            Ce message a été supprimé
+                        </p>
+                    ) : (
+                        <>
+                            {msg.content && (
+                              <p className="text-[15px] leading-relaxed whitespace-pre-wrap">
+                                {renderMessageContent(msg.content)}
+                              </p>
+                            )}
+                            
+                            {/* Attachments */}
+                            {msg.attachments && msg.attachments.length > 0 && (
+                               <div className={`${msg.content ? `mt-3 pt-3 border-t ${isOwn ? 'border-white/20' : 'border-white/5'}` : ''} space-y-2`}>
+                                {msg.attachments.map((att) => (
+                                  <div 
+                                    key={att.id} 
+                                    onClick={() => {
+                                      switch(att.type) {
+                                        case 'task': return router.push(`/tasks/${att.id}`);
+                                        case 'objective': return router.push(`/objectives/${att.id}`);
+                                        case 'idea': return router.push(`/ideas/${att.id}`);
+                                        case 'folder': return router.push(`/drive?folderId=${att.id}`);
+                                      }
+                                    }}
+                                    className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors group/att ${
+                                      isOwn ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 hover:bg-white/10'
+                                    }`}
+                                  >
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                      isOwn ? 'bg-white/20' : 'bg-indigo-500/20 text-indigo-400'
+                                    }`}>
+                                      {att.type === 'task' && <LayoutDashboard className="w-4 h-4" />}
+                                      {att.type === 'objective' && <Target className="w-4 h-4" />}
+                                      {att.type === 'idea' && <Lightbulb className="w-4 h-4" />}
+                                      {att.type === 'file' && <File className="w-4 h-4" />}
+                                      {att.type === 'folder' && <Folder className="w-4 h-4" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-semibold text-xs truncate">{att.name}</p>
+                                      <p className="text-[10px] opacity-70 uppercase font-medium">{att.type}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                        </>
                     )}
 
                     <div className={`flex items-center justify-end gap-1.5 pt-1 ${isOwn ? 'text-indigo-200' : 'text-gray-500'}`}>
                       <span className="text-[10px] font-medium">
                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                      {isOwn && (
+                      {isOwn && !msg.deletedForEveryone && (
                          msg.read ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 opacity-70" />
                       )}
                     </div>
@@ -378,6 +431,48 @@ export default function ChatWindow({
           </button>
         </form>
       </div>
+
+      {/* Delete Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-sm bg-[#1c1c1e] rounded-2xl p-6 border border-white/10 shadow-xl"
+            >
+              <h3 className="text-lg font-bold text-white mb-2">Supprimer le message ?</h3>
+              <p className="text-gray-400 text-sm mb-6">
+                Cette action est irréversible.
+              </p>
+              
+              <div className="space-y-3">
+                <button 
+                  onClick={() => handleDeleteMessage(false)}
+                  className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors"
+                >
+                  Supprimer pour moi
+                </button>
+                {messageToDelete?.sender === currentUserId && (
+                  <button 
+                     onClick={() => handleDeleteMessage(true)}
+                     className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-medium transition-colors"
+                  >
+                    Supprimer pour tout le monde
+                  </button>
+                )}
+                <button 
+                  onClick={() => setShowDeleteModal(false)}
+                  className="w-full py-2 text-gray-500 hover:text-white text-sm transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

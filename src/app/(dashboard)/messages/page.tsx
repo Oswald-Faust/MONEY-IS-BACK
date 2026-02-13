@@ -145,6 +145,52 @@ export default function MessagesPage() {
     }
   };
 
+  // Handle userId from URL to start chat with specific user
+  useEffect(() => {
+    const userId = searchParams.get('userId');
+    
+    if (userId && token) {
+      // If already selected, do nothing
+      if (selectedContact?._id === userId) return;
+
+      // Check if user is in loaded contacts
+      const existingContact = contacts.find(c => c._id === userId);
+      
+      if (existingContact) {
+        setSelectedContact(existingContact);
+      } else {
+        // User not in contacts list, fetch minimal details
+        const fetchUser = async () => {
+          try {
+            const res = await fetch(`/api/users/${userId}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            
+            if (data.success && data.data) {
+              const newContact = { 
+                ...data.data, 
+                unreadCount: 0
+              };
+
+              
+              setContacts(prev => {
+                if (prev.find(c => c._id === userId)) return prev;
+                return [newContact, ...prev];
+              });
+              setSelectedContact(newContact);
+            }
+          } catch (err) {
+            console.error("Failed to fetch user for chat", err);
+            toast.error("Impossible de charger l'utilisateur");
+          }
+        };
+        fetchUser();
+      }
+    }
+  }, [searchParams, contacts, selectedContact, token]);
+
+
   // Filter contacts to show in sidebar:
   // 1. Must have lastMessage
   // OR 2. Must be the currently selected contact (even if no messages yet)
@@ -190,6 +236,8 @@ export default function MessagesPage() {
             onRemoveAttachment={(id) => setAttachments(prev => prev.filter(a => a.id !== id))}
             onOpenResourcePicker={() => setShowResourcePicker(true)}
             onBack={() => setSelectedContact(null)}
+            token={token || ''}
+            onDeleteMessage={() => fetchMessages(selectedContact._id)}
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-gray-500 bg-[#0f1115] relative overflow-hidden">

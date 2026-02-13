@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { IdeaCard } from '@/components/ui';
 import { useAppStore, useAuthStore } from '@/store';
+import { CreateIdeaModal } from '@/components/modals';
 import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
@@ -21,9 +22,28 @@ export default function IdeasPage() {
   const projectId = searchParams.get('project');
   
   const [mounted, setMounted] = useState(false);
+  const [editingIdea, setEditingIdea] = useState<any>(null); // State for editing from URL
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'raw' | 'standby' | 'in_progress' | 'implemented'>('all');
   const [isLoading, setIsLoading] = useState(true);
+
+  // Handle URL params for direct idea access
+  useEffect(() => {
+    const ideaId = searchParams.get('ideaId');
+    if (ideaId && token) {
+        fetch(`/api/ideas?id=${ideaId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                setEditingIdea(data.data);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+  }, [searchParams, token]);
 
   useEffect(() => {
     setMounted(true);
@@ -176,6 +196,18 @@ export default function IdeasPage() {
           </button>
         </div>
       )}
+
+      {/* Edit Idea Modal (from URL) */}
+      <CreateIdeaModal 
+        isOpen={!!editingIdea} 
+        onClose={() => {
+            setEditingIdea(null);
+            const url = new URL(window.location.href);
+            url.searchParams.delete('ideaId');
+            window.history.replaceState({}, '', url);
+        }} 
+        initialData={editingIdea}
+      />
     </div>
   );
 }

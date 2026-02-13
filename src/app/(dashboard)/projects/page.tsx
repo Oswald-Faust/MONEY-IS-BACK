@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { Plus, Search, FolderKanban } from 'lucide-react';
 import ProjectCard from '@/components/ui/ProjectCard';
 import CreateProjectModal from '@/components/modals/CreateProjectModal';
+import EditTaskModal from '@/components/modals/EditTaskModal';
+import { useSearchParams } from 'next/navigation';
 import { useAppStore } from '@/store';
 
 import toast from 'react-hot-toast';
@@ -16,6 +18,26 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived' | 'paused'>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [editingTask, setEditingTask] = useState<any>(null);
+  const searchParams = useSearchParams();
+
+  // Handle URL params for direct task access
+  useEffect(() => {
+    const taskId = searchParams.get('taskId');
+    if (taskId && token) {
+        // Fetch task details
+        fetch(`/api/tasks?id=${taskId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                setEditingTask(data.data);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+  }, [searchParams, token]);
 
   const handleDeleteProject = async (id: string, name: string) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer le projet ${name} ?`)) {
@@ -294,6 +316,22 @@ export default function ProjectsPage() {
       <CreateProjectModal
         isOpen={isProjectModalOpen}
         onClose={() => setProjectModalOpen(false)}
+      />
+
+      {/* Edit Task Modal (from URL) */}
+      <EditTaskModal
+        isOpen={!!editingTask}
+        onClose={() => {
+          setEditingTask(null);
+          // Clear URL param
+          const url = new URL(window.location.href);
+          url.searchParams.delete('taskId');
+          window.history.replaceState({}, '', url);
+        }}
+        task={editingTask}
+        onUpdate={(updatedTask) => {
+             // Optional: update local state if needed, though simpler just to rely on modal
+        }}
       />
     </div>
   );

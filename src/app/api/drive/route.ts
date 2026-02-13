@@ -75,8 +75,8 @@ export async function GET(req: NextRequest) {
     }
 
     const [folders, initialFiles] = await Promise.all([
-      DriveFolder.find(folderQuery as Record<string, QueryVal>).sort({ name: 1 }),
-      DriveFile.find(fileQuery as Record<string, QueryVal>).sort({ createdAt: -1 }),
+      DriveFolder.find(folderQuery).sort({ name: 1 }),
+      DriveFile.find(fileQuery).sort({ createdAt: -1 }),
     ]);
 
     let files = initialFiles;
@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
     if (folderId) {
       let currentId: string | null = folderId;
       while (currentId) {
-        const f = await DriveFolder.findById(currentId);
+        const f: any = await DriveFolder.findById(currentId);
         if (f) {
           path.unshift({ _id: f._id.toString(), name: f.name });
           currentId = f.parentId ? f.parentId.toString() : null;

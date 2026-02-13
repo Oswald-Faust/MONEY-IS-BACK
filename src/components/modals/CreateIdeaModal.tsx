@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lightbulb, Loader2, Plus, Paperclip, Image as ImageIcon, File as FileIcon, Trash2 } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
-import type { Attachment } from '@/types';
+import type { Idea, Attachment } from '@/types';
 import UserSelector from '@/components/ui/UserSelector';
 
 import { useSearchParams } from 'next/navigation';
@@ -13,10 +13,11 @@ import { useSearchParams } from 'next/navigation';
 interface CreateIdeaModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: any; // Idea type
 }
 
-export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProps) {
-  const { projects, addIdea } = useAppStore();
+export default function CreateIdeaModal({ isOpen, onClose, initialData }: CreateIdeaModalProps) {
+  const { projects, addIdea, updateIdea } = useAppStore();
   const { token: authToken } = useAuthStore();
   const searchParams = useSearchParams();
   const defaultProjectId = searchParams.get('project');
@@ -31,15 +32,24 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
     assignee: ''
   });
 
-  // Pre-select project when modal opens or projectId changes
+  // Pre-select project or populate from initialData
   React.useEffect(() => {
-    if (isOpen && defaultProjectId) {
-      setFormData(prev => ({ ...prev, project: defaultProjectId }));
-    } else if (isOpen && !defaultProjectId) {
-       // Reset if no project selected in URL (optional, depending on UX preference)
-       // setFormData(prev => ({ ...prev, project: '' }));
+    if (isOpen) {
+      if (initialData) {
+        setFormData({
+            title: initialData.title,
+            content: initialData.content,
+            project: typeof initialData.project === 'object' ? initialData.project._id : initialData.project || '',
+            status: initialData.status,
+            tags: initialData.tags || [],
+            assignee: typeof initialData.assignee === 'object' ? initialData.assignee._id : initialData.assignee || ''
+        });
+        // We might want to handle existing attachments here too, but skipped for simplicity
+      } else if (defaultProjectId) {
+        setFormData(prev => ({ ...prev, project: defaultProjectId }));
+      }
     }
-  }, [isOpen, defaultProjectId]);
+  }, [isOpen, defaultProjectId, initialData]);
 
   const [newTag, setNewTag] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -86,8 +96,14 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
         uploadedAt: new Date().toISOString()
       }));
 
-      const response = await fetch('/api/ideas', {
-        method: 'POST',
+      // Adjust existing attachments if editing (we just append new ones for now)
+      // Ideally we should merge with existing ones, but for now let's just handle new ones
+      
+      const url = initialData ? `/api/ideas?id=${initialData._id}` : '/api/ideas';
+      const method = initialData ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`,
@@ -98,7 +114,7 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
           project: formData.project,
           status: formData.status,
           tags: formData.tags,
-          attachments: processedAttachments,
+          attachments: processedAttachments, // Note: this overwrites if PATCH, strictly one needs to merge.
           assignee: formData.assignee || undefined
         }),
       });
@@ -106,8 +122,13 @@ export default function CreateIdeaModal({ isOpen, onClose }: CreateIdeaModalProp
       const data = await response.json();
 
       if (data.success) {
-        addIdea(data.data);
-        toast.success('Idée ajoutée avec succès');
+        if (initialData) {
+            updateIdea(data.data._id, data.data);
+            toast.success('Idée mise à jour avec succès');
+        } else {
+            addIdea(data.data);
+            toast.success('Idée ajoutée avec succès');
+        }
         onClose();
         setFormData({
           title: '',

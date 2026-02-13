@@ -12,6 +12,9 @@ export interface IMessage extends Document {
   content: string;
   attachments: IAttachment[];
   read: boolean;
+  deletedForSender: boolean;
+  deletedForRecipient: boolean;
+  deletedForEveryone: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +56,18 @@ const MessageSchema = new Schema<IMessage>(
       },
     ],
     read: {
+      type: Boolean,
+      default: false,
+    },
+    deletedForSender: {
+      type: Boolean,
+      default: false,
+    },
+    deletedForRecipient: {
+      type: Boolean,
+      default: false,
+    },
+    deletedForEveryone: {
       type: Boolean,
       default: false,
     },

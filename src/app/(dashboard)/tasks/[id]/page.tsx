@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Avatar from '@/components/ui/Avatar';
+import UserHoverCard from '@/components/ui/UserHoverCard';
 import { EditTaskModal } from '@/components/modals';
 import { useAppStore } from '@/store';
 
@@ -294,29 +295,43 @@ export default function TaskDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-6 text-sm text-dim">
-            <div className="flex items-center gap-2">
-              <Avatar 
-                src={task.creator?.avatar} 
-                fallback={task.creator?.firstName || '?'} 
-                color={task.creator && typeof task.creator === 'object' && 'profileColor' in task.creator ? (task.creator as any).profileColor : undefined}
-                size="xs"
-              />
-              <span>
-                {task.creator && typeof task.creator === 'object' && 'firstName' in task.creator 
-                  ? `Créé par ${task.creator.firstName} ${task.creator.lastName}`
-                  : 'Créé par Utilisateur inconnu'}
-              </span>
-            </div>
-            {task.assignee && (
-              <div className="flex items-center gap-2">
+            {task.creator && typeof task.creator === 'object' && 'firstName' in task.creator ? (
+              <UserHoverCard user={task.creator as any}>
+                <div className="flex items-center gap-2 group/creator cursor-pointer">
+                  <Avatar 
+                    src={task.creator.avatar} 
+                    fallback={task.creator.firstName} 
+                    color={(task.creator as any).profileColor}
+                    size="xs"
+                  />
+                  <span className="group-hover/creator:text-indigo-400 transition-colors">
+                    Créé par {task.creator.firstName} {task.creator.lastName}
+                  </span>
+                </div>
+              </UserHoverCard>
+            ) : (
+              <div className="flex items-center gap-2 opacity-60">
                 <Avatar 
-                  src={task.assignee.avatar} 
-                  fallback={task.assignee.firstName} 
-                  color={(task.assignee as any).profileColor}
+                  fallback="?" 
                   size="xs"
                 />
-                <span>Assigné à {task.assignee.firstName} {task.assignee.lastName}</span>
+                <span>Créé par Utilisateur inconnu</span>
               </div>
+            )}
+            {task.assignee && (
+              <UserHoverCard user={task.assignee as any}>
+                <div className="flex items-center gap-2 group/assignee cursor-pointer">
+                  <Avatar 
+                    src={task.assignee.avatar} 
+                    fallback={task.assignee.firstName} 
+                    color={(task.assignee as any).profileColor}
+                    size="xs"
+                  />
+                  <span className="group-hover/assignee:text-indigo-400 transition-colors">
+                    Assigné à {task.assignee.firstName} {task.assignee.lastName}
+                  </span>
+                </div>
+              </UserHoverCard>
             )}
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
@@ -395,20 +410,39 @@ export default function TaskDetailPage() {
                      <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                            {/* Avatar user */}
-                           <Avatar 
-                             src={comment.user?.avatar} 
-                             fallback={comment.user?.firstName || '?'} 
-                             color={(comment.user as any)?.profileColor}
-                             size="sm"
-                           />
-                           <div>
-                             <p className="text-sm font-medium text-white">
-                               {comment.user ? `${comment.user.firstName} ${comment.user.lastName}` : 'Utilisateur inconnu'}
-                             </p>
-                             <p className="text-xs text-dim">
-                               {format(new Date(comment.createdAt), 'd MMMM yyyy à HH:mm', { locale: fr })}
-                             </p>
-                           </div>
+                           {comment.user ? (
+                             <UserHoverCard user={comment.user}>
+                               <div className="flex items-center gap-3 group/user cursor-pointer">
+                                 <Avatar 
+                                   src={comment.user?.avatar} 
+                                   fallback={comment.user?.firstName || '?'} 
+                                   color={(comment.user as any)?.profileColor}
+                                   size="sm"
+                                 />
+                                 <div>
+                                   <p className="text-sm font-medium text-white group-hover/user:text-indigo-400 transition-colors">
+                                     {`${comment.user.firstName} ${comment.user.lastName}`}
+                                   </p>
+                                   <p className="text-xs text-dim">
+                                     {format(new Date(comment.createdAt), 'd MMMM yyyy à HH:mm', { locale: fr })}
+                                   </p>
+                                 </div>
+                               </div>
+                             </UserHoverCard>
+                           ) : (
+                             <>
+                               <Avatar 
+                                 fallback="?" 
+                                 size="sm"
+                               />
+                               <div>
+                                 <p className="text-sm font-medium text-white">Utilisateur inconnu</p>
+                                 <p className="text-xs text-dim">
+                                   {format(new Date(comment.createdAt), 'd MMMM yyyy à HH:mm', { locale: fr })}
+                                 </p>
+                               </div>
+                             </>
+                           )}
                         </div>
                         {/* Delete button (if current user is author) */}
                         {currentUser && currentUser._id === comment.user?._id && (

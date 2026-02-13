@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
 
     const messages = await Message.find({
       $or: [
-        { sender: auth.userId, recipient: otherUserId },
-        { sender: otherUserId, recipient: auth.userId },
+        { sender: auth.userId, recipient: otherUserId, deletedForSender: { $ne: true } },
+        { sender: otherUserId, recipient: auth.userId, deletedForRecipient: { $ne: true } },
       ],
     })
       .sort({ createdAt: 1 })

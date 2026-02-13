@@ -247,6 +247,9 @@ export interface Message {
   content: string;
   attachments: MessageAttachment[];
   read: boolean;
+  deletedForSender?: boolean;
+  deletedForRecipient?: boolean;
+  deletedForEveryone?: boolean;
   createdAt: string;
   updatedAt: string;
 }
