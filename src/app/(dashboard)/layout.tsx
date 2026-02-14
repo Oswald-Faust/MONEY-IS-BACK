@@ -2,7 +2,7 @@
 
 import Sidebar from '@/components/layout/Sidebar';
 import { Toaster } from 'react-hot-toast';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import { motion } from 'framer-motion';
 import {
   CreateProjectModal,
@@ -43,11 +43,16 @@ export default function DashboardLayout({
     setObjectiveModalOpen,
     setUploadModalOpen,
     setCreateFolderModalOpen,
-    setIdeaModalOpen
+    setIdeaModalOpen,
+    currentWorkspace, // Import currentWorkspace
+    setCurrentWorkspace, // Import setCurrentWorkspace
+    setWorkspaces // Import setWorkspaces
   } = useAppStore();
 
   const [mounted, setMounted] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
+  const { token } = useAuthStore();
+  const { setProjects } = useAppStore();
 
   React.useEffect(() => {
     setMounted(true);
@@ -58,6 +63,57 @@ export default function DashboardLayout({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Fetch workspaces if not set
+  React.useEffect(() => {
+    const fetchWorkspaces = async () => {
+      if (!currentWorkspace && token) {
+        try {
+          const response = await fetch('/api/workspaces', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const data = await response.json();
+          if (data.success && data.data.length > 0) {
+            setWorkspaces(data.data);
+            setCurrentWorkspace(data.data[0]);
+          }
+        } catch (error) {
+          console.error('Failed to fetch workspaces', error);
+        }
+      }
+    };
+    
+    if (mounted && token) {
+      fetchWorkspaces();
+    }
+  }, [mounted, currentWorkspace, setCurrentWorkspace, setWorkspaces, token]);
+
+  // Fetch projects when currentWorkspace changes
+  React.useEffect(() => {
+    const fetchProjects = async () => {
+      if (currentWorkspace && token) {
+        try {
+          const response = await fetch(`/api/projects?workspace=${currentWorkspace._id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const data = await response.json();
+          if (data.success) {
+            setProjects(data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch projects', error);
+        }
+      }
+    };
+
+    if (mounted && currentWorkspace && token) {
+      fetchProjects();
+    }
+  }, [mounted, currentWorkspace, token, setProjects]);
 
   if (!mounted) {
     return (

@@ -5,6 +5,7 @@ export interface IObjective extends Document {
   title: string;
   description?: string;
   project?: mongoose.Types.ObjectId;
+  workspace?: mongoose.Types.ObjectId;
   creator: mongoose.Types.ObjectId;
   assignee?: mongoose.Types.ObjectId;
   targetDate?: Date;
@@ -36,6 +37,10 @@ const ObjectiveSchema = new Schema<IObjective>(
     project: {
       type: Schema.Types.ObjectId,
       ref: 'Project',
+    },
+    workspace: {
+      type: Schema.Types.ObjectId,
+      ref: 'Workspace',
     },
     creator: {
       type: Schema.Types.ObjectId,
@@ -89,6 +94,7 @@ const ObjectiveSchema = new Schema<IObjective>(
 // Indexes
 ObjectiveSchema.index({ creator: 1, status: 1 });
 ObjectiveSchema.index({ project: 1 });
+ObjectiveSchema.index({ workspace: 1 });
 
 const Objective: Model<IObjective> = mongoose.models.Objective || mongoose.model<IObjective>('Objective', ObjectiveSchema);
 

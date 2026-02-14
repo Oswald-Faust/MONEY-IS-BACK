@@ -16,9 +16,10 @@ interface CreateObjectiveModalProps {
   onClose: () => void;
   initialData?: Objective | null;
   defaultProjectId?: string;
+  workspaceId?: string;
 }
 
-export default function CreateObjectiveModal({ isOpen, onClose, initialData, defaultProjectId: propProjectId }: CreateObjectiveModalProps) {
+export default function CreateObjectiveModal({ isOpen, onClose, initialData, defaultProjectId: propProjectId, workspaceId }: CreateObjectiveModalProps) {
   const { projects, addObjective, updateObjective } = useAppStore();
   const { token } = useAuthStore();
   const searchParams = useSearchParams();
@@ -35,6 +36,11 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
     targetDate: '',
     assignee: ''
   });
+
+
+  
+  // ... rest of the file
+
 
   React.useEffect(() => {
     if (isOpen) {
@@ -111,6 +117,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
           title: formData.title,
           description: formData.description,
           project: formData.project,
+          workspace: workspaceId,
           priority: formData.priority,
           targetDate: formData.targetDate,
           assignee: formData.assignee || undefined,

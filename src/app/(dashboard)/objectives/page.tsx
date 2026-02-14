@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { CreateObjectiveModal } from '@/components/modals';
 
 export default function ObjectivesPage() {
-  const { objectives, projects, setObjectiveModalOpen, setObjectives } = useAppStore();
+  const { objectives, projects, setObjectiveModalOpen, setObjectives, currentWorkspace } = useAppStore();
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('project');
@@ -46,11 +46,11 @@ export default function ObjectivesPage() {
 
   useEffect(() => {
     const fetchObjectives = async () => {
-      if (!token) return;
+      if (!token || !currentWorkspace) return;
 
       try {
         setIsLoading(true);
-        const response = await fetch('/api/objectives', {
+        const response = await fetch(`/api/objectives?workspace=${currentWorkspace._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           }
@@ -61,6 +61,7 @@ export default function ObjectivesPage() {
           setObjectives(data.data);
         } else {
           toast.error(data.error || 'Erreur lors du chargement des objectifs');
+          setObjectives([]);
         }
       } catch {
         toast.error('Erreur lors du chargement des objectifs');
@@ -69,10 +70,10 @@ export default function ObjectivesPage() {
       }
     };
 
-    if (token) {
+    if (token && currentWorkspace) {
       fetchObjectives();
     }
-  }, [token, setObjectives]);
+  }, [token, setObjectives, currentWorkspace]);
 
   if (!mounted) return null;
 
@@ -202,6 +203,7 @@ export default function ObjectivesPage() {
             window.history.replaceState({}, '', url);
         }} 
         initialData={editingObjective}
+        workspaceId={currentWorkspace?._id}
       />
     </div>
   );

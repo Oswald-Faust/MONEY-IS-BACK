@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const projectId = searchParams.get('project');
     const priority = searchParams.get('priority');
     const status = searchParams.get('status');
+    const workspaceId = searchParams.get('workspace');
 
     if (id) {
       const task = await Task.findById(id)
@@ -45,9 +46,16 @@ export async function GET(request: NextRequest) {
 
     const query: any = {};
     
-    // Filter by project
+    // Filter by project or workspace
     if (projectId) {
       query.project = projectId;
+    } else if (workspaceId) {
+      // Find all projects in this workspace
+      const projects = await Project.find({ workspace: workspaceId }).select('_id');
+      const projectIds = projects.map(p => p._id);
+      query.project = { $in: projectIds };
+    } else {
+      return NextResponse.json({ success: false, error: 'Workspace ID ou Project ID requis' }, { status: 400 });
     }
     
     // Filter by priority

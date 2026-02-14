@@ -135,7 +135,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Forgot Password */}
+            {/* Forgot Password - Disabled for now
             <div className="flex justify-end">
               <Link
                 href="/forgot-password"
@@ -144,6 +144,7 @@ export default function LoginPage() {
                 Mot de passe oublié ?
               </Link>
             </div>
+            */}
 
             {/* Submit Button */}
             <motion.button

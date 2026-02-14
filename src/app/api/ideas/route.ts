@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const projectId = searchParams.get('project');
+    const workspaceId = searchParams.get('workspace');
     const status = searchParams.get('status');
 
     if (id) {
@@ -35,7 +36,21 @@ export async function GET(request: NextRequest) {
     }
 
     const query: any = {};
-    if (projectId) query.project = projectId;
+    if (projectId) {
+        query.project = projectId;
+    } else if (workspaceId) {
+        query.workspace = workspaceId;
+    } else {
+         // Optionally return all if no filter, or require workspace for safety.
+         // Let's require workspace or project to prevent leaking all ideas.
+         // But "Boîte à idées" means finding ideas.
+         // Previous code didn't filter strictly if no project provided?
+         // Previous code: `if (projectId) query.project = projectId;` -> implied if no project, return ALL ideas (likely scoped to user via auth? No, auth check only).
+         // This is a security risk if not careful. Filter by workspace is safer.
+         // Since I am enforcing workspace now, I should require it.
+         return NextResponse.json({ success: false, error: 'Projet ou Workspace requis' }, { status: 400 });
+    }
+
     if (status && status !== 'all') query.status = status;
 
     const ideas = await Idea.find(query)
@@ -71,6 +86,7 @@ export async function POST(request: NextRequest) {
       title, 
       content, 
       project: projectId, 
+      workspace: workspaceId,
       status = 'raw',
       tags = [],
       attachments = [],
@@ -83,11 +99,27 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    
+    if (!projectId && !workspaceId) {
+       return NextResponse.json(
+        { success: false, error: 'Projet ou Workspace requis' },
+        { status: 400 }
+      );
+    }
+    
+    let finalWorkspaceId = workspaceId;
+    if (projectId) {
+       const project = await import('@/models/Project').then(mod => mod.default.findById(projectId));
+       if (project && !finalWorkspaceId) {
+           finalWorkspaceId = project.workspace;
+       }
+    }
 
     const idea = await Idea.create({
       title,
       content,
       project: projectId || undefined,
+      workspace: finalWorkspaceId,
       creator: auth.userId,
       status,
       tags,

@@ -3,8 +3,10 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IIdea extends Document {
   _id: mongoose.Types.ObjectId;
   title: string;
+
   content: string;
   project?: mongoose.Types.ObjectId;
+  workspace?: mongoose.Types.ObjectId;
   creator: mongoose.Types.ObjectId;
   assignee?: mongoose.Types.ObjectId;
   attachments: {
@@ -44,6 +46,10 @@ const IdeaSchema = new Schema<IIdea>(
     project: {
       type: Schema.Types.ObjectId,
       ref: 'Project',
+    },
+    workspace: {
+      type: Schema.Types.ObjectId,
+      ref: 'Workspace',
     },
     creator: {
       type: Schema.Types.ObjectId,
@@ -122,6 +128,7 @@ const IdeaSchema = new Schema<IIdea>(
 // Indexes
 IdeaSchema.index({ creator: 1, status: 1 });
 IdeaSchema.index({ project: 1 });
+IdeaSchema.index({ workspace: 1 });
 IdeaSchema.index({ tags: 1 });
 
 const Idea: Model<IIdea> = mongoose.models.Idea || mongoose.model<IIdea>('Idea', IdeaSchema);

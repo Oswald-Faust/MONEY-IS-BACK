@@ -15,7 +15,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function IdeasPage() {
-  const { ideas, projects, setIdeaModalOpen, setIdeas } = useAppStore();
+  const { ideas, projects, setIdeaModalOpen, setIdeas, currentWorkspace } = useAppStore();
   const { token } = useAuthStore();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -51,11 +51,11 @@ export default function IdeasPage() {
 
   useEffect(() => {
     const fetchIdeas = async () => {
-      if (!token) return;
+      if (!token || !currentWorkspace) return;
 
       try {
         setIsLoading(true);
-        const response = await fetch('/api/ideas', {
+        const response = await fetch(`/api/ideas?workspace=${currentWorkspace._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           }
@@ -66,6 +66,7 @@ export default function IdeasPage() {
           setIdeas(data.data);
         } else {
           toast.error(data.error || 'Erreur lors du chargement des idées');
+          setIdeas([]);
         }
       } catch {
         toast.error('Erreur lors du chargement des idées');
@@ -74,10 +75,10 @@ export default function IdeasPage() {
       }
     };
 
-    if (token) {
+    if (token && currentWorkspace) {
       fetchIdeas();
     }
-  }, [token, setIdeas]);
+  }, [token, setIdeas, currentWorkspace]);
 
   if (!mounted) return null;
 
@@ -207,6 +208,7 @@ export default function IdeasPage() {
             window.history.replaceState({}, '', url);
         }} 
         initialData={editingIdea}
+        workspaceId={currentWorkspace?._id}
       />
     </div>
   );

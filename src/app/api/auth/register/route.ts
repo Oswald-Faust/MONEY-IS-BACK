@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
-import Workspace from '@/models/Workspace';
 import jwt from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {
@@ -50,17 +49,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Create default workspace for user
-    const workspace = await Workspace.create({
-      name: 'Mon Workspace',
-      description: 'Workspace personnel',
-      owner: user._id,
-      members: [{ user: user._id, role: 'admin', joinedAt: new Date() }],
-    });
-
-    // Update user with workspace
-    user.workspaces = [workspace._id];
-    await user.save();
+    // Workspace creation moved to onboarding step
+    // const workspace = await Workspace.create({...});
+    // user.workspaces = [workspace._id];
+    // await user.save();
 
     // Generate JWT token
     const token = jwt.sign(
@@ -86,10 +78,7 @@ export async function POST(request: NextRequest) {
       data: {
         user: userResponse,
         token,
-        workspace: {
-          _id: workspace._id,
-          name: workspace.name,
-        },
+        // Workspace to be created in onboarding
       },
       message: 'Inscription réussie',
     });

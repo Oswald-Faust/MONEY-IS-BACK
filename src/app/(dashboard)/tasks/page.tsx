@@ -12,7 +12,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function TasksPage() {
-  const { tasks, projects, setTaskModalOpen, setTasks, updateTask } = useAppStore();
+  const { tasks, projects, setTaskModalOpen, setTasks, updateTask, currentWorkspace } = useAppStore();
   const { token } = useAuthStore();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -53,8 +53,14 @@ export default function TasksPage() {
     setMounted(true);
     
     const fetchTasks = async () => {
+      if (!currentWorkspace) return;
+
       try {
-        const response = await fetch('/api/tasks', {
+        const url = `/api/tasks?workspace=${currentWorkspace._id}`;
+        // If projectId is present, API prioritizes it, but we can send both or just project if we want strictness.
+        // The API now handles workspace filter to find relevant projects if no project is specified.
+        
+        const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -62,16 +68,18 @@ export default function TasksPage() {
         const data = await response.json();
         if (data.success) {
           setTasks(data.data);
+        } else {
+             setTasks([]);
         }
       } catch {
         toast.error('Erreur lors du chargement des tâches');
       }
     };
 
-    if (token) {
+    if (token && currentWorkspace) {
       fetchTasks();
     }
-  }, [token, setTasks]);
+  }, [token, setTasks, currentWorkspace]);
 
   if (!mounted) return null;
 

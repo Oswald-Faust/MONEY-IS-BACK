@@ -14,7 +14,10 @@ export interface IWorkspace extends Document {
   settings: {
     defaultProjectColor: string;
     allowInvitations: boolean;
+    icon: string;
+    theme: 'dark' | 'light' | 'system';
   };
+  useCase: 'personal' | 'work' | 'school' | 'agency' | 'startup' | 'other';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -62,6 +65,20 @@ const WorkspaceSchema = new Schema<IWorkspace>(
         type: Boolean,
         default: true,
       },
+      icon: {
+        type: String,
+        default: 'Briefcase',
+      },
+      theme: {
+        type: String,
+        enum: ['dark', 'light', 'system'],
+        default: 'dark',
+      },
+    },
+    useCase: {
+      type: String,
+      enum: ['personal', 'work', 'school', 'agency', 'startup', 'other'],
+      default: 'other',
     },
   },
   {

@@ -14,9 +14,10 @@ interface CreateIdeaModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: any; // Idea type
+  workspaceId?: string;
 }
 
-export default function CreateIdeaModal({ isOpen, onClose, initialData }: CreateIdeaModalProps) {
+export default function CreateIdeaModal({ isOpen, onClose, initialData, workspaceId }: CreateIdeaModalProps) {
   const { projects, addIdea, updateIdea } = useAppStore();
   const { token: authToken } = useAuthStore();
   const searchParams = useSearchParams();
@@ -112,6 +113,7 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData }: Create
           title: formData.title,
           content: formData.content,
           project: formData.project,
+          workspace: workspaceId,
           status: formData.status,
           tags: formData.tags,
           attachments: processedAttachments, // Note: this overwrites if PATCH, strictly one needs to merge.

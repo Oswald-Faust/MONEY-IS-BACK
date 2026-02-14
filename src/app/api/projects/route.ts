@@ -17,12 +17,12 @@ export async function GET(request: NextRequest) {
     const workspaceId = searchParams.get('workspace');
     const status = searchParams.get('status') || 'active';
 
-    const query: any = {};
-    if (workspaceId) query.workspace = workspaceId;
-    if (status !== 'all') query.status = status;
+    if (!workspaceId) {
+       return NextResponse.json({ success: false, error: 'Workspace ID requis' }, { status: 400 });
+    }
 
-    // Tous les utilisateurs voient tous les projets, sans distinction.
-    // L'ancien filtrage par rôle/membre a été retiré à la demande de l'utilisateur.
+    const query: any = { workspace: workspaceId };
+    if (status !== 'all') query.status = status;
 
     const projects = await Project.find(query)
       .populate('owner', 'firstName lastName avatar')

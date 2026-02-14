@@ -61,7 +61,7 @@ export default function RegisterPage() {
         setAuth(data.data.user, data.data.token);
         toast.success('Compte créé avec succès !');
         // Utiliser replace pour éviter les problèmes d'hydratation
-        window.location.replace('/dashboard');
+        window.location.replace('/onboarding');
       } else {
         toast.error(data.error || 'Erreur lors de l\'inscription');
       }

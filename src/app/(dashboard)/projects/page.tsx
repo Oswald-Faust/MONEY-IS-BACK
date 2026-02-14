@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store';
 
 export default function ProjectsPage() {
-  const { projects, setProjects, setProjectModalOpen, isProjectModalOpen, setCurrentProject, deleteProject } = useAppStore();
+  const { projects, setProjects, setProjectModalOpen, isProjectModalOpen, setCurrentProject, deleteProject, currentWorkspace } = useAppStore();
   const { token } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived' | 'paused'>('all');
@@ -70,9 +70,11 @@ export default function ProjectsPage() {
   // Charger les projets depuis l'API
   useEffect(() => {
     const fetchProjects = async () => {
+      if (!currentWorkspace) return;
+
       try {
         setIsLoading(true);
-        const response = await fetch('/api/projects', {
+        const response = await fetch(`/api/projects?workspace=${currentWorkspace._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -84,6 +86,8 @@ export default function ProjectsPage() {
           setProjects(data.data);
         } else {
           toast.error(data.error || 'Erreur lors du chargement des projets');
+          // Clean existing projects on error/mismatch
+          setProjects([]);
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -93,10 +97,10 @@ export default function ProjectsPage() {
       }
     };
 
-    if (token) {
+    if (token && currentWorkspace) {
       fetchProjects();
     }
-  }, [token, setProjects]);
+  }, [token, currentWorkspace, setProjects]);
 
   // Filter projects
   const filteredProjects = projects.filter((project) => {
@@ -316,6 +320,7 @@ export default function ProjectsPage() {
       <CreateProjectModal
         isOpen={isProjectModalOpen}
         onClose={() => setProjectModalOpen(false)}
+        workspaceId={currentWorkspace?._id}
       />
 
       {/* Edit Task Modal (from URL) */}

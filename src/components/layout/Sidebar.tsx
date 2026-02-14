@@ -62,7 +62,7 @@ const demoProjects: PartialProject[] = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { sidebarCollapsed, toggleSidebar, projects, setProjectModalOpen, isMobileMenuOpen, setMobileMenuOpen } = useAppStore();
+  const { sidebarCollapsed, toggleSidebar, projects, setProjectModalOpen, isMobileMenuOpen, setMobileMenuOpen, currentWorkspace } = useAppStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
@@ -118,7 +118,9 @@ export default function Sidebar() {
                   <span className="text-white font-bold text-sm">MB</span>
                 </div>
                 <div>
-                  <h1 className="font-semibold text-main text-sm">MONEY IS BACK</h1>
+                  <h1 className="font-semibold text-main text-sm truncate max-w-[160px]">
+                    {currentWorkspace?.name || 'MONEY IS BACK'}
+                  </h1>
                   <p className="text-xs text-dim">Workspace</p>
                 </div>
               </motion.div>

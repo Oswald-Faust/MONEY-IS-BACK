@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const projectId = searchParams.get('project');
     const priority = searchParams.get('priority');
     const status = searchParams.get('status');
+    const workspaceId = searchParams.get('workspace');
 
     if (id) {
       const objective = await Objective.findById(id)
@@ -44,9 +45,15 @@ export async function GET(request: NextRequest) {
 
     const query: any = {};
     
-    // Filter by project
+    // Filter by project or workspace
     if (projectId) {
       query.project = projectId;
+    } else if (workspaceId) {
+       const projects = await Project.find({ workspace: workspaceId }).select('_id');
+       const projectIds = projects.map(p => p._id);
+       query.project = { $in: projectIds };
+    } else {
+        return NextResponse.json({ success: false, error: 'Workspace ID ou Project ID requis' }, { status: 400 });
     }
     
     // Filter by priority
@@ -99,6 +106,7 @@ export async function POST(request: NextRequest) {
       title, 
       description, 
       project: projectId, 
+      workspace: workspaceId,
       priority = 'medium',
       status = 'not_started',
       targetDate,
@@ -112,8 +120,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    
+    if (!projectId && !workspaceId) {
+       return NextResponse.json(
+        { success: false, error: 'Projet ou Workspace requis' },
+        { status: 400 }
+      );
+    }
 
     let projectData = null;
+    let finalWorkspaceId = workspaceId;
+
     if (projectId) {
       projectData = await Project.findById(projectId);
       if (!projectData) {
@@ -122,12 +139,17 @@ export async function POST(request: NextRequest) {
           { status: 404 }
         );
       }
+      // Inherit workspace from project if not explicitly set (or to ensure consistency)
+      if (!finalWorkspaceId) {
+          finalWorkspaceId = projectData.workspace;
+      }
     }
 
     const objective = await Objective.create({
       title,
       description,
       project: projectId || undefined,
+      workspace: finalWorkspaceId,
       creator: auth.userId,
       priority,
       status,
