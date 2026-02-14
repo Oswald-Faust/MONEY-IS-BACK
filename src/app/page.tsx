@@ -27,10 +27,15 @@ import {
   Shield,
   Clock,
   ArrowRight,
-  ChevronDown
+  ChevronDown,
+  LogOut,
+  User as UserIcon,
+  Briefcase
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
 
 // --- Mock Components for UI Visualization ---
 
@@ -256,6 +261,106 @@ const FaqItem = ({ question, answer }: { question: string, answer: string }) => 
     );
 };
 
+// --- Navbar Components ---
+
+const MegaMenu = ({ category }: { category: 'product' | 'solutions' }) => {
+    return (
+        <div className="absolute top-full left-0 w-[600px] bg-bg-card/95 backdrop-blur-xl border border-glass-border rounded-xl shadow-2xl p-6 grid grid-cols-2 gap-8 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
+            {category === 'product' ? (
+                <>
+                    <div className="space-y-4">
+                        <h4 className="text-xs font-bold text-dim uppercase tracking-wider">Fonctionnalités</h4>
+                        <Link href="#" className="flex items-start gap-3 group/item">
+                            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover/item:bg-indigo-500 group-hover/item:text-white transition-colors">
+                                <List className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-main group-hover/item:text-indigo-400 transition-colors">Tâches</div>
+                                <div className="text-xs text-dim">Gérez vos projets avec flexibilité</div>
+                            </div>
+                        </Link>
+                        <Link href="#" className="flex items-start gap-3 group/item">
+                            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 group-hover/item:bg-purple-500 group-hover/item:text-white transition-colors">
+                                <FileText className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-main group-hover/item:text-purple-400 transition-colors">Docs</div>
+                                <div className="text-xs text-dim">Wikis et documentation</div>
+                            </div>
+                        </Link>
+                         <Link href="#" className="flex items-start gap-3 group/item">
+                            <div className="p-2 rounded-lg bg-pink-500/10 text-pink-400 group-hover/item:bg-pink-500 group-hover/item:text-white transition-colors">
+                                <Target className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-main group-hover/item:text-pink-400 transition-colors">Objectifs</div>
+                                <div className="text-xs text-dim">Suivez vos OKRs</div>
+                            </div>
+                        </Link>
+                    </div>
+                    <div className="space-y-4">
+                        <h4 className="text-xs font-bold text-dim uppercase tracking-wider">Vues</h4>
+                        <Link href="#" className="flex items-start gap-3 group/item">
+                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 group-hover/item:bg-blue-500 group-hover/item:text-white transition-colors">
+                                <Kanban className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-main group-hover/item:text-blue-400 transition-colors">Board</div>
+                                <div className="text-xs text-dim">Kanban agile</div>
+                            </div>
+                        </Link>
+                        <Link href="#" className="flex items-start gap-3 group/item">
+                            <div className="p-2 rounded-lg bg-green-500/10 text-green-400 group-hover/item:bg-green-500 group-hover/item:text-white transition-colors">
+                                <Calendar className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-main group-hover/item:text-green-400 transition-colors">Calendrier</div>
+                                <div className="text-xs text-dim">Planification visuelle</div>
+                            </div>
+                        </Link>
+                    </div>
+                </>
+            ) : (
+                <>
+                   <div className="space-y-4">
+                        <h4 className="text-xs font-bold text-dim uppercase tracking-wider">Par équipe</h4>
+                        <Link href="#" className="flex items-start gap-3 group/item">
+                            <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400 group-hover/item:bg-orange-500 group-hover/item:text-white transition-colors">
+                                <Layout className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-main group-hover/item:text-orange-400 transition-colors">Marketing</div>
+                                <div className="text-xs text-dim">Campagnes et contenu</div>
+                            </div>
+                        </Link>
+                        <Link href="#" className="flex items-start gap-3 group/item">
+                            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 group-hover/item:bg-cyan-500 group-hover/item:text-white transition-colors">
+                                <Users className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-main group-hover/item:text-cyan-400 transition-colors">Produit</div>
+                                <div className="text-xs text-dim">Roadmap et sprints</div>
+                            </div>
+                        </Link>
+                    </div> 
+                    <div className="space-y-4">
+                        <h4 className="text-xs font-bold text-dim uppercase tracking-wider">Par besoin</h4>
+                        <Link href="#" className="flex items-start gap-3 group/item">
+                            <div className="p-2 rounded-lg bg-red-500/10 text-red-400 group-hover/item:bg-red-500 group-hover/item:text-white transition-colors">
+                                <Briefcase className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-main group-hover/item:text-red-400 transition-colors">Gestion de projet</div>
+                                <div className="text-xs text-dim">Pour toutes les échelles</div>
+                            </div>
+                        </Link>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
+
 // --- Main Page Component ---
 
 export default function HomePage() {
@@ -265,6 +370,8 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const { isAuthenticated, user, logout } = useAuthStore();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -320,7 +427,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-bg-primary selection:bg-indigo-500/30 selection:text-white font-sans text-main">
       
       {/* --- Navbar --- */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-bg-primary/80 backdrop-blur-xl border-b border-glass-border py-4' : 'bg-transparent py-6'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-bg-primary/80 backdrop-blur-xl border-b border-glass-border py-4 shadow-lg shadow-black/5' : 'bg-transparent py-6'}`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 group">
@@ -331,25 +438,73 @@ export default function HomePage() {
             </Link>
 
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-dim">
-              <Link href="#features" className="hover:text-white transition-colors">Produit</Link>
-              <Link href="#integrations" className="hover:text-white transition-colors">Intégrations</Link>
-              <Link href="#pricing" className="hover:text-white transition-colors">Tarifs</Link>
-              <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
+              <div className="relative group cursor-pointer h-full flex items-center">
+                  <span className="flex items-center gap-1 hover:text-indigo-400 transition-colors py-2">
+                       Produit <ChevronDown className="w-3 h-3 group-hover:rotate-180 transition-transform duration-300"/>
+                  </span>
+                  <MegaMenu category="product" />
+              </div>
+              
+              <div className="relative group cursor-pointer h-full flex items-center">
+                  <span className="flex items-center gap-1 hover:text-indigo-400 transition-colors py-2">
+                       Solutions <ChevronDown className="w-3 h-3 group-hover:rotate-180 transition-transform duration-300"/>
+                  </span>
+                  <MegaMenu category="solutions" />
+              </div>
+
+              <Link href="#pricing" className="hover:text-indigo-400 transition-colors py-2">Tarifs</Link>
+              <Link href="#faq" className="hover:text-indigo-400 transition-colors py-2">FAQ</Link>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
              <div className="hidden md:flex items-center gap-4">
-                <Link href="/login" className="text-sm font-semibold text-white hover:text-indigo-400 transition-colors">
-                  Connexion
-                </Link>
-                <Link 
-                  href="/register" 
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25 transition-all transform hover:scale-105"
-                >
-                  S&apos;inscrire
-                </Link>
+                {isAuthenticated ? (
+                    <>
+                        <Link 
+                            href="/dashboard"
+                            className="px-4 py-2 rounded-lg bg-white text-indigo-950 text-sm font-bold hover:bg-gray-100 shadow-md transition-all transform hover:scale-105 flex items-center gap-2"
+                        >   
+                            <Layout className="w-4 h-4" />
+                            Dashboard
+                        </Link>
+                        <div className="h-8 w-[1px] bg-glass-border mx-2"></div>
+                        <div className="flex items-center gap-3 cursor-pointer group relative">
+                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-transparent group-hover:ring-indigo-500/50 transition-all">
+                                {user?.firstName?.charAt(0) || <UserIcon className="w-5 h-5"/>}
+                             </div>
+                             {/* User Dropdown */}
+                             <div className="absolute top-full right-0 mt-2 w-48 bg-bg-card border border-glass-border rounded-xl shadow-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-1">
+                                <Link href="/settings" className="flex items-center gap-2 px-3 py-2 text-sm text-dim hover:bg-glass-hover hover:text-white rounded-lg transition-colors">
+                                    <Settings className="w-4 h-4" /> Paramètres
+                                </Link>
+                                <button 
+                                    onClick={() => {
+                                        logout();
+                                        router.push('/');
+                                    }} 
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-colors text-left"
+                                >
+                                    <LogOut className="w-4 h-4" /> Déconnexion
+                                </button>
+                             </div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <Link href="/login" className="text-sm font-semibold text-white/80 hover:bg-white/5 px-4 py-2 rounded-lg transition-colors">
+                        Connexion
+                        </Link>
+                        <Link 
+                        href="/register" 
+                        className="px-4 py-2 rounded-lg bg-pink-600 text-white text-sm font-bold hover:bg-pink-700 shadow-lg shadow-pink-500/25 transition-all transform hover:scale-105"
+                        >
+                        S&apos;inscrire
+                        </Link>
+                    </>
+                )}
              </div>
+             
              <button 
                 className="md:hidden text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -369,11 +524,26 @@ export default function HomePage() {
                     className="md:hidden bg-bg-card border-b border-glass-border overflow-hidden"
                 >
                     <div className="px-6 py-4 flex flex-col gap-4">
-                        <Link href="#features" className="text-dim hover:text-white">Produit</Link>
-                        <Link href="#pricing" className="text-dim hover:text-white">Tarifs</Link>
+                        <Link href="#features" className="text-dim hover:text-white font-medium">Produit</Link>
+                        <Link href="#integrations" className="text-dim hover:text-white font-medium">Solutions</Link>
+                        <Link href="#pricing" className="text-dim hover:text-white font-medium">Tarifs</Link>
                         <hr className="border-glass-border" />
-                        <Link href="/login" className="text-white font-semibold">Connexion</Link>
-                        <Link href="/register" className="text-indigo-400 font-bold">S&apos;inscrire pour tester</Link>
+                        
+                        {isAuthenticated ? (
+                            <>
+                                <Link href="/dashboard" className="text-white font-bold text-lg flex items-center gap-2">
+                                    <Layout className="w-5 h-5" /> Accéder au Dashboard
+                                </Link>
+                                <button onClick={() => logout()} className="text-red-400 font-medium flex items-center gap-2">
+                                    <LogOut className="w-5 h-5" /> Se déconnecter
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/login" className="text-white font-semibold">Connexion</Link>
+                                <Link href="/register" className="text-indigo-400 font-bold">S&apos;inscrire pour 0€</Link>
+                            </>
+                        )}
                     </div>
                 </motion.div>
             )}
