@@ -17,6 +17,15 @@ export default function InviteMemberModal({ isOpen, onClose, workspaceId, onSucc
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'admin' | 'editor' | 'visitor'>('editor');
   const [loading, setLoading] = useState(false);
+  const [successData, setSuccessData] = useState<any>(null);
+
+  // Reset state when opening/closing
+  React.useEffect(() => {
+    if (isOpen) {
+        setSuccessData(null);
+        setEmail('');
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,11 +45,17 @@ export default function InviteMemberModal({ isOpen, onClose, workspaceId, onSucc
       const data = await response.json();
 
       if (data.success) {
-        toast.success(data.message || 'Invitation envoyée');
+        // Don't close immediately, show success state with link
+        setSuccessData({
+            email,
+            token: data.invitation?.token || ''
+        });
+        
+        // Reset form but keep modal open
         setEmail('');
         setRole('editor');
         onSuccess();
-        onClose();
+        // onClose(); // Removed auto close
       } else {
         toast.error(data.error || 'Erreur lors de l\'invitation');
       }
@@ -82,6 +97,50 @@ export default function InviteMemberModal({ isOpen, onClose, workspaceId, onSucc
             </button>
           </div>
 
+          {successData ? (
+            <div className="p-6 space-y-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-500 mb-2 ring-1 ring-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.2)]">
+                  <Mail className="w-8 h-8" />
+                </div>
+                <div>
+                    <h3 className="text-xl font-bold text-white">Invitation envoyée !</h3>
+                    <p className="text-gray-400 mt-1">
+                        Un email a été envoyé à <span className="text-white font-medium">{successData.email}</span>.
+                    </p>
+                </div>
+              </div>
+
+              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-3">
+                 <p className="text-sm text-dim">
+                    Vous pouvez aussi copier ce lien d'invitation et l'envoyer directement :
+                 </p> 
+                 <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-black/30 border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 break-all font-mono">
+                         {typeof window !== 'undefined' ? `${window.location.origin}/join/${successData.token}` : ''}
+                    </code>
+                    <button 
+                        onClick={() => {
+                            const link = `${window.location.origin}/join/${successData.token}`;
+                            navigator.clipboard.writeText(link);
+                            toast.success('Lien copié !');
+                        }}
+                        className="p-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg transition-colors"
+                        title="Copier"
+                    >
+                        <Shield className="w-4 h-4" /> {/* Using Shield as Copy icon as fallback or import Copy from lucide */}
+                    </button>
+                 </div>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="w-full py-3.5 rounded-xl bg-white/5 text-white font-bold hover:bg-white/10 transition-all border border-white/5"
+              >
+                Terminer
+              </button>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 ml-1">Adresse email</label>
@@ -139,6 +198,7 @@ export default function InviteMemberModal({ isOpen, onClose, workspaceId, onSucc
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Envoyer l\'invitation'}
             </button>
           </form>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>

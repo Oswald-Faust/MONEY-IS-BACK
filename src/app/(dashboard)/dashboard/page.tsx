@@ -18,6 +18,7 @@ import toast from 'react-hot-toast';
 import ProjectCard from '@/components/ui/ProjectCard';
 import TaskCard from '@/components/ui/TaskCard';
 import RoutineCalendar from '@/components/ui/RoutineCalendar';
+import TeamSection from '@/components/dashboard/TeamSection';
 import { useAppStore, useAuthStore } from '@/store';
 // import type { Project, Task, Routine } from '@/types'; // Types non utilisés pour l'instant
 
@@ -34,7 +35,8 @@ export default function DashboardPage() {
     setTaskModalOpen,
     setCurrentProject,
     deleteProject,
-    updateTask
+    updateTask,
+    currentWorkspace // Added
   } = useAppStore();
   
   const [isLoading, setIsLoading] = useState(true);
@@ -183,6 +185,13 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Team Section */}
+      {currentWorkspace && (
+        <div className="mb-8">
+          <TeamSection workspaceId={currentWorkspace._id} />
+        </div>
+      )}
+
       {/* Mes Business - Full Width Section */}
       <section>
         <div className="flex items-center justify-between mb-8">
@@ -266,7 +275,6 @@ export default function DashboardPage() {
               Tâches Prioritaires
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Important Column */}
               {/* Important Column */}
               <div className="glass-card p-6 space-y-6">
                 <div className="flex items-center justify-between">

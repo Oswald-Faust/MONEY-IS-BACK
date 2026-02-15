@@ -10,12 +10,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MONEY IS BACK | Gestion de Projets",
+  title: "Edwin | Gestion de Projets",
   description: "Plateforme de gestion de projets ultra-personnalisée pour centraliser vos business",
   keywords: ["gestion de projet", "saas", "productivity", "tâches", "collaboration"],
   authors: [{ name: "Mathias MERCIER" }],
   openGraph: {
-    title: "MONEY IS BACK | Gestion de Projets",
+    title: "Edwin | Gestion de Projets",
     description: "Plateforme de gestion de projets ultra-personnalisée",
     type: "website",
   },

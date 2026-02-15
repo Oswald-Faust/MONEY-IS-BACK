@@ -24,6 +24,7 @@ import {
   User,
   X,
   MessageCircle,
+  UserPlus,
 } from 'lucide-react';
 
 const mainNavItems = [
@@ -40,6 +41,7 @@ const secondaryNavItems = [
   { icon: Lightbulb, label: 'Idées', href: '/ideas', view: 'ideas' as const },
   { icon: Key, label: 'IDs Sécurisés', href: '/secure-ids', view: 'ids' as const },
   { icon: HardDrive, label: 'Drive', href: '/drive', view: 'drive' as const },
+  { icon: UserPlus, label: 'Inviter', href: '/invite', view: 'invite' as const },
 ];
 
 import Image from 'next/image';

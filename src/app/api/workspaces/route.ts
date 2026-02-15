@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const userId = decoded.userId;
 
     const body = await request.json();
-    const { name, description, useCase, theme, icon } = body;
+    const { name, description, useCase, theme, icon, image, defaultProjectColor, invitedEmails } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -84,10 +84,11 @@ export async function POST(request: NextRequest) {
       members: [{ user: userId, role: 'admin', joinedAt: new Date() }],
       useCase: useCase || 'other',
       settings: {
-        defaultProjectColor: '#6366f1',
+        defaultProjectColor: defaultProjectColor || '#6366f1',
         allowInvitations: true,
         icon: icon || 'Briefcase',
-        theme: theme || 'dark'
+        theme: theme || 'dark',
+        image: image || undefined,
       }
     });
 
@@ -95,6 +96,42 @@ export async function POST(request: NextRequest) {
     await User.findByIdAndUpdate(userId, {
       $push: { workspaces: workspace._id }
     });
+
+    // Handle Invitations
+    if (invitedEmails && Array.isArray(invitedEmails) && invitedEmails.length > 0) {
+      const Invitations = (await import('@/models/Invitation')).default;
+      const { v4: uuidv4 } = await import('uuid'); // Dynamic import for uuid if needed or use native crypto
+
+      const invitePromises = invitedEmails.map(async (email: string) => {
+        // Validate email format if needed
+        if (!email || !email.includes('@')) return;
+
+        try {
+          // Check if already invited
+          const existing = await Invitations.findOne({ 
+             email: email.toLowerCase(), 
+             workspace: workspace._id,
+             status: 'pending'
+          });
+          
+          if (!existing) {
+             await Invitations.create({
+                email: email.toLowerCase(),
+                workspace: workspace._id,
+                role: 'editor', // Default role
+                token: uuidv4(),
+                inviter: userId,
+                status: 'pending',
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+             });
+          }
+        } catch (err) {
+          console.error(`Failed to invite ${email}`, err);
+        }
+      });
+      
+      await Promise.all(invitePromises);
+    }
 
     return NextResponse.json({
       success: true,

@@ -14,8 +14,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
     }
 
-    // Récupérer tous les utilisateurs sauf l'actuel
-    const users = await User.find({ _id: { $ne: auth.userId } })
+    // Get current user to access their workspaces
+    const currentUser = await User.findById(auth.userId).select('workspaces');
+    if (!currentUser) {
+      return NextResponse.json({ success: false, error: 'Utilisateur non trouvé' }, { status: 404 });
+    }
+
+    const userWorkspaceIds = currentUser.workspaces || [];
+
+    // Récupérer tous les utilisateurs sauf l'actuel, restriens aux workspaces communs
+    const users = await User.find({ 
+      _id: { $ne: auth.userId },
+      workspaces: { $in: userWorkspaceIds }
+    })
       .select('firstName lastName email avatar profileColor')
       .lean();
 

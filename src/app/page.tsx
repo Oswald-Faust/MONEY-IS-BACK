@@ -30,7 +30,13 @@ import {
   Briefcase,
   Cpu,
   Lock,
-  Box
+  Box,
+  PieChart,
+  Check,
+  Twitter,
+  Github,
+  Linkedin,
+  Instagram
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -58,7 +64,11 @@ const Navbar = () => {
 
     useEffect(() => {
         const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
+            if (window.scrollY > 40) {
+                setScrolled(true);
+            } else if (window.scrollY < 20) {
+                setScrolled(false);
+            }
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -78,16 +88,13 @@ const Navbar = () => {
                     animate={{ 
                         width: isMobile ? "100%" : (scrolled ? "auto" : "100%"), 
                         maxWidth: isMobile ? "100%" : (scrolled ? "800px" : "1024px"),
-                        y: isMobile ? 0 : (scrolled ? 10 : 0)
+                        y: isMobile ? 0 : (scrolled ? 10 : 0),
+                        padding: isMobile ? "12px 16px" : (scrolled ? "8px 24px" : "12px 32px")
                     }}
                     transition={{ 
                         type: "spring", 
-                        stiffness: 350, 
-                        damping: 30,
-                        layout: { duration: 0.3 }
-                    }}
-                    style={{
-                        padding: isMobile ? "12px 16px" : (scrolled ? "8px 24px" : "12px 32px"),
+                        stiffness: 260, 
+                        damping: 20,
                     }}
                     className="bg-[#0A0A0F]/80 backdrop-blur-xl border border-white/10 flex items-center justify-between shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
                 >
@@ -104,7 +111,7 @@ const Navbar = () => {
                                     transition={{ duration: 0.2 }}
                                     className="text-lg font-bold text-white tracking-tight hidden sm:block whitespace-nowrap overflow-hidden origin-left"
                                 >
-                                    MONEY IS BACK
+                                    Edwin
                                 </motion.span>
                             )}
                         </AnimatePresence>
@@ -355,7 +362,7 @@ const Hero = () => {
                             <div className="w-3 h-3 rounded-full bg-green-500/20 text-green-500 border border-transparent" />
                         </div>
                         <div className="mx-auto w-[40%] h-5 bg-white/5 rounded-md text-[10px] flex items-center justify-center text-zinc-600">
-                            moneyisback.app
+                            edwin.app
                         </div>
                     </div>
                     {/* Content Preview */}
@@ -464,126 +471,340 @@ const BentoGrid = () => {
                     {/* Large Card */}
                     <div className="md:col-span-2 relative h-[400px] rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden group">
                          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10" />
-                         <img src="https://images.unsplash.com/photo-1614028674026-a65e31bfd27c?q=80&w=2670&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Feature" />
+                         <img src="https://images.unsplash.com/photo-1614064641938-3bcee52636c4?q=80&w=2671&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Feature" />
                          <div className="absolute bottom-0 left-0 p-10 z-20 max-w-lg">
-                             <div className="text-[#00FFB2] font-mono text-xs mb-2">INTELLIGENCE</div>
-                             <h3 className="text-3xl font-medium text-white mb-2">Automatisations Natives</h3>
-                             <p className="text-zinc-400 font-light">Créez des workflows complexes sans une seule ligne de code. Si X alors Y, instantanément.</p>
+                             <div className="text-[#00FFB2] font-mono text-xs mb-2">DRIVE</div>
+                             <h3 className="text-3xl font-medium text-white mb-2">Stockage & Partage Sécurisé</h3>
+                             <p className="text-zinc-400 font-light">Un espace centralisé pour tous vos fichiers. Partagez des documents avec des liens sécurisés et gérez les permissions d&apos;accès.</p>
                          </div>
                     </div>
 
                     {/* Tall Card */}
                     <div className="md:row-span-2 rounded-3xl bg-white/[0.02] border border-white/5 p-8 flex flex-col items-center text-center group hover:border-[#00FFB2]/20 transition-colors">
-                        <div className="w-full h-48 bg-gradient-to-tr from-[#00FFB2]/20 to-purple-500/20 rounded-2xl mb-8 flex items-center justify-center relative overflow-hidden">
+                        <div className="w-full h-48 bg-gradient-to-tr from-[#00FFB2]/20 to-blue-500/20 rounded-2xl mb-8 flex items-center justify-center relative overflow-hidden">
                              <div className="absolute inset-0 bg-grid-white/[0.05]" />
-                             <Cpu className="w-16 h-16 text-white relative z-10" />
+                             <BarChart3 className="w-16 h-16 text-white relative z-10" />
                         </div>
-                        <h3 className="text-2xl font-medium text-white mb-4">Moteur Rapide</h3>
-                        <p className="text-zinc-500 font-light text-sm">Construit sur une architecture Rust pour une latence proche de zéro. Vos clics sont instantanés.</p>
+                        <h3 className="text-2xl font-medium text-white mb-4">Tableaux de Bord Dynamiques</h3>
+                        <p className="text-zinc-500 font-light text-sm">Visualisez l&apos;avancement de vos projets, suivez vos budgets et analysez la performance de vos équipes en un coup d&apos;œil.</p>
                     </div>
 
                     {/* Small Cards */}
                     <FeatureCard 
-                        title="Temps Réel" 
-                        desc="Collaboration multijoueur sur tous les documents et tâches." 
+                        title="Collaboration en Temps Réel" 
+                        desc="Travaillez ensemble sur les mêmes documents et tâches sans conflit." 
                         icon={Users}
                         delay={0.1}
                     />
                     <FeatureCard 
-                        title="Sécurité Bank-Grade" 
-                        desc="Chiffrement AES-256 et conformité SOC2 Type II." 
-                        icon={Shield}
+                        title="Messagerie Intégrée" 
+                        desc="Discutez avec votre équipe directement dans le contexte de vos projets." 
+                        icon={MessageSquare}
                         delay={0.2}
                     />
+
+                    {/* New Content */}
+                    <FeatureCard 
+                        title="Gestion de Tâches Avancée" 
+                        desc="Organisez votre travail avec des listes, des tableaux kanban et des calendriers." 
+                        icon={List}
+                        delay={0.3}
+                    />
+                    
+                     <div className="md:col-span-2 relative h-[320px] rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden group p-10 flex flex-col justify-between hover:border-[#00FFB2]/20 transition-colors">
+                         <div className="absolute top-0 right-0 p-16 opacity-10 group-hover:opacity-20 transition-opacity">
+                             <Shield className="w-64 h-64 text-[#00FFB2]" />
+                         </div>
+                         <div className="relative z-10">
+                             <div className="w-12 h-12 rounded-xl bg-[#00FFB2]/20 flex items-center justify-center mb-6">
+                                 <Shield className="w-6 h-6 text-[#00FFB2]" />
+                             </div>
+                             <h3 className="text-2xl font-medium text-white mb-3">Contrôle d&apos;Accès Sécurisé</h3>
+                             <p className="text-zinc-400 font-light max-w-md">Définissez précisément qui peut voir et modifier quoi. Protégez vos informations sensibles avec des rôles et des permissions granulaires.</p>
+                         </div>
+                    </div>
                 </div>
             </div>
         </section>
     );
 };
 
-const Pricing = () => {
+const TAB_CONTENT = [
+    {
+        id: 'docs',
+        title: 'Documents',
+        desc: 'Créez des documents magnifiques, des wikis et des bases de connaissances connectés à vos tâches.',
+        icon: FileText,
+        gradient: 'from-[#00FFB2]/20 to-emerald-500/20',
+        image: 'https://images.unsplash.com/photo-1618044733300-9472054094ee?auto=format&fit=crop&q=80&w=2670' // Updated Image
+    },
+    {
+        id: 'dashboards',
+        title: 'Tableaux de bord',
+        desc: 'Obtenez une vue d’ensemble complète avec des graphiques en temps réel et des rapports personnalisables.',
+        icon: Layout,
+        gradient: 'from-blue-500/20 to-cyan-500/20',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2670' 
+    },
+    {
+        id: 'chat',
+        title: 'Discussion',
+        desc: 'Communiquez en temps réel avec votre équipe, partagez des fichiers et restez connectés.',
+        icon: MessageSquare,
+        gradient: 'from-purple-500/20 to-pink-500/20',
+        image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80&w=2670'
+    },
+    {
+        id: 'goals',
+        title: 'Objectifs',
+        desc: 'Définissez des objectifs stratégiques, suivez la progression et alignez votre équipe.',
+        icon: Target,
+        gradient: 'from-red-500/20 to-orange-500/20',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426'
+    },
+    {
+        id: 'whiteboards',
+        title: 'Routines',
+        desc: 'Automatisez vos processus récurrents et maintenez la cohérence de vos opérations.',
+        icon: Zap,
+        gradient: 'from-yellow-400/20 to-amber-500/20',
+        image: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=2670'
+    }
+];
+
+const Services = () => {
+    const [activeTab, setActiveTab] = useState(0);
+    const { isAuthenticated } = useAuthStore();
+
     return (
-        <section id="pricing" className="py-32 px-6 bg-[#050505] relative border-t border-white/5">
-            <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-20">
-                    <h2 className="text-4xl font-medium text-white mb-4">Plans Flexibles</h2>
-                    <p className="text-zinc-400">Commencez petit, grandissez vite.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    {/* Basic */}
-                    <div className="p-10 rounded-3xl border border-white/5 bg-transparent hover:bg-white/[0.02] transition-colors">
-                        <h3 className="text-xl font-medium text-white mb-2">Starter</h3>
-                        <div className="text-4xl font-medium text-white mb-6">$0<span className="text-zinc-500 text-lg">/mo</span></div>
-                        <p className="text-zinc-400 text-sm mb-8">Pour les individus et side-projects.</p>
-                        <button className="w-full py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors text-sm font-medium">Commencer</button>
-                        <div className="mt-8 space-y-4">
-                            {['Projets illimités', '100MB Stockage', 'Support communautaire'].map(f => (
-                                <div key={f} className="flex items-center gap-3 text-zinc-500 text-sm"><CheckCircle2 className="w-4 h-4 text-zinc-600"/> {f}</div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Pro */}
-                    <div className="relative p-10 rounded-3xl border border-[#00FFB2]/20 bg-white/[0.02] shadow-[0_0_50px_rgba(0,255,178,0.05)] transform md:-translate-y-4">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-[#00FFB2] text-black text-[10px] font-bold uppercase tracking-widest rounded-full">Populaire</div>
-                        <h3 className="text-xl font-medium text-white mb-2">Pro</h3>
-                        <div className="text-4xl font-medium text-white mb-6">$12<span className="text-zinc-500 text-lg">/mo</span></div>
-                        <p className="text-zinc-400 text-sm mb-8">Pour les équipes en croissance.</p>
-                        <button className="w-full py-3 rounded-xl bg-[#00FFB2] text-black hover:bg-[#00e6a0] transition-colors text-sm font-bold">Essayer Pro</button>
-                        <div className="mt-8 space-y-4">
-                            {['Tout du plan Starter', 'Stockage Illimité', 'Analytiques Avancées', 'Support Prioritaire'].map(f => (
-                                <div key={f} className="flex items-center gap-3 text-zinc-300 text-sm"><CheckCircle2 className="w-4 h-4 text-[#00FFB2]"/> {f}</div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Enterprise */}
-                    <div className="p-10 rounded-3xl border border-white/5 bg-transparent hover:bg-white/[0.02] transition-colors">
-                        <h3 className="text-xl font-medium text-white mb-2">Enterprise</h3>
-                        <div className="text-4xl font-medium text-white mb-6">Custom</div>
-                        <p className="text-zinc-400 text-sm mb-8">Sécurité et contrôle total.</p>
-                        <button className="w-full py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors text-sm font-medium">Contacter</button>
-                        <div className="mt-8 space-y-4">
-                            {['SSO SAML', 'Audit Logs', 'Manager Dédié', 'SLA 99.99%'].map(f => (
-                                <div key={f} className="flex items-center gap-3 text-zinc-500 text-sm"><CheckCircle2 className="w-4 h-4 text-zinc-600"/> {f}</div>
-                            ))}
-                        </div>
+        <section className="py-32 px-4 max-w-[1400px] mx-auto">
+            <div className="bg-[#111] rounded-[48px] p-8 md:p-16 border border-white/5 flex flex-col md:flex-row gap-16 min-h-[600px]">
+                {/* Left: Tabs */}
+                <div className="w-full md:w-1/3 flex flex-col gap-4">
+                    <div className="text-[#D7FE03] font-bold uppercase tracking-widest mb-8">Services</div>
+                    <div className="space-y-4">
+                        {TAB_CONTENT.map((tab, i) => (
+                            <button 
+                                key={i}
+                                onClick={() => setActiveTab(i)}
+                                className={`w-full text-left p-6 rounded-[24px] border transition-all duration-300 flex items-center justify-between group ${
+                                    activeTab === i 
+                                    ? 'bg-[#1F1F1F] border-[#333] text-white' 
+                                    : 'bg-transparent border-transparent text-[#666] hover:bg-[#151515]'
+                                }`}
+                            >
+                                <span className={`text-xl font-medium ${activeTab === i ? 'text-white' : 'group-hover:text-[#A8A8A8]'}`}>
+                                    {tab.title}
+                                </span>
+                                {activeTab === i && (
+                                    <div className="w-8 h-8 bg-[#D7FE03] rounded-full flex items-center justify-center">
+                                        <ArrowRight className="w-4 h-4 text-black" />
+                                    </div>
+                                )}
+                            </button>
+                        ))}
                     </div>
                 </div>
+
+                {/* Right: Content */}
+                <div className="w-full md:w-2/3 relative rounded-[32px] overflow-hidden bg-[#1A1A1A] border border-white/5">
+                     <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0 p-12 flex flex-col"
+                        >
+                            {/* Background Image */}
+                            <div className="absolute inset-0 z-0 opacity-40">
+                                <img src={TAB_CONTENT[activeTab].image} alt={TAB_CONTENT[activeTab].title} className="w-full h-full object-cover grayscale mix-blend-overlay" />
+                                <div className={`absolute inset-0 bg-gradient-to-br ${TAB_CONTENT[activeTab].gradient} mix-blend-soft-light`} />
+                            </div>
+
+                            <div className="relative z-10 mt-auto">
+                                <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border border-white/10">
+                                    <Zap className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-4xl text-white font-medium mb-4">{TAB_CONTENT[activeTab].title}</h3>
+                                <p className="text-[#A8A8A8] text-lg max-w-md mb-8">{TAB_CONTENT[activeTab].desc}</p>
+                                <Link 
+                                    href={isAuthenticated ? "/dashboard" : "/login"}
+                                    className="px-8 py-3 bg-white text-black rounded-full font-bold hover:bg-[#D7FE03] transition-colors inline-block"
+                                >
+                                    Explore Feature
+                                </Link>
+                            </div>
+                        </motion.div>
+                     </AnimatePresence>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const PricingCard = ({ plan, price, highlight = false }: { plan: string; price: string; highlight?: boolean }) => (
+    <div className={`
+        p-10 rounded-[40px] border flex flex-col h-full transition-all duration-300
+        ${highlight 
+            ? 'bg-[#1A1A1A] border-[#D7FE03]/50 shadow-[0_0_40px_rgba(215,254,3,0.1)]' 
+            : 'bg-[#0A0A0A] border-white/5 hover:border-white/10'
+        }
+    `}>
+        <div className="mb-8">
+            <h3 className="text-2xl text-white font-medium mb-2">{plan}</h3>
+            <div className="flex items-baseline gap-1">
+                <span className="text-5xl font-medium text-white">${price}</span>
+                <span className="text-[#666]">/mo</span>
+            </div>
+        </div>
+
+        <div className="space-y-4 mb-10 flex-1">
+            {['Unlimited transactions', 'Analytics dashboard', 'Support 24/7', 'Virtual cards'].map((f, i) => (
+                <div key={i} className="flex items-center gap-3 text-[#A8A8A8]">
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${highlight ? 'bg-[#D7FE03] text-black' : 'bg-[#242424] text-white'}`}>
+                        <Check className="w-3 h-3" />
+                    </div>
+                    {f}
+                </div>
+            ))}
+        </div>
+
+        <button className={`
+            w-full py-4 rounded-[20px] font-bold text-lg transition-all
+            ${highlight 
+                ? 'bg-[#D7FE03] text-black hover:bg-[#c2e503]' 
+                : 'bg-[#242424] text-white hover:bg-white hover:text-black'
+            }
+        `}>
+            Choose Plan
+        </button>
+    </div>
+);
+
+const SimplePricing = () => {
+    const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
+    const prices = {
+        basic: { monthly: '0', yearly: '0' },
+        pro: { monthly: '29', yearly: '24' },
+        enterprise: { monthly: '99', yearly: '79' }
+    };
+
+    return (
+        <section className="py-32 px-4 max-w-[1400px] mx-auto">
+            <div className="text-center mb-20">
+                <h2 className="text-[60px] text-white font-medium mb-6">Simple Pricing</h2>
+                
+                {/* Toggle */}
+                <div className="inline-flex items-center p-1 bg-[#1A1A1A] rounded-full border border-white/5">
+                    <button 
+                        onClick={() => setBillingCycle('monthly')}
+                        className={`px-8 py-3 rounded-full font-bold text-sm transition-all ${billingCycle === 'monthly' ? 'bg-[#333] text-white shadow-lg' : 'text-[#666] hover:text-white'}`}
+                    >
+                        Monthly
+                    </button>
+                    <button 
+                        onClick={() => setBillingCycle('yearly')}
+                        className={`px-8 py-3 rounded-full font-bold text-sm transition-all ${billingCycle === 'yearly' ? 'bg-[#333] text-white shadow-lg' : 'text-[#666] hover:text-white'}`}
+                    >
+                        Yearly (-20%)
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+                <PricingCard plan="Basic" price={prices.basic[billingCycle]} />
+                <PricingCard plan="Pro" price={prices.pro[billingCycle]} highlight={true} />
+                <PricingCard plan="Enterprise" price={prices.enterprise[billingCycle]} />
             </div>
         </section>
     );
 };
 
 const Footer = () => (
-    <footer className="py-20 px-6 border-t border-white/5 bg-[#050505] text-zinc-500 text-sm">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-10">
-            <div>
-                <div className="flex items-center gap-2 mb-6">
-                    <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center">
-                        <span className="text-white font-bold text-[10px]">M</span>
+    <footer className="py-20 px-6 bg-[#050505] border-t border-white/5">
+        <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-10 mb-20">
+                <div className="col-span-2 lg:col-span-2">
+                    <Link href="/" className="flex items-center gap-2 mb-6">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
+                            <span className="text-white font-bold text-xs">E</span>
+                        </div>
+                        <span className="text-white font-bold text-xl">Edwin</span>
+                    </Link>
+                    <p className="text-zinc-500 text-sm mb-6 max-w-sm">
+                        La plateforme tout-en-un pour gérer vos projets, vos équipes et votre croissance. 
+                        Construit pour les bâtisseurs.
+                    </p>
+                    <div className="flex gap-4">
+                        <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white transition-colors">
+                            <Twitter className="w-4 h-4" />
+                        </a>
+                        <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white transition-colors">
+                            <Github className="w-4 h-4" />
+                        </a>
+                        <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white transition-colors">
+                            <Linkedin className="w-4 h-4" />
+                        </a>
+                        <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white transition-colors">
+                            <Instagram className="w-4 h-4" />
+                        </a>
                     </div>
-                    <span className="text-white font-bold">MONEY IS BACK</span>
                 </div>
-                <p className="max-w-xs">Le futur du travail est ici. Rejoignez le mouvement.</p>
+                
+                {/* Columns */}
+                <div>
+                    <h4 className="text-white font-bold mb-6">Produit</h4>
+                    <ul className="space-y-4 text-sm text-zinc-500">
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Fonctionnalités</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Tarifs</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Sécurité</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Changelog</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Intégrations</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 className="text-white font-bold mb-6">Entreprise</h4>
+                    <ul className="space-y-4 text-sm text-zinc-500">
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">À propos</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Carrières</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Blog</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Contact</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Partenaires</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 className="text-white font-bold mb-6">Ressources</h4>
+                    <ul className="space-y-4 text-sm text-zinc-500">
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Documentation</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Communauté</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Help Center</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Status</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">API</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 className="text-white font-bold mb-6">Légal</h4>
+                    <ul className="space-y-4 text-sm text-zinc-500">
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Confidentialité</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">CGU</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Cookies</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Licences</a></li>
+                    </ul>
+                </div>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
-                <div>
-                    <h4 className="text-white font-medium mb-4">Produit</h4>
-                    <ul className="space-y-2">
-                        <li><a href="#" className="hover:text-[#00FFB2]">Features</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2]">Changelog</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2]">Docs</a></li>
-                    </ul>
+
+            <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="text-zinc-600 text-sm">
+                    © 2026 Edwin Inc. Tous droits réservés.
                 </div>
-                <div>
-                    <h4 className="text-white font-medium mb-4">Société</h4>
-                    <ul className="space-y-2">
-                        <li><a href="#" className="hover:text-[#00FFB2]">À propos</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2]">Carrières</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2]">Légal</a></li>
-                    </ul>
+                <div className="flex gap-8 text-sm font-medium text-zinc-500">
+                    <span>Fait avec ❤️ à Paris</span>
                 </div>
             </div>
         </div>
@@ -597,7 +818,8 @@ export default function HomePage() {
         <Hero />
         <ReplaceAllSection />
         <BentoGrid />
-        <Pricing />
+        <Services />
+        <SimplePricing />
         <Footer />
     </main>
   );

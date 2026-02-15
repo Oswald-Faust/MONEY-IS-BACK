@@ -18,9 +18,20 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
-    
+
+    // Get current user to access their workspaces
+    const currentUser = await User.findById(auth.userId).select('workspaces');
+    if (!currentUser) {
+      return NextResponse.json({ success: false, error: 'Utilisateur non trouvé' }, { status: 404 });
+    }
+
+    const userWorkspaceIds = currentUser.workspaces || [];
+
     // Build query conditions
-    const conditions: any = { _id: { $ne: auth.userId } }; // Exclude current user
+    const conditions: any = { 
+      _id: { $ne: auth.userId },
+      workspaces: { $in: userWorkspaceIds }
+    };
     
     if (query.trim()) {
       const regex = new RegExp(query, 'i');
