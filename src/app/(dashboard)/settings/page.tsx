@@ -21,10 +21,21 @@ import toast from 'react-hot-toast';
 import UsersManagement from '@/components/admin/UsersManagement';
 import AccessControl from '@/components/admin/AccessControl';
 import Avatar from '@/components/ui/Avatar';
+import WorkspaceMembers from '@/components/settings/WorkspaceMembers';
+import { useAppStore } from '@/store';
 
-const sidebarItems = [
+type SidebarItem = {
+  id: string;
+  label: string;
+  icon: any;
+  adminOnly?: boolean;
+  workspaceOnly?: boolean;
+};
+
+const sidebarItems: SidebarItem[] = [
   { id: 'profile', label: 'Profil Personnel', icon: User },
   { id: 'security', label: 'Sécurité & Accès', icon: Shield },
+  { id: 'members', label: 'Personnes', icon: Users, workspaceOnly: true },
   { id: 'access', label: 'Accès & Vérifications', icon: ShieldCheck, adminOnly: true },
   { id: 'users', label: 'Gestion des utilisateurs', icon: Users, adminOnly: true },
 ];
@@ -42,6 +53,7 @@ const PRESET_COLORS = [
 
 export default function SettingsPage() {
   const { user, updateUser, token } = useAuthStore();
+  const { currentWorkspace } = useAppStore();
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -197,7 +209,10 @@ export default function SettingsPage() {
           </div>
           
           {sidebarItems
-            .filter(item => !item.adminOnly || user?.role === 'admin')
+            .filter(item => 
+              (!item.adminOnly || user?.role === 'admin') && 
+              (!('workspaceOnly' in item) || currentWorkspace)
+            )
             .map((item) => (
             <button
               key={item.id}
@@ -235,7 +250,10 @@ export default function SettingsPage() {
         {/* Mobile Navigation (Standard Stacked) */}
         <div className="block lg:hidden space-y-2">
            {sidebarItems
-            .filter(item => !item.adminOnly || user?.role === 'admin')
+            .filter(item => 
+              (!item.adminOnly || user?.role === 'admin') && 
+              (!('workspaceOnly' in item) || currentWorkspace)
+            )
             .map((item) => (
             <button
               key={item.id}
@@ -429,6 +447,10 @@ export default function SettingsPage() {
 
             {activeTab === 'access' && user?.role === 'admin' && (
               <AccessControl />
+            )}
+
+            {activeTab === 'members' && (
+              <WorkspaceMembers />
             )}
 
             {activeTab === 'users' && user?.role === 'admin' && (

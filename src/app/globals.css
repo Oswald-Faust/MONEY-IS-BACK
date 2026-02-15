@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 @theme {
   --color-glass-border: var(--glass-border);
   --color-glass-bg: var(--glass-bg);
@@ -17,23 +16,19 @@
   --color-input-bg: var(--input-bg);
   --color-input-border: var(--input-border);
 }
-
 /* ========================================
    PROJECT HUB - Clean Premium Dark Theme
    ======================================== */
-
 :root {
   /* Core Colors */
   --bg-primary: #0a0a0f;
   --bg-secondary: #0f0f15;
   --bg-tertiary: #14141d;
   --bg-card: #14141d;
-
   /* Glass Effects */
   --glass-bg: rgba(255, 255, 255, 0.01);
   --glass-border: rgba(255, 255, 255, 0.015);
   --glass-hover: rgba(255, 255, 255, 0.02);
-
   /* Text Colors */
   --text-main: #ffffff;
   --text-dim: #94a3b8;
@@ -43,23 +38,22 @@
   --input-bg: #0d0d14;
   --input-border: rgba(255, 255, 255, 0.02);
   --scrollbar-thumb: #1a1a24;
-
   /* Spacing & Radii (Shared) */
   --sidebar-w: 280px;
   --sidebar-coll: 80px;
   --radius-xl: 16px;
   --radius-lg: 12px;
-
   /* Accent Colors (Shared) */
   --accent-primary: #6366f1;
   --accent-secondary: #8b5cf6;
   --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  /* Cryptix Theme Colors */
+  --color-neon-cyan: #00FFB2;
+  --bg-deep: #050505; /* Deep black/purple for hero */
 }
-
 /* ========================================
    Base Styles
    ======================================== */
-
 body {
   background-color: var(--bg-primary);
   color: var(--text-main);
@@ -67,7 +61,6 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
-
 /* Base Layout Spacing */
 .dashboard-container {
   max-width: 1400px;
@@ -75,17 +68,14 @@ body {
   padding: 2.5rem;
   width: 100%;
 }
-
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 1rem;
   }
 }
-
 /* ========================================
    Components
    ======================================== */
-
 .glass-card {
   background: var(--bg-card);
   backdrop-filter: blur(12px);
@@ -95,12 +85,10 @@ body {
   padding: 1.5rem;
   transition: all 0.2s ease;
 }
-
 .glass-card:hover {
   border-color: var(--glass-border);
   background: var(--glass-hover);
 }
-
 /* Inputs & Buttons - More breathing room */
 input:not([class*="pl-"]), select, textarea {
   background: var(--input-bg);
@@ -111,14 +99,12 @@ input:not([class*="pl-"]), select, textarea {
   transition: all 0.2s;
   font-size: 0.9375rem;
 }
-
 input:focus {
   outline: none;
   border-color: var(--accent-primary);
   background: var(--input-bg);
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
-
 .btn-primary {
   background: var(--accent-gradient);
   padding: 0.75rem 1.5rem;
@@ -129,11 +115,9 @@ input:focus {
   border: none;
   cursor: pointer;
 }
-
 .btn-primary:active {
   transform: scale(0.98);
 }
-
 /* Section Titles */
 .section-title {
   font-size: 1.25rem;
@@ -142,40 +126,32 @@ input:focus {
   margin-bottom: 1.5rem;
   color: var(--text-main);
 }
-
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
   border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
-
 /* Priority Colors */
 .priority-important { color: #ef4444; border-color: rgba(239, 68, 68, 0.5); }
 .priority-less { color: #3b82f6; border-color: rgba(59, 130, 246, 0.5); }
 .priority-waiting { color: #94a3b8; border-color: rgba(148, 163, 184, 0.5); }
-
 /* Utilities */
 .text-dim { color: var(--text-dim); }
 .text-muted { color: var(--text-muted); }
-
 /* Animation wrapper */
 .page-fade {
   animation: fadeIn 0.4s ease-out;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

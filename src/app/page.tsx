@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
   Menu,
@@ -13,7 +13,6 @@ import {
   Zap,
   Users,
   Bell,
-  Plus,
   Search,
   Settings,
   Calendar,
@@ -21,880 +20,548 @@ import {
   List,
   Kanban,
   CreditCard,
-  HelpCircle,
   Globe,
   Smartphone,
   Shield,
-  Clock,
   ArrowRight,
   ChevronDown,
   LogOut,
   User as UserIcon,
-  Briefcase
+  Briefcase,
+  Cpu,
+  Lock,
+  Box
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 
-// --- Mock Components for UI Visualization ---
+// --- Components ---
 
-const MockSidebar = () => (
-  <div className="w-60 bg-bg-card/50 border-r border-glass-border flex flex-col p-4 gap-4 hidden md:flex h-full">
-    <div className="flex items-center gap-2 px-2">
-      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">MB</div>
-      <div className="text-sm font-semibold text-main">Workspace</div>
-    </div>
+const Navbar = () => {
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { isAuthenticated, user, logout } = useAuthStore();
     
-    <div className="space-y-1">
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 text-sm font-medium">
-        <Layout className="w-4 h-4" />
-        <span>Accueil</span>
-      </div>
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-dim hover:text-main hover:bg-glass-hover transition-colors text-sm">
-        <Bell className="w-4 h-4" />
-        <span>Notifications</span>
-      </div>
-    </div>
-  </div>
-);
+    // Add scroll direction tracking
+    const [isVisible, setIsVisible] = useState(true);
+    const lastScrollY = useRef(0);
 
-const MockTopBar = () => (
-  <div className="h-14 border-b border-glass-border flex items-center justify-between px-6 bg-bg-card/30">
-    <div className="flex items-center gap-4">
-      <div className="flex items-center gap-2 text-dim text-sm">
-        <span className="text-main font-medium">Marketing</span>
-        <ChevronRight className="w-4 h-4" />
-        <span>Campagne Q1</span>
-      </div>
-    </div>
-    <div className="flex items-center gap-3">
-      <div className="flex -space-x-2">
-         {[1,2,3].map(i => (
-           <div key={i} className="w-8 h-8 rounded-full border-2 border-bg-card bg-gray-700 flex items-center justify-center text-[10px] text-white">
-             U{i}
-           </div>
-         ))}
-      </div>
-    </div>
-  </div>
-);
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            
+            // Determine if scrolled more than threshold
+            setScrolled(currentScrollY > 20);
 
-const MockTask = ({ title, status, assignee, priority }: { title: string, status: string, assignee: string, priority: string }) => (
-  <div className="flex items-center gap-4 p-3 bg-bg-card border border-glass-border rounded-xl hover:border-indigo-500/30 transition-colors cursor-pointer group">
-    <div className={`w-4 h-4 rounded-full border-2 ${status === 'Done' ? 'bg-green-500 border-green-500' : 'border-gray-600 group-hover:border-indigo-500'}`} />
-    <span className="text-sm text-main flex-1">{title}</span>
-    <div className={`text-[10px] px-2 py-0.5 rounded ${
-      priority === 'High' ? 'bg-red-500/10 text-red-500' : 
-      priority === 'Medium' ? 'bg-yellow-500/10 text-yellow-500' : 
-      'bg-blue-500/10 text-blue-500'
-    }`}>
-      {priority}
-    </div>
-  </div>
-);
-
-const MockDashboard = ({ viewType = 'list' }: { viewType?: 'list' | 'board' | 'gantt' }) => (
-  <div className="w-full h-full bg-bg-primary rounded-xl overflow-hidden flex flex-col shadow-2xl shadow-indigo-500/20 border border-glass-border">
-    <MockTopBar />
-    <div className="flex-1 p-6 overflow-hidden relative">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-main">Tâches actives</h3>
-        <div className="flex gap-2">
-            <div className={`p-2 rounded-lg ${viewType === 'list' ? 'bg-indigo-500/20 text-indigo-400' : 'text-dim'}`}><List className="w-4 h-4" /></div>
-            <div className={`p-2 rounded-lg ${viewType === 'board' ? 'bg-indigo-500/20 text-indigo-400' : 'text-dim'}`}><Kanban className="w-4 h-4" /></div>
-            <div className={`p-2 rounded-lg ${viewType === 'gantt' ? 'bg-indigo-500/20 text-indigo-400' : 'text-dim'}`}><Calendar className="w-4 h-4" /></div>
-        </div>
-      </div>
-      
-      {viewType === 'list' && (
-        <div className="space-y-3">
-            <MockTask title="Refonte de la landing page" status="In Progress" assignee="JD" priority="High" />
-            <MockTask title="Intégration API Stripe" status="Todo" assignee="AL" priority="High" />
-            <MockTask title="Review design system" status="Done" assignee="MS" priority="Medium" />
-            <MockTask title="Optimisation SEO" status="Todo" assignee="JD" priority="Low" />
-        </div>
-      )}
-
-      {viewType === 'board' && (
-        <div className="flex gap-4 h-full">
-            {[
-                { title: 'To Do', color: 'border-gray-500' },
-                { title: 'In Progress', color: 'border-blue-500' },
-                { title: 'Done', color: 'border-green-500' }
-            ].map(col => (
-                <div key={col.title} className="flex-1 bg-bg-card/30 rounded-lg p-3 border border-glass-border flex flex-col gap-3">
-                    <div className={`text-xs font-bold text-dim uppercase flex items-center gap-2 mb-2 before:content-[''] before:w-2 before:h-2 before:rounded-full before:${col.color.replace('border-', 'bg-')}`}>
-                        {col.title}
-                    </div>
-                    {[1,2].map(i => (
-                        <div key={i} className="bg-bg-card p-3 rounded-lg border border-glass-border shadow-sm text-xs">Tâche {i}</div>
-                    ))}
-                </div>
-            ))}
-        </div>
-      )}
-
-      {viewType === 'gantt' && (
-          <div className="space-y-4">
-              {[1,2,3,4].map(i => (
-                  <div key={i} className="flex items-center gap-4">
-                      <div className="w-32 text-xs text-dim">Tâche {i}</div>
-                      <div className="flex-1 bg-bg-card/30 h-8 rounded-lg relative overflow-hidden">
-                          <div 
-                            className="absolute top-1 bottom-1 bg-indigo-500/40 rounded border border-indigo-500/50" 
-                            style={{ left: `${i * 10}%`, width: `${20 + i * 5}%` }}
-                          />
-                      </div>
-                  </div>
-              ))}
-          </div>
-      )}
-
-      {/* Floating Elements for "Pop" effect */}
-      <motion.div 
-        animate={{ y: [0, -10, 0] }} 
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-8 right-8 bg-bg-card border border-glass-border p-4 rounded-xl shadow-xl max-w-[200px]"
-      >
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span className="text-xs font-bold text-main">Projet terminé !</span>
-        </div>
-        <div className="text-xs text-dim">La refonte est en ligne 🚀</div>
-      </motion.div>
-    </div>
-  </div>
-);
-
-// --- New Sections Components ---
-
-const PricingCard = ({ 
-    plan, 
-    price, 
-    description, 
-    features, 
-    recommended = false,
-    cta = "Commencer gratuitement"
-}: { 
-    plan: string, 
-    price: string, 
-    description: string, 
-    features: string[], 
-    recommended?: boolean,
-    cta?: string
-}) => (
-    <div className={`
-        relative p-8 rounded-2xl border flex flex-col h-full transition-transform hover:-translate-y-2
-        ${recommended 
-            ? 'bg-gradient-to-b from-indigo-900/20 to-bg-card border-indigo-500/50 shadow-2xl shadow-indigo-500/10' 
-            : 'bg-glass-card border-glass-border hover:border-glass-hover'
-        }
-    `}>
-        {recommended && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-indigo-500 text-white text-xs font-bold rounded-full uppercase tracking-wide">
-                Recommandé
-            </div>
-        )}
-        <h3 className="text-xl font-bold text-main mb-2">{plan}</h3>
-        <div className="mb-4">
-            <span className="text-4xl font-black text-white">{price}</span>
-            {price !== 'Gratuit' && <span className="text-dim text-sm"> /membre/mois</span>}
-        </div>
-        <p className="text-dim text-sm mb-8 h-10">{description}</p>
-        
-        <button className={`
-            w-full py-3 rounded-xl font-bold text-sm mb-8 transition-all
-            ${recommended 
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg hover:shadow-indigo-500/25' 
-                : 'bg-white/10 text-white hover:bg-white/20'
+            // Determine scroll direction
+            if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+               // Scrolling DOWN
+               setIsVisible(false); // Can be used to hide completely, or just shrink
+            } else {
+               // Scrolling UP
+               setIsVisible(true);
             }
-        `}>
-            {cta}
-        </button>
+            lastScrollY.current = currentScrollY;
+        };
 
-        <div className="space-y-3 flex-1">
-            {features.map((feat, i) => (
-                <div key={i} className="flex items-start gap-3 text-sm text-dim">
-                    <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-                    <span>{feat}</span>
-                </div>
-            ))}
-        </div>
-    </div>
-);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
-const IntegrationsGrid = () => (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 opacity-70">
-        {['Slack', 'GitHub', 'GitLab', 'Discord', 'Figma', 'Notion', 'Google Drive', 'Sentry', 'Zoom', 'Intercom', 'Zendesk', 'HubSpot'].map((tool) => (
-            <div key={tool} className="flex items-center justify-center p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                <span className="text-sm font-medium text-dim">{tool}</span>
-            </div>
-        ))}
-    </div>
-);
-
-const FaqItem = ({ question, answer }: { question: string, answer: string }) => {
-    const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className="border-b border-glass-border">
-            <button 
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-full py-6 flex items-center justify-between text-left hover:text-indigo-400 transition-colors"
+        <>
+            <motion.nav 
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4"
             >
-                <span className="text-lg font-medium text-main">{question}</span>
-                <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
+                <motion.div 
+                    initial={{ width: "100%", maxWidth: "64rem" }} // max-w-5xl
+                    animate={{ 
+                        width: scrolled ? "auto" : "100%", 
+                        maxWidth: scrolled ? "800px" : "1024px",
+                        padding: scrolled ? "8px 24px" : "12px 32px",
+                        y: scrolled ? 10 : 0
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="bg-[#0A0A0F]/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-between shadow-2xl shadow-black/50 overflow-hidden"
+                >
+                    <Link href="/" className="flex items-center gap-2 group shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:border-[#00FFB2]/50 transition-colors">
+                            <span className="text-white font-bold text-xs">M</span>
+                        </div>
+                        <AnimatePresence>
+                            {!scrolled && (
+                                <motion.span 
+                                    initial={{ opacity: 0, width: 0 }}
+                                    animate={{ opacity: 1, width: "auto" }}
+                                    exit={{ opacity: 0, width: 0 }}
+                                    className="text-lg font-bold text-white tracking-tight hidden sm:block whitespace-nowrap overflow-hidden"
+                                >
+                                    MONEY IS BACK
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </Link>
+
+                    {/* Desktop Nav */}
+                    <div className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-400 mx-4">
+                        <Link href="#features" className="hover:text-white transition-colors">Produit</Link>
+                        <Link href="#solutions" className="hover:text-white transition-colors">Solutions</Link>
+                        <Link href="#pricing" className="hover:text-white transition-colors">Tarifs</Link>
+                        <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
+                    </div>
+
+                    {/* Auth / Mobile Toggle */}
+                    <div className="flex items-center gap-3 shrink-0">
+                        {isAuthenticated ? (
+                             <>
+                                <Link 
+                                    href="/dashboard"
+                                    className="hidden md:flex px-4 py-2 rounded-full bg-white/5 text-white text-xs font-bold hover:bg-white/10 border border-white/10 transition-all items-center gap-2"
+                                >   
+                                    <Layout className="w-3 h-3" />
+                                    <AnimatePresence>
+                                        {!scrolled && (
+                                            <motion.span
+                                                initial={{ opacity: 0, width: 0 }}
+                                                animate={{ opacity: 1, width: "auto" }}
+                                                exit={{ opacity: 0, width: 0 }}
+                                                className="overflow-hidden whitespace-nowrap"
+                                            >
+                                                Dashboard
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+                                </Link>
+                                <button onClick={() => logout()} className="hidden md:flex w-8 h-8 rounded-full bg-red-500/10 text-red-400 items-center justify-center hover:bg-red-500/20 transition-colors">
+                                    <LogOut className="w-4 h-4" />
+                                </button>
+                             </>
+                        ) : (
+                            <div className={`hidden md:flex items-center gap-3 ${!scrolled ? "pl-4 border-l border-white/10" : ""}`}>
+                                <Link href="/login" className="text-white text-sm font-medium hover:text-[#00FFB2] transition-colors">
+                                    Connexion
+                                </Link>
+                                <Link 
+                                    href="/register" 
+                                    className="bg-[#00FFB2] text-black px-5 py-2 rounded-full text-xs font-bold hover:bg-[#00e6a0] transition-colors hover:shadow-[0_0_20px_rgba(0,255,178,0.3)]"
+                                >
+                                    Commencer
+                                </Link>
+                            </div>
+                        )}
+
+                        <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        </button>
+                    </div>
+                </motion.div>
+            </motion.nav>
+
+             {/* Mobile Menu Overlay */}
             <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
+                {mobileMenuOpen && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-40 flex flex-col pt-32 px-6 gap-8 md:hidden"
                     >
-                        <p className="pb-6 text-dim leading-relaxed">{answer}</p>
+                        <div className="flex flex-col gap-6 items-center text-center">
+                            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Produit</Link>
+                            <Link href="#solutions" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Solutions</Link>
+                            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Tarifs</Link>
+                            <hr className="w-20 border-white/10" />
+                            {isAuthenticated ? (
+                                <Link href="/dashboard" className="text-xl font-bold text-[#00FFB2]">Accéder au Dashboard</Link>
+                            ) : (
+                                <>
+                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-xl text-zinc-400">Connexion</Link>
+                                    <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-[#00FFB2]">Commencer</Link>
+                                </>
+                            )}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </>
     );
 };
 
-// --- Navbar Components ---
+const ReplaceAllSection = () => {
+    const tools = [
+        { name: 'Trello', icon: Layout },
+        { name: 'Asana', icon: List },
+        { name: 'Monday', icon: Calendar },
+        { name: 'Notion', icon: FileText },
+        { name: 'Slack', icon: MessageSquare },
+        { name: 'Jira', icon: BarChart3 },
+    ];
 
-const MegaMenu = ({ category }: { category: 'product' | 'solutions' }) => {
     return (
-        <div className="absolute top-full left-0 w-[600px] bg-bg-card/95 backdrop-blur-xl border border-glass-border rounded-xl shadow-2xl p-6 grid grid-cols-2 gap-8 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
-            {category === 'product' ? (
-                <>
-                    <div className="space-y-4">
-                        <h4 className="text-xs font-bold text-dim uppercase tracking-wider">Fonctionnalités</h4>
-                        <Link href="#" className="flex items-start gap-3 group/item">
-                            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover/item:bg-indigo-500 group-hover/item:text-white transition-colors">
-                                <List className="w-5 h-5" />
+        <section className="py-24 border-t border-white/5 bg-[#050505] overflow-hidden">
+             <div className="text-center mb-16 px-6">
+                <h2 className="text-3xl font-bold text-white mb-4">Remplacez-les tous</h2>
+                <p className="text-zinc-500 max-w-xl mx-auto">
+                    Ne perdez plus de contexte entre vos outils.
+                </p>
+            </div>
+            
+            <div className="relative flex overflow-hidden">
+                {/* Marquee Container */}
+                <div className="flex gap-16 items-center">
+                    <motion.div 
+                        initial={{ x: 0 }}
+                        animate={{ x: "-50%" }}
+                        transition={{ 
+                            duration: 30, 
+                            repeat: Infinity, 
+                            ease: "linear",
+                            repeatType: "loop"
+                        }}
+                        className="flex gap-16 items-center flex-nowrap pr-16"
+                    >
+                        {/* Render items multiple times to ensure seamless loop */}
+                        {[...tools, ...tools, ...tools, ...tools].map((tool, index) => (
+                            <div key={index} className="flex items-center gap-4 text-2xl font-bold text-zinc-600 opacity-50 hover:opacity-100 transition-opacity whitespace-nowrap">
+                                <tool.icon className="w-8 h-8" />
+                                <span>{tool.name}</span>
                             </div>
-                            <div>
-                                <div className="font-bold text-main group-hover/item:text-indigo-400 transition-colors">Tâches</div>
-                                <div className="text-xs text-dim">Gérez vos projets avec flexibilité</div>
-                            </div>
-                        </Link>
-                        <Link href="#" className="flex items-start gap-3 group/item">
-                            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 group-hover/item:bg-purple-500 group-hover/item:text-white transition-colors">
-                                <FileText className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-main group-hover/item:text-purple-400 transition-colors">Docs</div>
-                                <div className="text-xs text-dim">Wikis et documentation</div>
-                            </div>
-                        </Link>
-                         <Link href="#" className="flex items-start gap-3 group/item">
-                            <div className="p-2 rounded-lg bg-pink-500/10 text-pink-400 group-hover/item:bg-pink-500 group-hover/item:text-white transition-colors">
-                                <Target className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-main group-hover/item:text-pink-400 transition-colors">Objectifs</div>
-                                <div className="text-xs text-dim">Suivez vos OKRs</div>
-                            </div>
-                        </Link>
-                    </div>
-                    <div className="space-y-4">
-                        <h4 className="text-xs font-bold text-dim uppercase tracking-wider">Vues</h4>
-                        <Link href="#" className="flex items-start gap-3 group/item">
-                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 group-hover/item:bg-blue-500 group-hover/item:text-white transition-colors">
-                                <Kanban className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-main group-hover/item:text-blue-400 transition-colors">Board</div>
-                                <div className="text-xs text-dim">Kanban agile</div>
-                            </div>
-                        </Link>
-                        <Link href="#" className="flex items-start gap-3 group/item">
-                            <div className="p-2 rounded-lg bg-green-500/10 text-green-400 group-hover/item:bg-green-500 group-hover/item:text-white transition-colors">
-                                <Calendar className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-main group-hover/item:text-green-400 transition-colors">Calendrier</div>
-                                <div className="text-xs text-dim">Planification visuelle</div>
-                            </div>
-                        </Link>
-                    </div>
-                </>
-            ) : (
-                <>
-                   <div className="space-y-4">
-                        <h4 className="text-xs font-bold text-dim uppercase tracking-wider">Par équipe</h4>
-                        <Link href="#" className="flex items-start gap-3 group/item">
-                            <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400 group-hover/item:bg-orange-500 group-hover/item:text-white transition-colors">
-                                <Layout className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-main group-hover/item:text-orange-400 transition-colors">Marketing</div>
-                                <div className="text-xs text-dim">Campagnes et contenu</div>
-                            </div>
-                        </Link>
-                        <Link href="#" className="flex items-start gap-3 group/item">
-                            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 group-hover/item:bg-cyan-500 group-hover/item:text-white transition-colors">
-                                <Users className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-main group-hover/item:text-cyan-400 transition-colors">Produit</div>
-                                <div className="text-xs text-dim">Roadmap et sprints</div>
-                            </div>
-                        </Link>
-                    </div> 
-                    <div className="space-y-4">
-                        <h4 className="text-xs font-bold text-dim uppercase tracking-wider">Par besoin</h4>
-                        <Link href="#" className="flex items-start gap-3 group/item">
-                            <div className="p-2 rounded-lg bg-red-500/10 text-red-400 group-hover/item:bg-red-500 group-hover/item:text-white transition-colors">
-                                <Briefcase className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-main group-hover/item:text-red-400 transition-colors">Gestion de projet</div>
-                                <div className="text-xs text-dim">Pour toutes les échelles</div>
-                            </div>
-                        </Link>
-                    </div>
-                </>
-            )}
-        </div>
+                        ))}
+                    </motion.div>
+                </div>
+                
+                 {/* Fade edges */}
+                <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
+                <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
+            </div>
+        </section>
     );
 };
 
-// --- Main Page Component ---
+const Hero = () => {
+    return (
+        <section className="relative min-h-[100vh] flex flex-col items-center justify-center pt-32 px-6 overflow-hidden">
+            {/* Background Effects */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[500px] bg-[#00FFB2] opacity-[0.03] blur-[150px] rounded-full pointer-events-none" />
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay pointer-events-none"></div>
 
-export default function HomePage() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [activeTab, setActiveTab] = useState('tasks');
-  const [email, setEmail] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { scrollYProgress } = useScroll();
-  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const { isAuthenticated, user, logout } = useAuthStore();
-  const router = useRouter();
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const features = {
-    tasks: {
-      title: "Gestion de tâches",
-      desc: "Des listes à faire aux projets complexes, gérez tout avec précision.",
-      icon: Layout,
-      content: <MockDashboard viewType="list" />
-    },
-    docs: {
-      title: "Documents",
-      desc: "Wikis, notes de réunion et docs de spécification, tout au même endroit.",
-      icon: FileText,
-      content: (
-        <div className="w-full h-full bg-bg-primary p-8 rounded-xl border border-glass-border shadow-2xl relative overflow-hidden">
-             <div className="max-w-2xl mx-auto space-y-6">
-                <div className="h-8 w-3/4 bg-gray-800 rounded-lg animate-pulse" />
-                <div className="space-y-3">
-                  <div className="h-4 w-full bg-gray-800/50 rounded animate-pulse" />
-                  <div className="h-4 w-full bg-gray-800/50 rounded animate-pulse" />
-                  <div className="h-4 w-2/3 bg-gray-800/50 rounded animate-pulse" />
-                </div>
-                <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-                    <div className="flex items-center gap-2 text-indigo-400 text-sm font-medium mb-2">
-                        <Zap className="w-4 h-4" />
-                        <span>Suggestion AI</span>
-                    </div>
-                </div>
-             </div>
-        </div>
-      )
-    },
-    chat: {
-      title: "Chat",
-      desc: "Remplacez Slack. Discutez directement dans le contexte de vos tâches.",
-      icon: MessageSquare,
-      content: <MockDashboard viewType="board" />
-    },
-    views: {
-        title: "Vues multiples",
-        desc: "Kanban, Gantt, Calendrier. Visualisez le travail à votre façon.",
-        icon: Kanban,
-        content: <MockDashboard viewType="gantt" />
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-bg-primary selection:bg-indigo-500/30 selection:text-white font-sans text-main">
-      
-      {/* --- Navbar --- */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-bg-primary/80 backdrop-blur-xl border-b border-glass-border py-4 shadow-lg shadow-black/5' : 'bg-transparent py-6'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-200">
-                <span className="text-white font-bold text-sm">MB</span>
-              </div>
-              <span className="text-lg font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-indigo-300 transition-all">MONEY IS BACK</span>
-            </Link>
-
-            <div className="hidden md:flex items-center gap-6 text-sm font-medium text-dim">
-              <div className="relative group cursor-pointer h-full flex items-center">
-                  <span className="flex items-center gap-1 hover:text-indigo-400 transition-colors py-2">
-                       Produit <ChevronDown className="w-3 h-3 group-hover:rotate-180 transition-transform duration-300"/>
-                  </span>
-                  <MegaMenu category="product" />
-              </div>
-              
-              <div className="relative group cursor-pointer h-full flex items-center">
-                  <span className="flex items-center gap-1 hover:text-indigo-400 transition-colors py-2">
-                       Solutions <ChevronDown className="w-3 h-3 group-hover:rotate-180 transition-transform duration-300"/>
-                  </span>
-                  <MegaMenu category="solutions" />
-              </div>
-
-              <Link href="#pricing" className="hover:text-indigo-400 transition-colors py-2">Tarifs</Link>
-              <Link href="#faq" className="hover:text-indigo-400 transition-colors py-2">FAQ</Link>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-             <div className="hidden md:flex items-center gap-4">
-                {isAuthenticated ? (
-                    <>
-                        <Link 
-                            href="/dashboard"
-                            className="px-4 py-2 rounded-lg bg-white text-indigo-950 text-sm font-bold hover:bg-gray-100 shadow-md transition-all transform hover:scale-105 flex items-center gap-2"
-                        >   
-                            <Layout className="w-4 h-4" />
-                            Dashboard
-                        </Link>
-                        <div className="h-8 w-[1px] bg-glass-border mx-2"></div>
-                        <div className="flex items-center gap-3 cursor-pointer group relative">
-                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-transparent group-hover:ring-indigo-500/50 transition-all">
-                                {user?.firstName?.charAt(0) || <UserIcon className="w-5 h-5"/>}
-                             </div>
-                             {/* User Dropdown */}
-                             <div className="absolute top-full right-0 mt-2 w-48 bg-bg-card border border-glass-border rounded-xl shadow-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-1">
-                                <Link href="/settings" className="flex items-center gap-2 px-3 py-2 text-sm text-dim hover:bg-glass-hover hover:text-white rounded-lg transition-colors">
-                                    <Settings className="w-4 h-4" /> Paramètres
-                                </Link>
-                                <button 
-                                    onClick={() => {
-                                        logout();
-                                        router.push('/');
-                                    }} 
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-colors text-left"
-                                >
-                                    <LogOut className="w-4 h-4" /> Déconnexion
-                                </button>
-                             </div>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <Link href="/login" className="text-sm font-semibold text-white/80 hover:bg-white/5 px-4 py-2 rounded-lg transition-colors">
-                        Connexion
-                        </Link>
-                        <Link 
-                        href="/register" 
-                        className="px-4 py-2 rounded-lg bg-pink-600 text-white text-sm font-bold hover:bg-pink-700 shadow-lg shadow-pink-500/25 transition-all transform hover:scale-105"
-                        >
-                        S&apos;inscrire
-                        </Link>
-                    </>
-                )}
-             </div>
-             
-             <button 
-                className="md:hidden text-white"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-             >
-                {mobileMenuOpen ? <X /> : <Menu />}
-             </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-            {mobileMenuOpen && (
-                <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="md:hidden bg-bg-card border-b border-glass-border overflow-hidden"
+            {/* Content */}
+            <div className="relative z-10 text-center max-w-5xl mx-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-mono text-[#00FFB2] tracking-widest uppercase mb-8"
                 >
-                    <div className="px-6 py-4 flex flex-col gap-4">
-                        <Link href="#features" className="text-dim hover:text-white font-medium">Produit</Link>
-                        <Link href="#integrations" className="text-dim hover:text-white font-medium">Solutions</Link>
-                        <Link href="#pricing" className="text-dim hover:text-white font-medium">Tarifs</Link>
-                        <hr className="border-glass-border" />
-                        
-                        {isAuthenticated ? (
-                            <>
-                                <Link href="/dashboard" className="text-white font-bold text-lg flex items-center gap-2">
-                                    <Layout className="w-5 h-5" /> Accéder au Dashboard
-                                </Link>
-                                <button onClick={() => logout()} className="text-red-400 font-medium flex items-center gap-2">
-                                    <LogOut className="w-5 h-5" /> Se déconnecter
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <Link href="/login" className="text-white font-semibold">Connexion</Link>
-                                <Link href="/register" className="text-indigo-400 font-bold">S&apos;inscrire pour 0€</Link>
-                            </>
-                        )}
-                    </div>
+                    <span className="w-2 h-2 rounded-full bg-[#00FFB2] animate-pulse shadow-[0_0_10px_#00FFB2]" />
+                    V2.0 Mainnet Live
                 </motion.div>
-            )}
-        </AnimatePresence>
-      </nav>
 
-      {/* --- Legend Hero Section --- */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden">
-        {/* Abstract Background Blurs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] -z-10 opacity-50" />
-        <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] -z-10" />
+                <motion.h1 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className="text-6xl md:text-8xl font-medium tracking-tight text-white mb-8 leading-[0.9]"
+                >
+                    Une seule app <br/>
+                    <span className="text-zinc-500">pour tout remplacer.</span>
+                </motion.h1>
 
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wide mb-8 hover:bg-indigo-500/20 transition-colors cursor-pointer"
-            >
-                <Kanban className="w-3 h-3" />
-                V2.0 est maintenant disponible
-                <ChevronRight className="w-3 h-3" />
-            </motion.div>
+                <motion.p 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-12 font-light"
+                >
+                    Retrouvez vos Tâches, Docs, Chat, Objectifs, et bien plus encore sur une seule plateforme unifiée. L'OS de votre réussite.
+                </motion.p>
 
-            <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tight mb-6 leading-[1.1]"
-            >
-                Une seule app<br />
-                <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    pour tout remplacer
-                </span>
-            </motion.h1>
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.6 }}
+                    className="flex flex-col sm:flex-row items-center justify-center gap-6"
+                >
+                    <Link 
+                        href="/register" 
+                        className="px-10 py-4 rounded-full bg-[#00FFB2] text-black font-bold text-sm tracking-wide hover:shadow-[0_0_40px_rgba(0,255,178,0.4)] transition-all hover:scale-105"
+                    >
+                        COMMENCER GRATUITEMENT
+                    </Link>
+                    <button className="px-10 py-4 rounded-full border border-white/10 text-white font-medium text-sm hover:bg-white/5 transition-colors flex items-center gap-2 group">
+                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                            <span className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
+                        </span>
+                        Voir la démo
+                    </button>
+                </motion.div>
+            </div>
 
-            <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-lg md:text-2xl text-dim max-w-3xl mx-auto mb-10 leading-relaxed font-light"
-            >
-                Retrouvez vos Tâches, Docs, Chat, Objectifs, et bien plus encore sur une seule plateforme unifiée. MONEY IS BACK est <span className="text-white font-medium">l&apos;OS de votre réussite</span>.
-            </motion.p>
-
+            {/* Dashboard Mockup - Floating & Glass */}
             <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto mb-16"
+                initial={{ opacity: 0, y: 100, rotateX: 20 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ duration: 1, delay: 0.8, type: "spring" }}
+                style={{ perspective: "1000px" }}
+                className="mt-20 relative w-full max-w-6xl mx-auto"
             >
-                <div className="flex-1 w-full relative">
-                    <input 
-                        type="email" 
-                        placeholder="Votre email professionnel" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full h-14 pl-5 pr-4 rounded-xl bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 text-lg shadow-xl"
-                    />
-                </div>
-                <button className="w-full sm:w-auto h-14 px-8 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg hover:from-indigo-500 hover:to-purple-500 shadow-xl shadow-indigo-600/30 active:scale-95 transition-all text-nowrap">
-                    C&apos;est parti
-                </button>
-            </motion.div>
-            
-            <motion.div
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 transition={{ delay: 0.5, duration: 1 }}
-                 className="flex flex-col items-center justify-center gap-4 py-8"
-            >   
-                <p className="text-xs uppercase tracking-widest text-dim font-bold">Ils nous font confiance</p>
-                <div className="flex flex-wrap justify-center gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                    {/* Placeholder logos - replace with real SVGs if available */}
-                    <div className="flex items-center gap-2 font-bold text-lg"><Globe className="w-5 h-5"/> GlobalCorp</div>
-                    <div className="flex items-center gap-2 font-bold text-lg"><Zap className="w-5 h-5"/> FlashInc</div>
-                    <div className="flex items-center gap-2 font-bold text-lg"><Shield className="w-5 h-5"/> SecureNet</div>
-                    <div className="flex items-center gap-2 font-bold text-lg"><Target className="w-5 h-5"/> AimHigh</div>
-                </div>
-            </motion.div>
-        </div>
-      </section>
-
-      {/* --- Marquee Section (App Replacement) --- */}
-      <section id="integrations" className="py-12 border-y border-glass-border bg-bg-card/30 overflow-hidden">
-         <div className="max-w-7xl mx-auto px-6 text-center mb-10">
-             <h2 className="text-2xl font-bold text-main">Remplacez-les tous</h2>
-             <p className="text-dim">Ne perdez plus de contexte entre vos outils.</p>
-         </div>
-         <div className="relative flex overflow-x-hidden group">
-            <motion.div 
-                animate={{ x: "-50%" }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="flex gap-12 whitespace-nowrap py-4 px-6 group-hover:[animation-play-state:paused]"
-            >
-                {[...Array(2)].map((_, i) => (
-                    <div key={i} className="flex gap-12 text-2xl font-bold text-dim items-center">
-                        <span className="flex items-center gap-2"><Layout className="w-6 h-6"/> Trello</span>
-                        <span className="flex items-center gap-2"><List className="w-6 h-6"/> Asana</span>
-                        <span className="flex items-center gap-2"><Calendar className="w-6 h-6"/> Monday</span>
-                        <span className="flex items-center gap-2"><FileText className="w-6 h-6"/> Notion</span>
-                        <span className="flex items-center gap-2"><MessageSquare className="w-6 h-6"/> Slack</span>
-                        <span className="flex items-center gap-2"><BarChart3 className="w-6 h-6"/> Jira</span>
-                         <span className="flex items-center gap-2"><Layout className="w-6 h-6"/> Trello</span>
-                        <span className="flex items-center gap-2"><List className="w-6 h-6"/> Asana</span>
-                        <span className="flex items-center gap-2"><Calendar className="w-6 h-6"/> Monday</span>
-                        <span className="flex items-center gap-2"><FileText className="w-6 h-6"/> Notion</span>
-                        <span className="flex items-center gap-2"><MessageSquare className="w-6 h-6"/> Slack</span>
-                        <span className="flex items-center gap-2"><BarChart3 className="w-6 h-6"/> Jira</span>
-                    </div>
-                ))}
-            </motion.div>
-         </div>
-      </section>
-
-      {/* --- Feature Tabs (Core Product) --- */}
-      <section id="features" className="py-24 px-6 relative z-10">
-         <div className="max-w-7xl mx-auto">
-             <div className="text-center mb-16">
-                 <h2 className="text-4xl md:text-5xl font-bold mb-4">Tout votre travail en un seul endroit</h2>
-                 <p className="text-xl text-dim">Pourquoi payer pour 5 outils quand une seule plateforme suffit ?</p>
-             </div>
-
-             <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
-                 {/* Left: Navigation Tabs */}
-                 <div className="w-full lg:w-1/3 space-y-4">
-                     {Object.entries(features).map(([key, feature]) => {
-                         const isActive = activeTab === key;
-                         const Icon = feature.icon;
-                         return (
-                            <div 
-                                key={key}
-                                onClick={() => setActiveTab(key)}
-                                className={`
-                                    group p-6 rounded-2xl cursor-pointer transition-all duration-300 border
-                                    ${isActive 
-                                        ? 'bg-glass-hover border-indigo-500/30 shadow-lg shadow-indigo-500/5' 
-                                        : 'bg-transparent border-transparent hover:bg-glass-hover/50 hover:border-glass-border'
-                                    }
-                                `}
-                            >
-                                <div className="flex items-center gap-4 mb-3">
-                                    <div className={`
-                                        w-12 h-12 rounded-xl flex items-center justify-center transition-colors
-                                        ${isActive ? 'bg-indigo-500/20 text-indigo-400' : 'bg-bg-card border border-glass-border text-dim'}
-                                    `}>
-                                        <Icon className="w-6 h-6" />
-                                    </div>
-                                    <h3 className={`text-xl font-bold ${isActive ? 'text-white' : 'text-dim'}`}>
-                                        {feature.title}
-                                    </h3>
-                                </div>
-                                <p className={`text-dim leading-relaxed ${isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`}>
-                                    {feature.desc}
-                                </p>
-                            </div>
-                         );
-                     })}
-                 </div>
-
-                 {/* Right: Visual Display */}
-                 <div className="w-full lg:w-2/3 h-[500px] md:h-[600px] relative">
-                     <AnimatePresence mode='wait'>
-                         <motion.div
-                            key={activeTab}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.3 }}
-                            className="absolute inset-0"
-                         >
-                            <div className="w-full h-full rounded-2xl border border-glass-border bg-gradient-to-br from-bg-card to-bg-secondary p-4 md:p-8 shadow-2xl overflow-hidden flex items-center justify-center">
-                                {(features as any)[activeTab].content}
-                            </div>
-                         </motion.div>
-                     </AnimatePresence>
-                 </div>
-             </div>
-         </div>
-      </section>
-
-      {/* --- Bento Grid Benefits --- */}
-      <section className="py-24 px-6 bg-gradient-to-b from-bg-primary via-bg-secondary to-bg-primary">
-        <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-auto">
-                <div className="md:col-span-2 glass-card p-12 relative overflow-hidden group">
-                     {/* Background Glow */}
-                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] group-hover:bg-indigo-500/20 transition-all duration-700" />
-                    
-                    <div className="relative z-10 flex flex-col justify-between h-full min-h-[300px]">
-                        <div>
-                            <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-600/30">
-                                <Zap className="w-7 h-7" />
-                            </div>
-                            <h3 className="text-3xl font-bold text-main mb-4">Automatisez 80% de votre routine</h3>
-                            <p className="text-xl text-dim max-w-md">Moins de clics, plus d'impact. Laissez MONEY IS BACK gérer les tâches répétitives.</p>
+                <div className="relative rounded-xl overflow-hidden border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.5)] bg-[#0A0A0F]/80 backdrop-blur-xl">
+                    {/* Fake Browser UI */}
+                    <div className="h-10 border-b border-white/5 flex items-center px-4 gap-2 bg-black/40">
+                        <div className="flex gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-500/20 text-red-500 border border-transparent" />
+                            <div className="w-3 h-3 rounded-full bg-yellow-500/20 text-yellow-500 border border-transparent" />
+                            <div className="w-3 h-3 rounded-full bg-green-500/20 text-green-500 border border-transparent" />
                         </div>
-                         <div className="mt-8 flex items-center gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
-                            <div className="px-4 py-2 bg-gray-800 rounded-lg text-xs font-mono border border-glass-border">IF Status is Done</div>
-                            <div className="w-8 h-[2px] bg-gray-600" />
-                            <div className="px-4 py-2 bg-indigo-900/50 border border-indigo-500/30 text-indigo-300 rounded-lg text-xs font-mono">THEN Close Task</div>
+                        <div className="mx-auto w-[40%] h-5 bg-white/5 rounded-md text-[10px] flex items-center justify-center text-zinc-600">
+                            moneyisback.app
+                        </div>
+                    </div>
+                    {/* Content Preview */}
+                    <div className="p-8 grid grid-cols-12 gap-8 h-[500px] md:h-[600px] overflow-hidden relative">
+                         {/* Sidebar */}
+                         <div className="col-span-2 hidden md:flex flex-col gap-4 border-r border-white/5 pr-4">
+                             <div className="h-8 w-8 bg-[#00FFB2] rounded-lg mb-6" />
+                             {[...Array(6)].map((_, i) => (
+                                 <div key={i} className="h-2 w-2/3 bg-white/10 rounded-full" />
+                             ))}
+                             <div className="mt-auto h-20 bg-white/5 rounded-xl border border-white/5" />
+                         </div>
+                         {/* Main */}
+                         <div className="col-span-12 md:col-span-10 flex flex-col gap-6">
+                             {/* Header */}
+                             <div className="flex justify-between items-center">
+                                 <div className="space-y-2">
+                                     <div className="h-8 w-64 bg-white/10 rounded-lg" />
+                                     <div className="h-4 w-96 bg-white/5 rounded-lg" />
+                                 </div>
+                                 <div className="flex gap-2">
+                                     <div className="h-8 w-24 bg-[#00FFB2]/20 rounded-lg border border-[#00FFB2]/30" />
+                                     <div className="h-8 w-8 bg-white/10 rounded-lg" />
+                                 </div>
+                             </div>
+                             {/* Cards Grid */}
+                             <div className="grid grid-cols-3 gap-6">
+                                 {[...Array(3)].map((_, i) => (
+                                     <div key={i} className="h-32 bg-white/5 rounded-xl border border-white/5 p-4 space-y-3 relative overflow-hidden group">
+                                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                         <div className="h-8 w-8 bg-white/10 rounded-full" />
+                                         <div className="h-4 w-3/4 bg-white/10 rounded-full" />
+                                         <div className="h-2 w-1/2 bg-white/5 rounded-full" />
+                                     </div>
+                                 ))}
+                             </div>
+                             {/* List */}
+                             <div className="flex-1 bg-white/5 rounded-xl border border-white/5 p-6 space-y-4">
+                                  {[...Array(5)].map((_, i) => (
+                                     <div key={i} className="flex items-center gap-4 py-2 border-b border-white/5 last:border-0">
+                                         <div className="w-4 h-4 rounded border border-white/20" />
+                                         <div className="h-4 w-1/3 bg-white/10 rounded-full" />
+                                         <div className="ml-auto h-4 w-16 bg-[#00FFB2]/20 text-[#00FFB2] rounded-full text-[10px] flex items-center justify-center font-mono">
+                                             ACTIVE
+                                         </div>
+                                     </div>
+                                 ))}
+                             </div>
+                         </div>
+                         
+                         {/* Floating Elements */}
+                         <motion.div 
+                             animate={{ y: [0, -20, 0] }} 
+                             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                             className="absolute top-20 right-20 w-64 p-4 bg-[#050505] border border-white/10 rounded-xl shadow-2xl z-20 pointer-events-none"
+                         >
+                             <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                                     <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                 </div>
+                                 <div>
+                                     <div className="text-white text-sm font-bold">Tâche terminée</div>
+                                     <div className="text-zinc-500 text-xs">Il y a 2 min</div>
+                                 </div>
+                             </div>
+                         </motion.div>
+                    </div>
+                </div>
+            </motion.div>
+        </section>
+    );
+};
+
+
+const FeatureCard = ({ title, desc, icon: Icon, delay = 0 }: { title: string, desc: string, icon: any, delay?: number }) => (
+    <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay }}
+        className="group relative p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-[#00FFB2]/30 hover:bg-white/[0.04] transition-all duration-300"
+    >
+        <div className="absolute inset-0 bg-gradient-to-br from-[#00FFB2]/5 to-transparent opacity-0 group-hover:opacity-100 transition-all rounded-3xl" />
+        <div className="relative z-10">
+            <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Icon className="w-6 h-6 text-zinc-400 group-hover:text-[#00FFB2] transition-colors" />
+            </div>
+            <h3 className="text-xl font-medium text-white mb-3">{title}</h3>
+            <p className="text-zinc-500 leading-relaxed text-sm font-light">{desc}</p>
+        </div>
+    </motion.div>
+);
+
+const BentoGrid = () => {
+    return (
+        <section id="features" className="py-32 px-6 bg-[#050505] relative z-20">
+            <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-24 max-w-3xl mx-auto">
+                    <h2 className="text-4xl md:text-5xl font-medium text-white mb-6">Tout ce dont vous avez besoin.</h2>
+                    <p className="text-zinc-400 font-light">
+                        Nous avons déconstruit le chaos du travail moderne pour en faire un système fluide et intégré.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Large Card */}
+                    <div className="md:col-span-2 relative h-[400px] rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden group">
+                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10" />
+                         <img src="https://images.unsplash.com/photo-1614028674026-a65e31bfd27c?q=80&w=2670&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Feature" />
+                         <div className="absolute bottom-0 left-0 p-10 z-20 max-w-lg">
+                             <div className="text-[#00FFB2] font-mono text-xs mb-2">INTELLIGENCE</div>
+                             <h3 className="text-3xl font-medium text-white mb-2">Automatisations Natives</h3>
+                             <p className="text-zinc-400 font-light">Créez des workflows complexes sans une seule ligne de code. Si X alors Y, instantanément.</p>
                          </div>
                     </div>
-                </div>
 
-                <div className="md:col-span-1 glass-card p-8 flex flex-col justify-center text-center">
-                    <div className="w-full h-40 bg-bg-primary rounded-xl border border-glass-border mb-6 flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20" />
-                        <Clock className="w-12 h-12 text-white relative z-10" />
+                    {/* Tall Card */}
+                    <div className="md:row-span-2 rounded-3xl bg-white/[0.02] border border-white/5 p-8 flex flex-col items-center text-center group hover:border-[#00FFB2]/20 transition-colors">
+                        <div className="w-full h-48 bg-gradient-to-tr from-[#00FFB2]/20 to-purple-500/20 rounded-2xl mb-8 flex items-center justify-center relative overflow-hidden">
+                             <div className="absolute inset-0 bg-grid-white/[0.05]" />
+                             <Cpu className="w-16 h-16 text-white relative z-10" />
+                        </div>
+                        <h3 className="text-2xl font-medium text-white mb-4">Moteur Rapide</h3>
+                        <p className="text-zinc-500 font-light text-sm">Construit sur une architecture Rust pour une latence proche de zéro. Vos clics sont instantanés.</p>
                     </div>
-                    <h3 className="text-xl font-bold text-main mb-2">Suivi du temps</h3>
-                    <p className="text-dim text-sm">Intégré nativement. Plus besoin d'outil tiers.</p>
+
+                    {/* Small Cards */}
+                    <FeatureCard 
+                        title="Temps Réel" 
+                        desc="Collaboration multijoueur sur tous les documents et tâches." 
+                        icon={Users}
+                        delay={0.1}
+                    />
+                    <FeatureCard 
+                        title="Sécurité Bank-Grade" 
+                        desc="Chiffrement AES-256 et conformité SOC2 Type II." 
+                        icon={Shield}
+                        delay={0.2}
+                    />
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const Pricing = () => {
+    return (
+        <section id="pricing" className="py-32 px-6 bg-[#050505] relative border-t border-white/5">
+            <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-20">
+                    <h2 className="text-4xl font-medium text-white mb-4">Plans Flexibles</h2>
+                    <p className="text-zinc-400">Commencez petit, grandissez vite.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    {/* Basic */}
+                    <div className="p-10 rounded-3xl border border-white/5 bg-transparent hover:bg-white/[0.02] transition-colors">
+                        <h3 className="text-xl font-medium text-white mb-2">Starter</h3>
+                        <div className="text-4xl font-medium text-white mb-6">$0<span className="text-zinc-500 text-lg">/mo</span></div>
+                        <p className="text-zinc-400 text-sm mb-8">Pour les individus et side-projects.</p>
+                        <button className="w-full py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors text-sm font-medium">Commencer</button>
+                        <div className="mt-8 space-y-4">
+                            {['Projets illimités', '100MB Stockage', 'Support communautaire'].map(f => (
+                                <div key={f} className="flex items-center gap-3 text-zinc-500 text-sm"><CheckCircle2 className="w-4 h-4 text-zinc-600"/> {f}</div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Pro */}
+                    <div className="relative p-10 rounded-3xl border border-[#00FFB2]/20 bg-white/[0.02] shadow-[0_0_50px_rgba(0,255,178,0.05)] transform md:-translate-y-4">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-[#00FFB2] text-black text-[10px] font-bold uppercase tracking-widest rounded-full">Populaire</div>
+                        <h3 className="text-xl font-medium text-white mb-2">Pro</h3>
+                        <div className="text-4xl font-medium text-white mb-6">$12<span className="text-zinc-500 text-lg">/mo</span></div>
+                        <p className="text-zinc-400 text-sm mb-8">Pour les équipes en croissance.</p>
+                        <button className="w-full py-3 rounded-xl bg-[#00FFB2] text-black hover:bg-[#00e6a0] transition-colors text-sm font-bold">Essayer Pro</button>
+                        <div className="mt-8 space-y-4">
+                            {['Tout du plan Starter', 'Stockage Illimité', 'Analytiques Avancées', 'Support Prioritaire'].map(f => (
+                                <div key={f} className="flex items-center gap-3 text-zinc-300 text-sm"><CheckCircle2 className="w-4 h-4 text-[#00FFB2]"/> {f}</div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Enterprise */}
+                    <div className="p-10 rounded-3xl border border-white/5 bg-transparent hover:bg-white/[0.02] transition-colors">
+                        <h3 className="text-xl font-medium text-white mb-2">Enterprise</h3>
+                        <div className="text-4xl font-medium text-white mb-6">Custom</div>
+                        <p className="text-zinc-400 text-sm mb-8">Sécurité et contrôle total.</p>
+                        <button className="w-full py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors text-sm font-medium">Contacter</button>
+                        <div className="mt-8 space-y-4">
+                            {['SSO SAML', 'Audit Logs', 'Manager Dédié', 'SLA 99.99%'].map(f => (
+                                <div key={f} className="flex items-center gap-3 text-zinc-500 text-sm"><CheckCircle2 className="w-4 h-4 text-zinc-600"/> {f}</div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const Footer = () => (
+    <footer className="py-20 px-6 border-t border-white/5 bg-[#050505] text-zinc-500 text-sm">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-10">
+            <div>
+                <div className="flex items-center gap-2 mb-6">
+                    <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center">
+                        <span className="text-white font-bold text-[10px]">M</span>
+                    </div>
+                    <span className="text-white font-bold">MONEY IS BACK</span>
+                </div>
+                <p className="max-w-xs">Le futur du travail est ici. Rejoignez le mouvement.</p>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
+                <div>
+                    <h4 className="text-white font-medium mb-4">Produit</h4>
+                    <ul className="space-y-2">
+                        <li><a href="#" className="hover:text-[#00FFB2]">Features</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2]">Changelog</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2]">Docs</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 className="text-white font-medium mb-4">Société</h4>
+                    <ul className="space-y-2">
+                        <li><a href="#" className="hover:text-[#00FFB2]">À propos</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2]">Carrières</a></li>
+                        <li><a href="#" className="hover:text-[#00FFB2]">Légal</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-      </section>
+    </footer>
+);
 
-      {/* --- Pricing Section --- */}
-      <section id="pricing" className="py-24 px-6 relative">
-          <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-16">
-                  <h2 className="text-4xl md:text-5xl font-bold mb-4">Un prix simple pour tout le monde</h2>
-                  <p className="text-xl text-dim">Commencez gratuitement, évoluez quand vous voulez.</p>
-              </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <PricingCard 
-                    plan="Free Forever" 
-                    price="Gratuit" 
-                    description="Pour usage personnel et hobbies." 
-                    cta="C'est parti"
-                    features={['100MB Stockage', 'Tâches illimitées', 'Membres illimités', 'Auth 2FA']}
-                />
-                 <PricingCard 
-                    plan="Unlimited" 
-                    price="7€" 
-                    description="Pour les petites équipes agiles." 
-                    cta="Essayer gratuitement"
-                    features={['Stockage illimité', 'Intégrations illimitées', 'Dashboards', 'Invités', 'Champs personnalisés']}
-                />
-                 <PricingCard 
-                    plan="Business" 
-                    price="12€" 
-                    description="Pour les équipes en croissance." 
-                    recommended={true}
-                    cta="Essayer gratuitement"
-                    features={['Tout de Unlimited', 'Google SSO', 'Equipes privées', 'Export personnalisé', 'Automatisations avancées']}
-                />
-                 <PricingCard 
-                    plan="Enterprise" 
-                    price="Sur mesure" 
-                    description="Sécurité et contrôle total." 
-                    cta="Contacter"
-                    features={['Single Sign-On (SSO)', 'Contrat entreprise', 'Manager dédié', 'Formation sur site']}
-                />
-              </div>
-          </div>
-      </section>
-
-      {/* --- FAQ Section --- */}
-      <section id="faq" className="py-24 px-6 bg-glass-card/50">
-          <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12">Questions fréquentes</h2>
-              <div className="space-y-4">
-                  <FaqItem question="Est-ce vraiment gratuit ?" answer="Oui ! Notre plan Free Forever est réellement gratuit pour toujours. Il inclut des tâches illimitées et des membres illimités, avec une limite de stockage de 100MB." />
-                  <FaqItem question="Puis-je importer mes données ?" answer="Absolument. Nous proposons un importateur universel qui fonctionne avec Trello, Asana, Monday, Jira, et bien d'autres fichiers CSV." />
-                  <FaqItem question="Est-ce sécurisé ?" answer="La sécurité est notre priorité. Toutes vos données sont chiffrées en transit et au repos. Nous sommes conformes GDPR et SOC2." />
-                  <FaqItem question="Puis-je changer de plan plus tard ?" answer="Bien sûr. Vous pouvez upgrader ou downgrader votre plan à tout moment depuis vos paramètres d'administration." />
-              </div>
-          </div>
-      </section>
-
-      {/* --- Final CTA Footer --- */}
-      <section className="py-24 px-6">
-        <div className="max-w-5xl mx-auto text-center">
-            <div className="relative glass-card p-16 md:p-24 overflow-hidden">
-                {/* Background Gradients */}
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2" />
-                
-                <h2 className="text-4xl md:text-6xl font-black text-white mb-8 relative z-10">
-                    Prêt à reprendre le contrôle ?
-                </h2>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-                    <Link href="/register" className="px-10 py-5 rounded-2xl bg-white text-indigo-900 font-bold text-xl hover:bg-gray-100 transition-colors shadow-xl">
-                        Commencer gratuitement
-                    </Link>
-                </div>
-                <div className="mt-8 flex justify-center gap-6 text-sm text-dim relative z-10">
-                    <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Pas de carte requise</span>
-                    <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Support 24/7</span>
-                </div>
-            </div>
-        </div>
-      </section>
-
-      {/* --- Footer Links --- */}
-      <footer className="border-t border-glass-border bg-bg-secondary pt-20 pb-10 px-6">
-          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10 mb-16">
-              <div className="col-span-2 lg:col-span-1">
-                 <div className="flex items-center gap-2 mb-6">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">MB</div>
-                    <span className="text-lg font-bold text-white">MONEY IS BACK</span>
-                 </div>
-                 <p className="text-dim text-sm mb-6">
-                    L'alternative tout-en-un à Jira, Trello et Slack.
-                 </p>
-                 <div className="flex gap-4">
-                     <Link href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"><Globe className="w-4 h-4 text-white"/></Link>
-                     <Link href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"><Smartphone className="w-4 h-4 text-white"/></Link>
-                 </div>
-              </div>
-              
-              <div>
-                  <h4 className="font-bold text-white mb-6">Produit</h4>
-                  <ul className="space-y-3 text-dim text-sm">
-                      <li><a href="#" className="hover:text-indigo-400">Fonctionnalités</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">Intégrations</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">Pour les startups</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">Pour les entreprises</a></li>
-                  </ul>
-              </div>
-               <div>
-                  <h4 className="font-bold text-white mb-6">Ressources</h4>
-                  <ul className="space-y-3 text-dim text-sm">
-                      <li><a href="#" className="hover:text-indigo-400">Blog</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">Communauté</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">Centre d&apos;aide</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">API</a></li>
-                  </ul>
-              </div>
-               <div>
-                  <h4 className="font-bold text-white mb-6">Comparer</h4>
-                  <ul className="space-y-3 text-dim text-sm">
-                      <li><a href="#" className="hover:text-indigo-400">Versus Trello</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">Versus Asana</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">Versus Monday</a></li>
-                      <li><a href="#" className="hover:text-indigo-400">Versus Jira</a></li>
-                  </ul>
-              </div>
-          </div>
-          <div className="max-w-7xl mx-auto border-t border-glass-border pt-8 flex flex-col md:flex-row items-center justify-between text-dim text-xs">
-              <p>&copy; 2026 Money Is Back Inc. All rights reserved.</p>
-              <div className="flex gap-6 mt-4 md:mt-0">
-                  <a href="#" className="hover:text-white">Confidentialité</a>
-                  <a href="#" className="hover:text-white">Conditions</a>
-                  <a href="#" className="hover:text-white">Sécurité</a>
-              </div>
-          </div>
-      </footer>
-
-    </div>
+export default function HomePage() {
+  return (
+    <main className="bg-[#050505] min-h-screen text-white font-sans selection:bg-[#00FFB2] selection:text-black">
+        <Navbar />
+        <Hero />
+        <ReplaceAllSection />
+        <BentoGrid />
+        <Pricing />
+        <Footer />
+    </main>
   );
 }

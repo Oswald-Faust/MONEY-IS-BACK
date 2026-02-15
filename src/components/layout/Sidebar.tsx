@@ -44,21 +44,7 @@ const secondaryNavItems = [
 
 import Image from 'next/image';
 
-interface PartialProject {
-  _id: string;
-  name: string;
-  color: string;
-  href?: string;
-}
 
-// Demo data for fallback
-const demoProjects: PartialProject[] = [
-  { _id: '1', name: 'FINEA', color: '#22c55e' },
-  { _id: '2', name: 'BUISPACE', color: '#f97316' },
-  { _id: '3', name: 'AFFI', color: '#ef4444' },
-  { _id: '4', name: 'MATHIAS', color: '#94a3b8' },
-  { _id: '5', name: 'AGBK', color: '#8b5cf6' },
-];
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -194,7 +180,7 @@ export default function Sidebar() {
         </div>
 
         {/* Projects Section */}
-        {(!sidebarCollapsed || isMobile) && (
+        {(!sidebarCollapsed || isMobile) && projects.length > 0 && (
           <div className="mt-6">
             <div className="flex items-center justify-between px-3 mb-2">
               <button
@@ -229,7 +215,7 @@ export default function Sidebar() {
                   className="overflow-hidden"
                 >
                   <div className="space-y-1">
-                    {(projects.length > 0 ? projects : demoProjects).map((project) => (
+                    {projects.map((project) => (
                       <Link key={project._id} href={`/projects/${project._id}`}>
                         <motion.div
                           whileHover={{ x: 4 }}
