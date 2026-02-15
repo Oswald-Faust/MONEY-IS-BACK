@@ -44,26 +44,21 @@ const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { isAuthenticated, user, logout } = useAuthStore();
     
-    // Add scroll direction tracking
-    const [isVisible, setIsVisible] = useState(true);
-    const lastScrollY = useRef(0);
+    const [isMobile, setIsMobile] = useState(false);
+    
+    // Mobile detection
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize(); // Initial check
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            
-            // Determine if scrolled more than threshold
-            setScrolled(currentScrollY > 20);
-
-            // Determine scroll direction
-            if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
-               // Scrolling DOWN
-               setIsVisible(false); // Can be used to hide completely, or just shrink
-            } else {
-               // Scrolling UP
-               setIsVisible(true);
-            }
-            lastScrollY.current = currentScrollY;
+            setScrolled(window.scrollY > 20);
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -75,30 +70,39 @@ const Navbar = () => {
             <motion.nav 
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4"
+                className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 pointers-events-none"
             >
                 <motion.div 
-                    initial={{ width: "100%", maxWidth: "64rem" }} // max-w-5xl
+                    layout
+                    initial={{ width: "100%", maxWidth: "64rem", borderRadius: "9999px" }}
                     animate={{ 
-                        width: scrolled ? "auto" : "100%", 
-                        maxWidth: scrolled ? "800px" : "1024px",
-                        padding: scrolled ? "8px 24px" : "12px 32px",
-                        y: scrolled ? 10 : 0
+                        width: isMobile ? "100%" : (scrolled ? "auto" : "100%"), 
+                        maxWidth: isMobile ? "100%" : (scrolled ? "800px" : "1024px"),
+                        y: isMobile ? 0 : (scrolled ? 10 : 0)
                     }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="bg-[#0A0A0F]/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-between shadow-2xl shadow-black/50 overflow-hidden"
+                    transition={{ 
+                        type: "spring", 
+                        stiffness: 350, 
+                        damping: 30,
+                        layout: { duration: 0.3 }
+                    }}
+                    style={{
+                        padding: isMobile ? "12px 16px" : (scrolled ? "8px 24px" : "12px 32px"),
+                    }}
+                    className="bg-[#0A0A0F]/80 backdrop-blur-xl border border-white/10 flex items-center justify-between shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
                 >
                     <Link href="/" className="flex items-center gap-2 group shrink-0">
                         <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:border-[#00FFB2]/50 transition-colors">
                             <span className="text-white font-bold text-xs">M</span>
                         </div>
-                        <AnimatePresence>
+                        <AnimatePresence mode="popLayout" initial={false}>
                             {!scrolled && (
                                 <motion.span 
-                                    initial={{ opacity: 0, width: 0 }}
-                                    animate={{ opacity: 1, width: "auto" }}
-                                    exit={{ opacity: 0, width: 0 }}
-                                    className="text-lg font-bold text-white tracking-tight hidden sm:block whitespace-nowrap overflow-hidden"
+                                    initial={{ opacity: 0, width: 0, x: -10 }}
+                                    animate={{ opacity: 1, width: "auto", x: 0 }}
+                                    exit={{ opacity: 0, width: 0, x: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="text-lg font-bold text-white tracking-tight hidden sm:block whitespace-nowrap overflow-hidden origin-left"
                                 >
                                     MONEY IS BACK
                                 </motion.span>
@@ -123,12 +127,13 @@ const Navbar = () => {
                                     className="hidden md:flex px-4 py-2 rounded-full bg-white/5 text-white text-xs font-bold hover:bg-white/10 border border-white/10 transition-all items-center gap-2"
                                 >   
                                     <Layout className="w-3 h-3" />
-                                    <AnimatePresence>
+                                    <AnimatePresence mode="popLayout" initial={false}>
                                         {!scrolled && (
                                             <motion.span
-                                                initial={{ opacity: 0, width: 0 }}
-                                                animate={{ opacity: 1, width: "auto" }}
-                                                exit={{ opacity: 0, width: 0 }}
+                                                initial={{ opacity: 0, width: 0, x: -10 }}
+                                                animate={{ opacity: 1, width: "auto", x: 0 }}
+                                                exit={{ opacity: 0, width: 0, x: -10 }}
+                                                transition={{ duration: 0.2 }}
                                                 className="overflow-hidden whitespace-nowrap"
                                             >
                                                 Dashboard
@@ -141,7 +146,10 @@ const Navbar = () => {
                                 </button>
                              </>
                         ) : (
-                            <div className={`hidden md:flex items-center gap-3 ${!scrolled ? "pl-4 border-l border-white/10" : ""}`}>
+                            <motion.div 
+                                layout
+                                className={`hidden md:flex items-center gap-3 ${!scrolled ? "pl-4 border-l border-white/10" : ""}`}
+                            >
                                 <Link href="/login" className="text-white text-sm font-medium hover:text-[#00FFB2] transition-colors">
                                     Connexion
                                 </Link>
@@ -151,7 +159,7 @@ const Navbar = () => {
                                 >
                                     Commencer
                                 </Link>
-                            </div>
+                            </motion.div>
                         )}
 
                         <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -242,6 +250,35 @@ const ReplaceAllSection = () => {
     );
 };
 
+const AnimatedText = () => {
+    const words = ["remplacer.", "contrôler.", "créer."];
+    const [index, setIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setIndex((prev) => (prev + 1) % words.length);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [words.length]);
+
+    return (
+        <span className="block h-[1.2em] overflow-hidden text-zinc-500">
+             <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span 
+                    key={index}
+                    initial={{ y: "100%", opacity: 0, filter: "blur(10px)" }}
+                    animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                    exit={{ y: "-100%", opacity: 0, filter: "blur(10px)" }}
+                    transition={{ duration: 0.6, ease: "circOut" }}
+                    className="block text-center whitespace-nowrap"
+                >
+                    pour tout {words[index]}
+                </motion.span>
+            </AnimatePresence>
+        </span>
+    );
+};
+
 const Hero = () => {
     return (
         <section className="relative min-h-[100vh] flex flex-col items-center justify-center pt-32 px-6 overflow-hidden">
@@ -265,10 +302,10 @@ const Hero = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
-                    className="text-6xl md:text-8xl font-medium tracking-tight text-white mb-8 leading-[0.9]"
+                    className="text-4xl sm:text-6xl md:text-8xl font-medium tracking-tight text-white mb-8 leading-[0.9]"
                 >
                     Une seule app <br/>
-                    <span className="text-zinc-500">pour tout remplacer.</span>
+                    <AnimatedText />
                 </motion.h1>
 
                 <motion.p 
@@ -393,7 +430,7 @@ const Hero = () => {
 };
 
 
-const FeatureCard = ({ title, desc, icon: Icon, delay = 0 }: { title: string, desc: string, icon: any, delay?: number }) => (
+const FeatureCard = ({ title, desc, icon: Icon, delay = 0 }: { title: string, desc: string, icon: React.ElementType, delay?: number }) => (
     <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
