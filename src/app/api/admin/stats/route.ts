@@ -30,6 +30,10 @@ export async function GET(req: NextRequest) {
       { $group: { _id: '$subscriptionPlan', count: { $sum: 1 } } }
     ]);
 
+    const useCaseDistribution = await Workspace.aggregate([
+      { $group: { _id: '$useCase', count: { $sum: 1 } } }
+    ]);
+
     // New users this week
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -63,6 +67,7 @@ export async function GET(req: NextRequest) {
           newUsersWeek
         },
         planDistribution,
+        useCaseDistribution,
         recentUsers,
         recentWorkspaces
       }

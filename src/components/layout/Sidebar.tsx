@@ -55,11 +55,13 @@ import Image from 'next/image';
 
 const PlanBadge = ({ plan }: { plan?: string }) => {
   const getPlanStyles = (planId: string = 'starter') => {
-    switch (planId) {
+    const normalizedPlan = planId?.toString().toLowerCase() || 'starter';
+    switch (normalizedPlan) {
       case 'pro':
         return { label: 'PRO', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-400', icon: Zap };
+      case 'team':
       case 'business':
-        return { label: 'BIZ', bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400', icon: Star };
+        return { label: 'TEAM', bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400', icon: Star };
       case 'enterprise':
         return { label: 'ENT', bg: 'bg-[#00FFB2]/10', border: 'border-[#00FFB2]/20', text: 'text-[#00FFB2]', icon: ShieldCheck };
       case 'admin':
@@ -92,7 +94,10 @@ export default function Sidebar() {
     isMobileMenuOpen, 
     setMobileMenuOpen, 
     currentWorkspace,
-    setSearchModalOpen
+    setCurrentWorkspace,
+    setSearchModalOpen,
+    setWorkspaceModalOpen,
+    workspaces
   } = useAppStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
@@ -139,38 +144,114 @@ export default function Sidebar() {
         <div className="p-4 flex items-center justify-between">
           <AnimatePresence mode="wait">
             {(!sidebarCollapsed || isMobile) && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex items-center gap-3"
-              >
-                <div 
-                  className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden flex-shrink-0"
-                  style={{ 
-                    backgroundColor: currentWorkspace?.settings?.image ? 'transparent' : (currentWorkspace?.settings?.defaultProjectColor || '#6366f1')
-                  }}
-                >
-                  {currentWorkspace?.settings?.image ? (
-                    <Image 
-                      src={currentWorkspace.settings.image} 
-                      alt="" 
-                      fill 
-                      className="object-cover"
-                    />
-                  ) : (
-                    <span className="text-white font-bold text-sm">
-                      {currentWorkspace?.name ? currentWorkspace.name.substring(0, 2).toUpperCase() : 'MB'}
-                    </span>
-                  )}
+              <div className="flex-1 min-w-0 pr-2">
+                <div className="relative group/ws">
+                  <button 
+                    onClick={() => {
+                      const dropdown = document.getElementById('ws-dropdown');
+                      if (dropdown) dropdown.classList.toggle('hidden');
+                    }}
+                    className="w-full flex items-center gap-3 p-1 rounded-xl hover:bg-white/5 transition-all text-left"
+                  >
+                    <div 
+                      className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden flex-shrink-0"
+                      style={{ 
+                        backgroundColor: currentWorkspace?.settings?.image ? 'transparent' : (currentWorkspace?.settings?.defaultProjectColor || '#6366f1')
+                      }}
+                    >
+                      {currentWorkspace?.settings?.image ? (
+                        <Image 
+                          src={currentWorkspace.settings.image} 
+                          alt="" 
+                          fill 
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="text-white font-bold text-sm">
+                          {currentWorkspace?.name ? currentWorkspace.name.substring(0, 2).toUpperCase() : 'MB'}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h1 className="font-semibold text-main text-sm truncate">
+                        {currentWorkspace?.name || 'MONEY IS BACK'}
+                      </h1>
+                      <div className="flex items-center gap-1">
+                        <p className="text-[10px] text-dim font-bold uppercase tracking-wider">Workspace</p>
+                        <ChevronRight className="w-3 h-3 text-dim group-hover/ws:rotate-90 transition-transform" />
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Workspace Dropdown */}
+                  <div id="ws-dropdown" className="hidden absolute top-full left-0 w-64 mt-2 py-2 bg-[#1a1a24] border border-white/10 rounded-2xl shadow-2xl z-[100] backdrop-blur-xl">
+                    <div className="px-4 py-2 border-b border-white/5 mb-2">
+                      <p className="text-[10px] font-black text-dim uppercase tracking-widest">Vos Espaces de Travail</p>
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto px-2 space-y-1 custom-scrollbar">
+                      {useAppStore.getState().workspaces.map((ws) => (
+                        <button
+                          key={ws._id}
+                          onClick={() => {
+                            setCurrentWorkspace(ws);
+                            document.getElementById('ws-dropdown')?.classList.add('hidden');
+                          }}
+                          className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${
+                            currentWorkspace?._id === ws._id ? 'bg-indigo-500/10 border border-indigo-500/20' : 'hover:bg-white/5 border border-transparent'
+                          }`}
+                        >
+                          <div 
+                            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
+                            style={{ 
+                              backgroundColor: ws.settings?.image ? 'transparent' : (ws.settings?.defaultProjectColor || '#6366f1')
+                            }}
+                          >
+                            {ws.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div className="flex-1 text-left min-w-0">
+                            <p className={`text-sm font-medium truncate ${currentWorkspace?._id === ws._id ? 'text-indigo-400' : 'text-main'}`}>
+                              {ws.name}
+                            </p>
+                            <p className="text-[10px] text-dim">{ws.subscriptionPlan.toUpperCase()}</p>
+                          </div>
+                          {currentWorkspace?._id === ws._id && <div className="w-2 h-2 rounded-full bg-indigo-500" />}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="px-2 mt-2 pt-2 border-t border-white/5">
+                      {workspaces.some(ws => ['team', 'enterprise'].includes(ws.subscriptionPlan)) || user?.role === 'admin' || workspaces.length < 1 ? (
+                        <button
+                          onClick={() => {
+                            setWorkspaceModalOpen(true);
+                            document.getElementById('ws-dropdown')?.classList.add('hidden');
+                          }}
+                          className="w-full flex items-center gap-3 p-2 rounded-xl text-dim hover:bg-white/5 hover:text-main transition-all group"
+                        >
+                          <div className="w-8 h-8 rounded-lg border border-dashed border-white/20 flex items-center justify-center group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all">
+                            <Plus className="w-4 h-4 group-hover:text-indigo-400" />
+                          </div>
+                          <span className="text-sm font-medium">Créer un workspace</span>
+                        </button>
+                      ) : (
+                        <Link
+                          href="/upgrade"
+                          onClick={() => document.getElementById('ws-dropdown')?.classList.add('hidden')}
+                          className="w-full flex items-center gap-3 p-2 rounded-xl text-dim hover:bg-white/5 hover:text-indigo-400 transition-all group"
+                        >
+                          <div className="w-8 h-8 rounded-lg border border-dashed border-white/20 flex items-center justify-center group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all">
+                            <Star className="w-4 h-4 group-hover:text-indigo-400" />
+                          </div>
+                          <div className="flex flex-col text-left">
+                            <span className="text-sm font-medium">Créer un workspace</span>
+                            <span className="text-[10px] text-indigo-400/70 font-bold">REQUIS : PLAN TEAM</span>
+                          </div>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="font-semibold text-main text-sm truncate max-w-[160px]">
-                    {currentWorkspace?.name || 'MONEY IS BACK'}
-                  </h1>
-                  <p className="text-xs text-dim">Workspace</p>
-                </div>
-              </motion.div>
+              </div>
             )}
           </AnimatePresence>
           

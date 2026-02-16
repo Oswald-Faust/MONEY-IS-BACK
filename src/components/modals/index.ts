@@ -8,4 +8,5 @@ export { default as CreateIdeaModal } from './CreateIdeaModal';
 export { default as EditTaskModal } from './EditTaskModal';
 export { default as CreateUserModal } from './CreateUserModal';
 export { default as UserProfileModal } from './UserProfileModal';
+export { default as CreateWorkspaceModal } from './CreateWorkspaceModal';
 

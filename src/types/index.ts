@@ -6,12 +6,14 @@ export interface User {
   avatar?: string;
   bio?: string;
   profileColor?: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'moderator' | 'support';
   preferences: {
     theme: 'dark' | 'light';
     notifications: boolean;
     language: string;
   };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Project {
@@ -129,7 +131,7 @@ export interface Workspace {
     image?: string;
     theme: 'dark' | 'light' | 'system';
   };
-  subscriptionPlan: 'starter' | 'pro' | 'business' | 'enterprise';
+  subscriptionPlan: 'starter' | 'pro' | 'team' | 'enterprise';
   subscriptionStatus?: string;
   subscriptionInterval?: 'month' | 'year';
   subscriptionEnd?: string;

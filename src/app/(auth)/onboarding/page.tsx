@@ -18,7 +18,10 @@ import {
   X,
   Link as LinkIcon,
   Copy,
-  Upload
+  Upload,
+  Heart,
+  ShoppingBag,
+  Sparkles
 } from 'lucide-react';
 import { useRef } from 'react';
 import toast from 'react-hot-toast';
@@ -380,31 +383,36 @@ export default function OnboardingPage() {
                   <p className="text-gray-400 text-sm">Nous adapterons l&apos;expérience en fonction de vos besoins.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {[
-                    { id: 'work', label: 'Travail', icon: Briefcase, desc: 'Gestion de projets & équipes' },
-                    { id: 'school', label: 'Études', icon: GraduationCap, desc: 'Cours & emplois du temps' },
-                    { id: 'personal', label: 'Personnel', icon: Zap, desc: 'Organisation quotidienne' },
-                    { id: 'agency', label: 'Agence', icon: Users, desc: 'Clients & livrables' },
+                    { id: 'work', label: 'Entreprise', icon: Briefcase, desc: 'Gestion d\'équipe' },
+                    { id: 'freelance', label: 'Freelance', icon: Zap, desc: 'Indépendant & Clients' },
+                    { id: 'agency', label: 'Agence', icon: Users, desc: 'Multi-projets & Clients' },
+                    { id: 'startup', label: 'Startup', icon: Rocket, desc: 'Croissance & Agilité' },
+                    { id: 'creative', label: 'Créatif', icon: Palette, desc: 'Design & Médias' },
+                    { id: 'ecommerce', label: 'E-commerce', icon: ShoppingBag, desc: 'Ventes & Produits' },
+                    { id: 'school', label: 'Études', icon: GraduationCap, desc: 'Organisation académique' },
+                    { id: 'nonprofit', label: 'Association', icon: Heart, desc: 'Social & Caritatif' },
+                    { id: 'personal', label: 'Personnel', icon: Sparkles, desc: 'Vie quotidienne' },
                   ].map((item) => (
                     <button
                       key={item.id}
                       onClick={() => updateData('useCase', item.id)}
                       className={`
-                        relative p-4 rounded-xl border text-left transition-all duration-200 group
+                        relative p-3 rounded-xl border text-left transition-all duration-200 group
                         ${data.useCase === item.id 
                           ? 'bg-indigo-600/10 border-indigo-500 ring-1 ring-indigo-500/50' 
                           : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10'}
                       `}
                     >
-                      <item.icon className={`w-6 h-6 mb-3 ${data.useCase === item.id ? 'text-indigo-400' : 'text-gray-400 group-hover:text-gray-300'}`} />
-                      <div className="font-semibold text-sm mb-1">{item.label}</div>
-                      <div className="text-xs text-gray-500">{item.desc}</div>
+                      <item.icon className={`w-5 h-5 mb-2 ${data.useCase === item.id ? 'text-indigo-400' : 'text-gray-400 group-hover:text-gray-300'}`} />
+                      <div className="font-semibold text-xs mb-0.5">{item.label}</div>
+                      <div className="text-[10px] text-gray-500 line-clamp-1">{item.desc}</div>
                       
                       {data.useCase === item.id && (
-                        <motion.div layoutId="check" className="absolute top-3 right-3">
+                        <motion.div layoutId="check-badge" className="absolute top-2 right-2">
                           <div className="bg-indigo-500 rounded-full p-0.5">
-                            <Check className="w-3 h-3 text-white" />
+                            <Check className="w-2.5 h-2.5 text-white" />
                           </div>
                         </motion.div>
                       )}

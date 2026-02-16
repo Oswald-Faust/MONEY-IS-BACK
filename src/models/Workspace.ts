@@ -21,7 +21,7 @@ export interface IWorkspace extends Document {
   useCase: 'personal' | 'work' | 'school' | 'agency' | 'startup' | 'other';
   stripeCustomerId?: string;
   subscriptionId?: string;
-  subscriptionPlan: 'starter' | 'pro' | 'business' | 'enterprise';
+  subscriptionPlan: 'starter' | 'pro' | 'team' | 'enterprise';
   subscriptionStatus?: string;
   subscriptionPriceId?: string;
   subscriptionInterval?: 'month' | 'year';
@@ -89,14 +89,14 @@ const WorkspaceSchema = new Schema<IWorkspace>(
     },
     useCase: {
       type: String,
-      enum: ['personal', 'work', 'school', 'agency', 'startup', 'other'],
+      enum: ['personal', 'work', 'school', 'agency', 'startup', 'freelance', 'creative', 'ecommerce', 'nonprofit', 'other'],
       default: 'other',
     },
     stripeCustomerId: String,
     subscriptionId: String,
     subscriptionPlan: {
       type: String,
-      enum: ['starter', 'pro', 'business', 'enterprise'],
+      enum: ['starter', 'pro', 'team', 'enterprise'],
       default: 'starter',
     },
     subscriptionStatus: String,

@@ -16,6 +16,8 @@ import {
 import Link from 'next/link';
 import { useAuthStore } from '@/store';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
+import type { User } from '@/types';
 
 interface AdminStats {
   counts: {
@@ -28,7 +30,8 @@ interface AdminStats {
   growth: {
     newUsersWeek: number;
   };
-  recentUsers: any[];
+  useCaseDistribution: { _id: string; count: number }[];
+  recentUsers: User[];
   recentWorkspaces: any[];
 }
 
@@ -47,8 +50,8 @@ export default function AdminDashboardPage() {
         if (data.success) {
           setStats(data.data);
         }
-      } catch (error) {
-        console.error('Failed to fetch admin stats', error);
+      } catch (_err) {
+        toast.error('Erreur de connexion');
       } finally {
         setIsLoading(false);
       }
@@ -192,16 +195,18 @@ export default function AdminDashboardPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-glass-bg flex items-center justify-center overflow-hidden">
-                            {ws.owner?.avatar ? (
-                              <Image src={ws.owner.avatar} alt="" width={24} height={24} className="object-cover" />
-                            ) : (
-                              <Users className="w-3 h-3 text-dim" />
-                            )}
+                        <Link href={`/admin/users/${ws.owner?._id}`}>
+                          <div className="flex items-center gap-2 group/owner cursor-pointer">
+                            <div className="w-6 h-6 rounded-full bg-glass-bg flex items-center justify-center overflow-hidden ring-1 ring-white/5 group-hover/owner:ring-red-500/50 transition-all">
+                              {ws.owner?.avatar ? (
+                                <Image src={ws.owner.avatar} alt="" width={24} height={24} className="object-cover" />
+                              ) : (
+                                <Users className="w-3 h-3 text-dim" />
+                              )}
+                            </div>
+                            <span className="text-sm text-dim group-hover/owner:text-red-400 transition-colors">{ws.owner?.firstName} {ws.owner?.lastName}</span>
                           </div>
-                          <span className="text-sm text-dim">{ws.owner?.firstName} {ws.owner?.lastName}</span>
-                        </div>
+                        </Link>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
@@ -233,6 +238,28 @@ export default function AdminDashboardPage() {
               </table>
             </div>
           </div>
+
+          {/* Use Case Distribution Section */}
+          <div className="space-y-4 pt-6">
+            <h2 className="text-xl font-bold text-main flex items-center gap-2">
+              <Activity className="w-5 h-5 text-red-500" />
+              Répartition des Usages
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+               {stats?.useCaseDistribution.map((item) => (
+                 <div key={item._id} className="glass-card flex flex-col items-center text-center p-4 hover:border-red-500/20 transition-all group">
+                    <span className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1 group-hover:text-red-500 transition-colors">{item._id || 'Autre'}</span>
+                    <span className="text-2xl font-bold text-main">{item.count}</span>
+                    <div className="w-full h-1 bg-white/5 rounded-full mt-3 overflow-hidden">
+                       <div 
+                         className="h-full bg-red-500" 
+                         style={{ width: `${(item.count / (stats.counts.workspaces || 1)) * 100}%` }} 
+                       />
+                    </div>
+                 </div>
+               ))}
+            </div>
+          </div>
         </div>
 
         {/* Recent Users column */}
@@ -243,27 +270,29 @@ export default function AdminDashboardPage() {
           </h2>
           <div className="glass-card space-y-4">
             {stats?.recentUsers.map((u) => (
-              <div key={u._id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.02] transition-colors border border-transparent hover:border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden ring-2 ring-white/5">
-                    {u.avatar ? (
-                      <Image src={u.avatar} alt="" width={40} height={40} className="object-cover" />
-                    ) : (
-                      u.firstName[0]
-                    )}
+              <Link key={u._id} href={`/admin/users/${u._id}`}>
+                <div className="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.02] transition-colors border border-transparent hover:border-white/5 group/u cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden ring-2 ring-white/5 group-hover/u:ring-red-500/50 transition-all">
+                      {u.avatar ? (
+                        <Image src={u.avatar} alt="" width={40} height={40} className="object-cover" />
+                      ) : (
+                        u.firstName[0]
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-main group-hover/u:text-red-400 transition-colors">{u.firstName} {u.lastName}</p>
+                      <p className="text-xs text-dim truncate max-w-[140px]">{u.email}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-main">{u.firstName} {u.lastName}</p>
-                    <p className="text-xs text-dim truncate max-w-[140px]">{u.email}</p>
+                  <div className="text-right">
+                    <p className="text-[10px] text-dim uppercase">Inscrit le</p>
+                    <p className="text-[10px] text-main font-bold">
+                      {new Date(u.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] text-dim uppercase">Inscrit le</p>
-                  <p className="text-[10px] text-main font-bold">
-                    {new Date(u.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
-                  </p>
-                </div>
-              </div>
+              </Link>
             ))}
             <Link href="/admin/users" className="block text-center pt-2">
               <button className="text-xs font-bold text-red-500 hover:text-red-400 transition-colors uppercase tracking-widest">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
@@ -22,17 +22,17 @@ import {
 
 const plans = [
   {
-    name: 'Starter',
+    name: 'Gratuit',
     id: 'starter',
     price: { monthly: 0, yearly: 0 },
-    originalPrice: { monthly: 19.99, yearly: 19.99 },
-    description: 'Parfait pour les petites équipes qui débutent.',
+    originalPrice: { monthly: 0, yearly: 0 },
+    description: 'Pour explorer les bases de MONEY IS BACK.',
     features: [
-      '3 Utilisateurs inclus',
-      '3 Projets actifs',
-      '2 Go de stockage Drive',
-      '5 IDs Sécurisés max',
-      'Support email (48h)',
+      '1 Utilisateur maximum',
+      '1 Projet maximum',
+      '1 Go de stockage Drive',
+      '7 Tâches max par projet',
+      'Routines limitées',
     ],
     icon: Rocket,
     color: '#94a3b8',
@@ -41,16 +41,16 @@ const plans = [
   {
     name: 'Pro',
     id: 'pro',
-    price: { monthly: 10, yearly: 7.90 },
-    originalPrice: { monthly: 15, yearly: 10 },
-    description: 'La puissance illimitée pour votre équipe en croissance.',
+    price: { monthly: 9.99, yearly: 8.99 },
+    originalPrice: { monthly: 15, yearly: 12 },
+    description: 'Idéal pour les indépendants et petites équipes.',
     features: [
-      '5 Utilisateurs inclus',
-      'Puis $10/user supplémentaire',
-      'Projets illimités',
-      'Stockage Drive Illimité',
-      'Time Tracking natif',
-      'Vues Gantt & Formulaires',
+      '3 Utilisateurs inclus',
+      '€6.99/user supplémentaire',
+      '3 Projets inclus',
+      '€4.99/projet supplémentaire',
+      '10 Go de stockage Drive',
+      'Tâches & Routines illimitées',
     ],
     icon: Zap,
     color: '#6366f1',
@@ -58,18 +58,18 @@ const plans = [
     popular: true,
   },
   {
-    name: 'Business',
-    id: 'business',
-    price: { monthly: 19, yearly: 12 },
-    originalPrice: { monthly: 29, yearly: 19 },
-    description: 'Le contrôle total pour les agences structurées.',
+    name: 'Team',
+    id: 'team',
+    price: { monthly: 29.99, yearly: 24.99 },
+    originalPrice: { monthly: 39, yearly: 29 },
+    description: 'Le choix ultime pour les équipes structurées.',
     features: [
       '10 Utilisateurs inclus',
-      'Puis $19/user supplémentaire',
+      '€4.99/user supplémentaire',
+      'Stockage Drive Illimité',
       'Dashboards personnalisés',
-      'Gestion de charge (Workload)',
-      'Google SSO intégré',
-      'Permissions granulaires',
+      'Mindmaps & Timelines',
+      'Projets illimités (plus de 5)',
     ],
     icon: Star,
     color: '#8b5cf6',
@@ -80,7 +80,7 @@ const plans = [
     id: 'enterprise',
     price: { monthly: 'Custom', yearly: 'Custom' },
     originalPrice: { monthly: '...', yearly: '...' },
-    description: 'Gouvernance et sécurité pour les grandes organisations.',
+    description: 'Sécurité et contrôle pour les grandes organisations.',
     features: [
       'Utilisateurs illimités',
       'White Label (Votre logo)',
@@ -98,6 +98,7 @@ const plans = [
 export default function UpgradePage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [isUpgrading, setIsUpgrading] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const { currentWorkspace, setCurrentWorkspace, setWorkspaces } = useAppStore();
   const { token } = useAuthStore();
@@ -114,41 +115,97 @@ export default function UpgradePage() {
     
     if (isSuccess && token && !hasRefreshed.current) {
       hasRefreshed.current = true;
-      toast.success('Paiement réussi ! Mise à jour de votre compte...', { 
+      setIsSyncing(true);
+      const targetPlanId = urlParams.get('planId');
+      
+      toast.success('Paiement réussi ! Finalisation de votre abonnement...', { 
         icon: '🎉',
-        id: 'stripe-success' // Prevent duplicate toasts
+        id: 'stripe-success',
+        duration: 5000
       });
       
-      const refreshWorkspaces = async () => {
+      let attempts = 0;
+      const intervalId = setInterval(async () => {
+        attempts++;
+        if (attempts > 15) { // 30s max
+          clearInterval(intervalId);
+          setIsSyncing(false);
+          toast.error('Délai dépassé. Vos données seront actualisées d\'ici peu.', { id: 'stripe-success' });
+          return;
+        }
+
         try {
-          const response = await fetch('/api/workspaces', {
+          const sessionId = urlParams.get('session_id');
+          const syncUrl = sessionId 
+            ? `/api/workspaces?t=${Date.now()}&session_id=${sessionId}`
+            : `/api/workspaces?t=${Date.now()}`;
+
+          const response = await fetch(syncUrl, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();
+          
           if (data.success && data.data.length > 0) {
-            // Update store
-            setWorkspaces(data.data);
+            // Plan-agnostic check: if status is now active, we are good
             const currentId = currentWorkspace?._id;
             const updatedWs = (data.data as Workspace[]).find((w: Workspace) => w._id === currentId) || data.data[0];
-            setCurrentWorkspace(updatedWs);
             
-            // Critical: Navigate away from the success URL to prevent loop
-            router.replace('/upgrade', { scroll: false });
+            const isUpdated = updatedWs.subscriptionStatus === 'active';
+
+            if (isUpdated) {
+              setWorkspaces(data.data);
+              setCurrentWorkspace(updatedWs);
+              setIsSyncing(false);
+              clearInterval(intervalId);
+              toast.success(`Votre plan ${updatedWs.subscriptionPlan.toUpperCase()} est désormais actif !`, {
+                icon: '🚀',
+                id: 'sync-complete'
+              });
+              router.replace('/upgrade', { scroll: false });
+            }
           }
         } catch (error) {
-          console.error('Failed to refresh workspaces:', error);
-          // Don't reset hasRefreshed here to avoid loops if the server is slow
+          console.error('Polling error:', error);
         }
-      };
+      }, 2000);
 
-      // Small delay to allow webhook to process
-      const timeoutId = setTimeout(refreshWorkspaces, 1500);
-      return () => clearTimeout(timeoutId);
+      return () => {
+        clearInterval(intervalId);
+        setIsSyncing(false);
+      };
     }
   }, [token, currentWorkspace?._id, setCurrentWorkspace, setWorkspaces, router]);
   
   const currentPlanId = currentWorkspace?.subscriptionPlan || 'starter';
   
+  const refreshData = useCallback(async (silent = false) => {
+    if (!token) return;
+    const loadingToast = silent ? null : toast.loading('Actualisation des données...');
+    try {
+      const response = await fetch(`/api/workspaces?t=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success && data.data.length > 0) {
+        setWorkspaces(data.data);
+        const currentId = currentWorkspace?._id;
+        const updatedWs = (data.data as Workspace[]).find((w: Workspace) => w._id === currentId) || data.data[0];
+        setCurrentWorkspace(updatedWs);
+        if (loadingToast) toast.success('Données actualisées', { id: loadingToast });
+      }
+    } catch (error) {
+      console.error('Refresh error:', error);
+      if (loadingToast) toast.error('Erreur lors de l\'actualisation', { id: loadingToast });
+    }
+  }, [token, currentWorkspace?._id, setCurrentWorkspace, setWorkspaces]);
+
+  // Auto-refresh on mount
+  React.useEffect(() => {
+    if (token) {
+      refreshData(true);
+    }
+  }, [token, refreshData]);
+
   const handleUpgrade = async (planId: string) => {
     if (planId === 'enterprise') return;
     if (!currentWorkspace) {
@@ -251,26 +308,31 @@ export default function UpgradePage() {
                 <ShieldCheck className="w-8 h-8 text-indigo-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white mb-1">Plan Actuel : {plans.find(p => p.id === currentPlanId)?.name}</h2>
+                <h2 className="text-xl font-bold text-white mb-1">
+                  Plan Actuel : {plans.find(p => p.id === currentPlanId)?.name}
+                  <span className="text-indigo-400 ml-2 text-sm font-normal">
+                    (Workspace: {currentWorkspace?.name})
+                  </span>
+                </h2>
                 <div className="flex flex-wrap gap-4 mt-2">
                   <div className="flex items-center gap-1.5 text-xs text-dim">
                     <Clock className="w-3.5 h-3.5" />
                     Fin de l&apos;abonnement : <span className="text-white font-medium ml-1">
-                      {currentWorkspace?.subscriptionEnd 
+                      {currentWorkspace?.subscriptionEnd && !isNaN(new Date(currentWorkspace.subscriptionEnd).getTime())
                         ? new Date(currentWorkspace.subscriptionEnd).toLocaleDateString('fr-FR', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
                           }) 
                         : currentPlanId === 'starter' 
-                          ? 'Jamais (Gratuit)' 
-                          : 'Date non définie'}
+                          ? 'À vie (Gratuit)' 
+                          : isSyncing ? 'Chargement...' : 'Date non définie'}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-dim">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Status : <span className={`${currentWorkspace?.subscriptionStatus === 'active' ? 'text-[#00FFB2]' : 'text-orange-400'} font-medium ml-1 uppercase text-[10px]`}>
-                      {currentWorkspace?.subscriptionStatus || 'Actif'}
+                      {currentWorkspace?.subscriptionStatus || (currentPlanId === 'starter' ? 'Actif' : 'Inconnu')}
                       {currentWorkspace?.subscriptionInterval && (
                         <span className="ml-1 text-dim font-normal normal-case">
                           ({currentWorkspace.subscriptionInterval === 'month' ? 'Mensuel' : 'Annuel'})

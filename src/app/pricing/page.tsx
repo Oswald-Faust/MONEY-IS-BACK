@@ -21,69 +21,70 @@ type BillingInterval = 'monthly' | 'yearly';
 // --- Data ---
 const plans = [
     {
-      name: "Starter",
+      name: "Gratuit",
       tagline: "Idéal pour débuter",
       price: { monthly: 0, yearly: 0 },
-      originalPrice: { monthly: 19.99, yearly: 19.99 },
+      originalPrice: { monthly: 0, yearly: 0 },
       cta: "Commencer gratuitement",
-      ctaVariant: "dark", // black button
+      ctaVariant: "dark",
       highlight: false,
       features: [
-        "1 Utilisateur Admin",
-        "2 Go de stockage",
-        "Tâches illimitées",
-        "Docs Collaboratifs",
-        "Chat Temps Réel",
-        "Vues Kanban"
+        "1 Utilisateur maximum",
+        "1 Projet maximum",
+        "1 Go de stockage Drive",
+        "7 Tâches max par projet",
+        "Routines limitées"
       ]
     },
     {
       name: "Pro",
-      tagline: "Pour les équipes en croissance",
-      price: { monthly: 9.9, yearly: 7.9 },
+      tagline: "Idéal pour les indépendants et petites équipes",
+      price: { monthly: 9.99, yearly: 8.99 },
+      originalPrice: { monthly: 15, yearly: 12 },
       cta: "Essayer Pro",
-      ctaVariant: "light", // grey button
+      ctaVariant: "light",
       highlight: false,
       features: [
-          "Tout dans Starter +",
-          "+1 Go stockage / utilisateur",
-          "Invités illimités",
-          "Dashboards illimités",
-          "Gantt Charts",
-          "Champs Personnalisés"
+        "3 Utilisateurs inclus",
+        "€6.99/user supplémentaire",
+        "3 Projets inclus",
+        "€4.99/projet supplémentaire",
+        "10 Go de stockage Drive",
+        "Tâches & Routines illimitées"
       ]
     },
     {
       name: "Team",
-      tagline: "Pour les entreprises établies",
-      price: { monthly: 119, yearly: 79 },
+      tagline: "Le choix ultime pour les équipes structurées",
+      price: { monthly: 29.99, yearly: 24.99 },
+      originalPrice: { monthly: 39, yearly: 29 },
       cta: "Choisir Team",
-      ctaVariant: "gradient", // gradient or solid distinctive
-      highlight: true, // "Popular" badge
+      ctaVariant: "gradient",
+      highlight: true,
       features: [
-          "Tout dans Pro +",
-          "Jusqu'à 10 utilisateurs",
-          "15 Go de stockage",
-          "Exportation Personnalisée",
-          "Automatisations Avancées",
-          "Suivi du Temps"
+        "10 Utilisateurs inclus",
+        "€4.99/user supplémentaire",
+        "5 Projets inclus",
+        "€4.99/projet supplémentaire",
+        "Stockage illimité",
+        "Dashboard personnalisés",
+        "Mindmaps & Timelines"
       ]
     },
     {
       name: "Enterprise",
-      tagline: "Solutions sur mesure",
-      price: { monthly: null, yearly: null }, // Custom
+      tagline: "Sécurité et contrôle pour les grandes organisations",
+      price: { monthly: null, yearly: null },
       cta: "Contacter les ventes",
       ctaVariant: "light",
       highlight: false,
       features: [
-          "Tout dans Team +",
-          "Marque Blanche",
-          "API Enterprise",
-          "Permissions Avancées",
-          "Rôles Personnalisés",
-          "SSO & SAML",
-          "Manager Dédié"
+        "Utilisateurs illimités",
+        "White Label complet",
+        "Logs d'Audit & Sécurité",
+        "SAML SSO / Okta",
+        "API illimitée",
+        "Success Manager dédié"
       ]
     }
   ];
@@ -220,7 +221,7 @@ export default function PricingPage() {
                                       {/* Original Price (Crossed out) */}
                                       {plan.originalPrice && (
                                          <div className="text-gray-400 line-through text-lg font-medium self-center w-full">
-                                             ${billingInterval === 'yearly' ? plan.originalPrice.yearly : plan.originalPrice.monthly}
+                                             €{billingInterval === 'yearly' ? plan.originalPrice.yearly : plan.originalPrice.monthly}
                                          </div>
                                       )}
 
@@ -230,7 +231,7 @@ export default function PricingPage() {
                                           ) : (
                                               <>
                                                   <span className="text-4xl font-bold flex">
-                                                      $
+                                                      €
                                                       <AnimatePresence mode="wait">
                                                           <motion.span
                                                               key={billingInterval}

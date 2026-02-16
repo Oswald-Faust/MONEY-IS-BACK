@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Project from '@/models/Project';
+import User from '@/models/User';
 import GlobalSettings from '@/models/GlobalSettings';
 import { verifyAuth } from '@/lib/auth';
 

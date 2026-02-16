@@ -1,6 +1,7 @@
 export const PLAN_LIMITS = {
   starter: {
     maxProjects: 3,
+    maxWorkspaces: 1,
     maxMembers: 3,
     storageGB: 2,
     maxIds: 5,
@@ -8,20 +9,31 @@ export const PLAN_LIMITS = {
   },
   pro: {
     maxProjects: Infinity,
-    maxMembers: 5, // Then $10/user
+    maxWorkspaces: 1,
+    maxMembers: 5,
     storageGB: Infinity,
     maxIds: Infinity,
     support: 'Prioritaire',
   },
-  business: {
+  team: { // This is the plan name used in Stripe metadata
     maxProjects: Infinity,
-    maxMembers: 10, // Then $19/user
+    maxWorkspaces: 4,
+    maxMembers: 10,
+    storageGB: Infinity,
+    maxIds: Infinity,
+    support: 'Prioritaire 24/7',
+  },
+  business: { // Alias for legacy/consistency
+    maxProjects: Infinity,
+    maxWorkspaces: 4,
+    maxMembers: 10,
     storageGB: Infinity,
     maxIds: Infinity,
     support: 'Prioritaire 24/7',
   },
   enterprise: {
     maxProjects: Infinity,
+    maxWorkspaces: Infinity,
     maxMembers: Infinity,
     storageGB: Infinity,
     maxIds: Infinity,

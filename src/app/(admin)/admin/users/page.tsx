@@ -15,7 +15,8 @@ import {
   AlertCircle,
   Briefcase,
   HelpCircle,
-  Calendar
+  Calendar,
+  Eye
 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import Image from 'next/image';
@@ -175,19 +176,21 @@ export default function AdminUsersPage() {
                       className="hover:bg-white/[0.02] transition-colors group"
                     >
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden ring-2 ring-white/5">
-                            {u.avatar ? (
-                              <Image src={u.avatar} alt="" width={40} height={40} className="object-cover" />
-                            ) : (
-                              u.firstName?.[0] || '?'
-                            )}
+                        <Link href={`/admin/users/${u._id}`}>
+                          <div className="flex items-center gap-3 cursor-pointer group/user">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden ring-2 ring-white/5 group-hover/user:ring-indigo-500/50 transition-all">
+                              {u.avatar ? (
+                                <Image src={u.avatar} alt="" width={40} height={40} className="object-cover" />
+                              ) : (
+                                u.firstName?.[0] || '?'
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-main group-hover/user:text-indigo-400 transition-colors">{u.firstName} {u.lastName}</p>
+                              <p className="text-xs text-dim">{u.email}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-semibold text-main">{u.firstName} {u.lastName}</p>
-                            <p className="text-xs text-dim">{u.email}</p>
-                          </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="px-6 py-4">
                         <button
@@ -225,6 +228,11 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <Link href={`/admin/users/${u._id}`}>
+                            <button className="p-2 rounded-xl hover:bg-white/5 text-dim hover:text-main transition-all">
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </Link>
                           <button 
                             onClick={() => deleteUser(u._id)}
                             className="p-2 rounded-xl hover:bg-red-500/10 text-dim hover:text-red-500 transition-all"

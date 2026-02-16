@@ -456,7 +456,7 @@ const BentoGrid = () => {
                     {/* Large Card */}
                     <div className="md:col-span-2 relative h-[400px] rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden group">
                          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10" />
-                         <Image src="https://images.unsplash.com/photo-1614064641938-3bcee52636c4?q=80&w=2671&auto=format&fit=crop" fill className="object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Feature" />
+                         <Image src="https://images.unsplash.com/photo-1558494949-ef010cbdcc48?q=80&w=2670&auto=format&fit=crop" fill className="object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Drive Storage" />
                          <div className="absolute bottom-0 left-0 p-10 z-20 max-w-lg">
                              <div className="text-[#00FFB2] font-mono text-xs mb-2">DRIVE</div>
                              <h3 className="text-3xl font-medium text-white mb-2">Stockage & Partage Sécurisé</h3>
@@ -654,7 +654,7 @@ const PricingCard = ({ plan, price, highlight = false, billingCycle, originalPri
                                 <span className="text-5xl font-medium text-white uppercase tracking-tight">Gratuit</span>
                             ) : (
                                 <span className="text-5xl font-medium text-white flex">
-                                    $
+                                    €
                                     <AnimatePresence mode="wait">
                                         <motion.span
                                             key={billingCycle + price}
@@ -708,44 +708,44 @@ const SimplePricing = () => {
 
     const plans = [
         {
-            plan: "Starter",
+            plan: "Gratuit",
             price: "GRATUIT",
-            originalPrice: "19.99",
+            originalPrice: "0",
             features: [
-                "3 Utilisateurs inclus",
-                "3 Projets actifs",
-                "2 Go de stockage Drive",
-                "5 IDs Sécurisés",
-                "Support par email (48h)"
+                "1 Utilisateur maximum",
+                "1 Projet maximum",
+                "1 Go de stockage Drive",
+                "7 Tâches max par projet",
+                "Routines limitées"
             ],
             highlight: false
         },
         {
             plan: "Pro",
-            price: billingCycle === 'monthly' ? "10" : "7.9",
-            originalPrice: billingCycle === 'monthly' ? "15" : "10",
+            price: billingCycle === 'monthly' ? "9.99" : "8.99",
+            originalPrice: billingCycle === 'monthly' ? "15" : "12",
             features: [
-                "5 Utilisateurs inclus",
-                "Puis $10/user supplémentaire",
-                "Stockage illimité",
-                "Time Tracking natif",
-                "Vues Gantt & Formulaires",
-                "Support Prioritaire"
+                "3 Utilisateurs inclus",
+                "€6.99/user supplémentaire",
+                "3 Projets inclus",
+                "€4.99/projet supplémentaire",
+                "10 Go de stockage Drive",
+                "Tâches & Routines illimitées"
             ],
             highlight: true
         },
         {
-            plan: "Business",
-            price: billingCycle === 'monthly' ? "19" : "12",
-            originalPrice: billingCycle === 'monthly' ? "29" : "19",
+            plan: "Team",
+            price: billingCycle === 'monthly' ? "29.99" : "24.99",
+            originalPrice: billingCycle === 'monthly' ? "39" : "29",
             features: [
                 "10 Utilisateurs inclus",
-                "Puis $19/user supplémentaire",
-                "Dashboards personnalisés",
-                "Mind Maps & Timelines",
-                "Gestion de charge (Workload)",
-                "Google SSO intégré",
-                "Permissions granulaires"
+                "€4.99/user supplémentaire",
+                "5 Projets inclus",
+                "€4.99/projet supplémentaire",
+                "Stockage illimité",
+                "Dashboard personnalisés",
+                "Mindmaps & Timelines"
             ],
             highlight: false
         },

@@ -80,6 +80,7 @@ interface AppState {
   isIdeaModalOpen: boolean;
   isCreateUserModalOpen: boolean;
   isSearchModalOpen: boolean;
+  isWorkspaceModalOpen: boolean;
   taskProjectId?: string;
   objectiveProjectId?: string;
   uploadProjectId?: string;
@@ -95,6 +96,7 @@ interface AppState {
   setIdeaModalOpen: (open: boolean) => void;
   setCreateUserModalOpen: (open: boolean) => void;
   setSearchModalOpen: (open: boolean) => void;
+  setWorkspaceModalOpen: (open: boolean) => void;
   
   // Loading states
   isLoading: boolean;
@@ -209,6 +211,7 @@ export const useAppStore = create<AppState>()(
       isIdeaModalOpen: false,
       isCreateUserModalOpen: false,
       isSearchModalOpen: false,
+      isWorkspaceModalOpen: false,
       taskProjectId: undefined,
       objectiveProjectId: undefined,
       uploadProjectId: undefined,
@@ -232,6 +235,7 @@ export const useAppStore = create<AppState>()(
       setIdeaModalOpen: (open) => set({ isIdeaModalOpen: open }),
       setCreateUserModalOpen: (open) => set({ isCreateUserModalOpen: open }),
       setSearchModalOpen: (open) => set({ isSearchModalOpen: open }),
+      setWorkspaceModalOpen: (open) => set({ isWorkspaceModalOpen: open }),
       
       // Loading
       isLoading: false,

@@ -32,19 +32,19 @@ export async function POST(req: NextRequest) {
     // Define price configuration ad-hoc (no need to create in Stripe Dashboard)
     const priceConfigs: Record<string, { name: string; monthly: { amount: number; interval: 'month' | 'year' }; yearly: { amount: number; interval: 'month' | 'year' } }> = {
       starter: {
-        name: 'Plan Starter',
+        name: 'Plan Gratuit',
         monthly: { amount: 0, interval: 'month' },
         yearly: { amount: 0, interval: 'year' },
       },
       pro: {
         name: 'Plan Pro',
-        monthly: { amount: 1000, interval: 'month' }, // 10.00$
-        yearly: { amount: 790, interval: 'year' },    // 7.90$
+        monthly: { amount: 999, interval: 'month' }, // 9.99€
+        yearly: { amount: 8990, interval: 'year' },  // 8.99€/mois (89.90€/an)
       },
-      business: {
-        name: 'Plan Business',
-        monthly: { amount: 1900, interval: 'month' }, // 19.00$
-        yearly: { amount: 1200, interval: 'year' },   // 12.00$
+      team: {
+        name: 'Plan Team',
+        monthly: { amount: 2999, interval: 'month' }, // 29.99€
+        yearly: { amount: 24990, interval: 'year' },  // 24.99€/mois (249.90€/an)
       }
     };
 
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
             currency: 'usd',
             product_data: {
               name: config.name,
-              description: `Abonnement Edwin - ${planId} (${billingCycle})`,
+              description: `Abonnement MONEY IS BACK - ${planId} (${billingCycle})`,
             },
             unit_amount: priceData.amount,
             recurring: {
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       ],
       mode: 'subscription',
       payment_method_collection: 'always', // Force card collection
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/upgrade?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/upgrade?success=true&planId=${planId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/upgrade?canceled=true`,
       metadata: {
         workspaceId,

@@ -63,7 +63,6 @@ InvitationSchema.index({ email: 1, workspace: 1 }, { unique: true }); // Prevent
 // Let's just index email and workspace.
 InvitationSchema.index({ email: 1 });
 InvitationSchema.index({ workspace: 1 });
-InvitationSchema.index({ token: 1 });
 
 const Invitation: Model<IInvitation> = mongoose.models.Invitation || mongoose.model<IInvitation>('Invitation', InvitationSchema);
 

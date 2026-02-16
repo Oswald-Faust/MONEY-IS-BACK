@@ -12,12 +12,14 @@ import {
   CreateFolderModal,
   UploadFileModal,
   CreateIdeaModal,
-  CreateUserModal
+  CreateUserModal,
+  CreateWorkspaceModal
 } from '@/components/modals';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import React from 'react';
 import { Menu } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard';
+import { Workspace } from '@/types';
 
 
 export default function DashboardLayout({
@@ -68,17 +70,29 @@ export default function DashboardLayout({
   // Fetch workspaces if not set
   React.useEffect(() => {
     const fetchWorkspaces = async () => {
-      if (!currentWorkspace && token) {
+      if (token) {
         try {
-          const response = await fetch('/api/workspaces', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+          const response = await fetch(`/api/workspaces?t=${Date.now()}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();
           if (data.success && data.data.length > 0) {
+            const state = useAppStore.getState();
             setWorkspaces(data.data);
-            setCurrentWorkspace(data.data[0]);
+            
+            const activeWs = state.currentWorkspace;
+            if (!activeWs) {
+              setCurrentWorkspace(data.data[0]);
+            } else {
+              const updated = (data.data as Workspace[]).find((ws) => ws._id === activeWs._id);
+              if (updated && (
+                updated.subscriptionPlan !== activeWs.subscriptionPlan || 
+                updated.subscriptionStatus !== activeWs.subscriptionStatus ||
+                updated.name !== activeWs.name
+              )) {
+                setCurrentWorkspace(updated);
+              }
+            }
           }
         } catch (error) {
           console.error('Failed to fetch workspaces', error);
@@ -89,7 +103,7 @@ export default function DashboardLayout({
     if (mounted && token) {
       fetchWorkspaces();
     }
-  }, [mounted, currentWorkspace, setCurrentWorkspace, setWorkspaces, token]);
+  }, [mounted, token, setCurrentWorkspace, setWorkspaces]);
 
   // Fetch projects when currentWorkspace changes
   React.useEffect(() => {
@@ -210,6 +224,7 @@ export default function DashboardLayout({
           onClose={() => setIdeaModalOpen(false)} 
         />
         <CreateUserModal />
+        <CreateWorkspaceModal />
         <GlobalSearch />
       </div>
     </AuthGuard>

@@ -70,48 +70,51 @@ export default function DashboardPage() {
 
   // Initialize store with real data from API
   useEffect(() => {
-    const fetchData = async () => {
-      if (!token) return;
+    if (token && currentWorkspace) {
+      const workspace = currentWorkspace; // Capture for closure narrowing
       
-      try {
-        setIsLoading(true);
-        
-        // Fetch projects
-        const projectsRes = await fetch('/api/projects', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const projectsData = await projectsRes.json();
-        if (projectsData.success) {
-          setProjects(projectsData.data);
-        }
+      const fetchData = async () => {
+        try {
+          setIsLoading(true);
+          const wsId = workspace._id;
+          
+          // Fetch projects
+          const projectsRes = await fetch(`/api/projects?workspace=${wsId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const projectsData = await projectsRes.json();
+          if (projectsData.success) {
+            setProjects(projectsData.data);
+          }
 
-        // Fetch tasks
-        const tasksRes = await fetch('/api/tasks', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const tasksData = await tasksRes.json();
-        if (tasksData.success) {
-          setTasks(tasksData.data);
-        }
+          // Fetch tasks
+          const tasksRes = await fetch(`/api/tasks?workspace=${wsId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const tasksData = await tasksRes.json();
+          if (tasksData.success) {
+            setTasks(tasksData.data);
+          }
 
-        // Fetch routines
-        const routinesRes = await fetch('/api/routines', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const routinesData = await routinesRes.json();
-        if (routinesData.success) {
-          setRoutines(routinesData.data);
+          // Fetch routines
+          const routinesRes = await fetch('/api/routines', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const routinesData = await routinesRes.json();
+          if (routinesData.success) {
+            setRoutines(routinesData.data);
+          }
+          
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error);
+        } finally {
+          setIsLoading(false);
         }
-        
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      };
 
-    fetchData();
-  }, [token, setProjects, setTasks, setRoutines]);
+      fetchData();
+    }
+  }, [token, currentWorkspace, setProjects, setTasks, setRoutines]);
 
   const stats = [
     { label: 'Projets Actifs', value: projects.length, icon: FolderKanban, color: '#6366f1' },

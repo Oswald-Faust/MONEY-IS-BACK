@@ -41,13 +41,14 @@ export async function POST(req: NextRequest) {
 
       const subscription = await stripe.subscriptions.retrieve(subscriptionId) as Stripe.Subscription;
       
-      const update = {
+      const sub = subscription as any;
+      const update: any = {
         subscriptionId: subscriptionId,
         subscriptionPlan: planId,
         subscriptionStatus: subscription.status,
-        subscriptionPriceId: subscription.items.data[0].price.id,
+        subscriptionPriceId: typeof subscription.items.data[0].price.id === 'string' ? subscription.items.data[0].price.id : subscription.items.data[0].price,
         subscriptionInterval: subscription.items.data[0].plan.interval,
-        subscriptionEnd: new Date((subscription as any).current_period_end * 1000),
+        subscriptionEnd: sub.current_period_end ? new Date(sub.current_period_end * 1000) : undefined,
       };
 
       console.log('Updating workspace with:', update);
@@ -61,10 +62,20 @@ export async function POST(req: NextRequest) {
       const subscription = event.data.object as Stripe.Subscription;
       console.log(`Subscription updated: ${subscription.id}, status: ${subscription.status}`);
 
-      const update = {
+      const sub = subscription as any;
+      const update: any = {
         subscriptionStatus: subscription.status,
-        subscriptionEnd: new Date((subscription as any).current_period_end * 1000),
+        subscriptionEnd: sub.current_period_end ? new Date(sub.current_period_end * 1000) : undefined,
       };
+
+      // Also sync plan if it's in metadata (handles plan changes via Stripe)
+      if (subscription.metadata?.planId) {
+        update.subscriptionPlan = subscription.metadata.planId;
+      }
+      
+      if (subscription.items.data[0]?.plan?.interval) {
+        update.subscriptionInterval = subscription.items.data[0].plan.interval;
+      }
 
       await Workspace.findOneAndUpdate({ subscriptionId: subscription.id }, update);
       break;
@@ -77,6 +88,7 @@ export async function POST(req: NextRequest) {
       await Workspace.findOneAndUpdate({ subscriptionId: subscription.id }, {
         subscriptionStatus: 'canceled',
         subscriptionPlan: 'starter',
+        subscriptionEnd: null,
       });
       break;
     }

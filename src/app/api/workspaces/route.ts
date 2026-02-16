@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Workspace from '@/models/Workspace';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
+import { PLAN_LIMITS } from '@/lib/limits';
 
 // GET /api/workspaces - Récupérer les workspaces de l'utilisateur
 export async function GET(request: NextRequest) {
@@ -24,14 +25,106 @@ export async function GET(request: NextRequest) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as { userId: string };
 
     // Récupérer les workspaces où l'utilisateur est propriétaire ou membre
-    const workspaces = await Workspace.find({
+    const rawWorkspaces = await Workspace.find({
       $or: [
         { owner: decoded.userId },
         { 'members.user': decoded.userId }
       ]
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+    }).sort({ createdAt: -1 });
+
+    const { stripe } = await import('@/lib/stripe');
+    const url = new URL(request.url);
+    const sessionId = url.searchParams.get('session_id');
+    
+    // Live sync with Stripe for paid plans if data is missing or stale
+    const workspaces = await Promise.all(rawWorkspaces.map(async (ws) => {
+      let subId = ws.subscriptionId;
+      let customerId = ws.stripeCustomerId;
+
+      // Special case: if session_id is provided, try to find the subscription from session
+      if (sessionId && (!subId || ws.subscriptionStatus !== 'active')) {
+        try {
+          const session = await stripe.checkout.sessions.retrieve(sessionId);
+          if (session.metadata?.workspaceId === ws._id.toString() && session.subscription) {
+            subId = session.subscription as string;
+            ws.subscriptionId = subId;
+            customerId = session.customer as string;
+            ws.stripeCustomerId = customerId;
+            if (session.metadata.planId) {
+              ws.subscriptionPlan = session.metadata.planId as any;
+            }
+          }
+        } catch (err) {
+          console.error('Session sync error:', err);
+        }
+      }
+
+      // SYNC FALLBACK 1: If customerId is missing, try to find it by owner's email
+      if (!customerId && ws.subscriptionPlan !== 'starter') {
+         try {
+           const owner = await User.findById(ws.owner);
+           if (owner?.email) {
+             const customerByEmail = await stripe.customers.list({ email: owner.email, limit: 1 });
+             if (customerByEmail.data.length > 0) {
+               customerId = customerByEmail.data[0].id;
+               ws.stripeCustomerId = customerId;
+             }
+           }
+         } catch (err) {
+           console.error('Email customer sync error:', err);
+         }
+      }
+
+      // SYNC FALLBACK 2: If we still don't have a subId but have a customerId, look for ANY subscriptions
+      if (!subId && customerId && ws.subscriptionPlan !== 'starter') {
+        try {
+          const subscriptions = await stripe.subscriptions.list({
+            customer: customerId,
+            limit: 1,
+          });
+          if (subscriptions.data.length > 0) {
+            const activeSub = subscriptions.data[0] as any;
+            subId = activeSub.id;
+            ws.subscriptionId = subId;
+            ws.subscriptionStatus = activeSub.status;
+            if (activeSub.current_period_end) {
+              ws.subscriptionEnd = new Date(activeSub.current_period_end * 1000);
+            }
+            ws.subscriptionInterval = activeSub.items.data[0].plan.interval as any;
+            if (activeSub.metadata?.planId) {
+              ws.subscriptionPlan = activeSub.metadata.planId;
+            }
+          }
+        } catch (err) {
+          console.error('Customer sub sync fallback error:', err);
+        }
+      }
+
+      // If we have a subId, ensure we have the latest info
+      if (subId) {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(subId) as any;
+          if (subscription) {
+            ws.subscriptionStatus = subscription.status;
+            if (subscription.current_period_end) {
+              ws.subscriptionEnd = new Date(subscription.current_period_end * 1000);
+            }
+            ws.subscriptionInterval = subscription.items.data[0].plan.interval;
+            // Force sync plan from metadata if available
+            if (subscription.metadata?.planId) {
+              ws.subscriptionPlan = subscription.metadata.planId;
+            }
+            await ws.save();
+          }
+        } catch (err) {
+          console.error(`Failed to sync subscription ${subId} for workspace ${ws._id}`, err);
+        }
+      } else if (ws.isModified()) {
+        await ws.save();
+      }
+      
+      return ws.toObject();
+    }));
 
     return NextResponse.json({
       success: true,
@@ -67,7 +160,7 @@ export async function POST(request: NextRequest) {
     const userId = decoded.userId;
 
     const body = await request.json();
-    const { name, description, useCase, theme, icon, image, defaultProjectColor, invitedEmails, subscriptionPlan } = body;
+    const { name, description, useCase, theme, icon, image, defaultProjectColor, invitedEmails } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -76,14 +169,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check workspace limits and inherit plan
+    const existingWorkspaces = await Workspace.find({ owner: userId });
+    const premiumWs = existingWorkspaces.find(ws => 
+      ['team', 'enterprise'].includes(ws.subscriptionPlan) && ws.subscriptionStatus === 'active'
+    );
+    
+    // Determine the current plan based on existing premium workspaces or default to starter
+    const currentPlan = premiumWs ? premiumWs.subscriptionPlan : 'starter';
+    const limit = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS]?.maxWorkspaces || 1;
+
+    if (existingWorkspaces.length >= limit) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Limite de workspaces atteinte pour le plan ${currentPlan.toUpperCase()}.`,
+          currentLimit: limit,
+          currentCount: existingWorkspaces.length
+        },
+        { status: 403 }
+      );
+    }
+
     // Créer le workspace
     const workspace = await Workspace.create({
       name,
       description: description || '',
       owner: userId,
-      members: [{ user: userId, role: 'admin', joinedAt: new Date() }],
+      members: [
+        {
+          user: userId,
+          role: 'admin',
+          joinedAt: new Date(),
+        },
+      ],
       useCase: useCase || 'other',
-      subscriptionPlan: subscriptionPlan || 'starter',
+      subscriptionPlan: currentPlan, // Inherit plan
+      subscriptionStatus: premiumWs ? 'active' : 'inactive', // Inherit status
+      stripeCustomerId: premiumWs?.stripeCustomerId, // Link to same customer if premium
       settings: {
         defaultProjectColor: defaultProjectColor || '#6366f1',
         allowInvitations: true,
@@ -140,10 +263,11 @@ export async function POST(request: NextRequest) {
       message: 'Workspace créé avec succès'
     });
 
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la création du workspace';
     console.error('Error creating workspace:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur lors de la création du workspace' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
