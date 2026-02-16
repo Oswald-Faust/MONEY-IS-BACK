@@ -33,7 +33,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
     project: defaultProjectId || '',
     priority: 'less_important' as TaskPriority,
     dueDate: '',
-    assignee: '',
+    assignees: [] as string[],
     tags: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,7 +83,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
           project: formData.project,
           priority: formData.priority,
           dueDate: formData.dueDate || undefined,
-          assignee: formData.assignee || undefined,
+          assignees: formData.assignees,
           tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
         }),
       });
@@ -99,7 +99,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
           project: defaultProjectId || '',
           priority: 'less_important',
           dueDate: '',
-          assignee: '',
+          assignees: [],
           tags: '',
         });
         onClose();
@@ -132,7 +132,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
           >
-            <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto">
+            <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto hover:!bg-[var(--bg-card)]">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-white">Nouvelle tâche</h2>
@@ -254,9 +254,10 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                 {/* Assignee */}
                 <div>
                    <UserSelector 
-                      value={formData.assignee}
-                      onChange={(userId) => setFormData({ ...formData, assignee: userId })}
+                      value={formData.assignees}
+                      onChange={(userIds) => setFormData({ ...formData, assignees: userIds })}
                       className="mb-4"
+                      multiple={true}
                    />
                 </div>
 

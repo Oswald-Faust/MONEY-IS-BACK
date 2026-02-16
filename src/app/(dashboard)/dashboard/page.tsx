@@ -12,6 +12,7 @@ import {
   Sparkles,
   LayoutGrid,
   RotateCcw,
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -139,6 +140,29 @@ export default function DashboardPage() {
             Tout est prêt pour une journée productive.
           </p>
         </div>
+
+        {user?.role === 'admin' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex-1 max-w-md p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-3xl flex items-center justify-between gap-4 group hover:border-red-500/40 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-red-500/20 flex items-center justify-center text-red-500 animate-pulse">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-red-500 uppercase tracking-widest">Creator Mode</p>
+                <p className="text-sm text-main font-medium">Gérez la plateforme Edwin</p>
+              </div>
+            </div>
+            <Link href="/admin/dashboard">
+              <button className="px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20">
+                Ouvrir le Panel
+              </button>
+            </Link>
+          </motion.div>
+        )}
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button

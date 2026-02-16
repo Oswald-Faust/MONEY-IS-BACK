@@ -80,6 +80,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Seuls les admins peuvent inviter' }, { status: 403 });
     }
 
+    // Check Plan Limits
+    const { PLAN_LIMITS } = await import('@/lib/limits');
+    const memberCount = workspace.members.length + 1; // +1 for owner
+    const pendingInvitesCount = await Invitation.countDocuments({ workspace: workspaceId, status: 'pending' });
+    const totalCount = memberCount + pendingInvitesCount;
+
+    const limit = PLAN_LIMITS[workspace.subscriptionPlan as keyof typeof PLAN_LIMITS]?.maxMembers || Infinity;
+    
+    if (totalCount >= limit) {
+        return NextResponse.json({ 
+            success: false, 
+            error: `Limite de membres atteinte pour le plan ${workspace.subscriptionPlan}. Veuillez passer au plan supérieur.` 
+        }, { status: 403 });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     
@@ -149,6 +164,57 @@ export async function POST(request: NextRequest) {
     console.error('Invite member error:', error);
     return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
   }
+}
+
+// PUT /api/workspaces/members - Update member role
+export async function PUT(request: NextRequest) {
+    try {
+        await connectDB();
+        const auth = await verifyAuth(request);
+        if (!auth.success) return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
+
+        const body = await request.json();
+        const { workspaceId, userId, role } = body;
+
+        if (!workspaceId || !userId || !role) {
+             return NextResponse.json({ success: false, error: 'Workspace ID, User ID et Role requis' }, { status: 400 });
+        }
+
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) return NextResponse.json({ success: false, error: 'Workspace non trouvé' }, { status: 404 });
+
+        // Check Permissions (Only Owner can change Admin roles securely or Admins can change Editors/Visitors)
+        // For simplicity: Only Owner and Admins can change roles.
+        // Prevent changing Owner's role
+        if (workspace.owner.toString() === userId) {
+            return NextResponse.json({ success: false, error: 'Impossible de modifier le rôle du propriétaire' }, { status: 403 });
+        }
+
+        const isOwner = workspace.owner.toString() === auth.userId;
+        const requesterMember = workspace.members.find(m => m.user.toString() === auth.userId);
+        const isAdmin = isOwner || (requesterMember && requesterMember.role === 'admin');
+
+        if (!isAdmin) {
+             return NextResponse.json({ success: false, error: 'Permission refusée' }, { status: 403 });
+        }
+
+        // Additional check: Admin cannot change another Admin's role unless Owner? 
+        // Let's keep it simple: Admin can manage roles.
+
+        const memberIndex = workspace.members.findIndex(m => m.user.toString() === userId);
+        if (memberIndex === -1) {
+            return NextResponse.json({ success: false, error: 'Membre non trouvé' }, { status: 404 });
+        }
+
+        workspace.members[memberIndex].role = role;
+        await workspace.save();
+
+        return NextResponse.json({ success: true, message: 'Rôle mis à jour' });
+
+    } catch (error: any) {
+        console.error('Update member error:', error);
+        return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
+    }
 }
 
 // DELETE /api/workspaces/members - Remove a member or cancel invitation

@@ -37,6 +37,20 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditing = !!currentProject;
+  const currentWorkspace = useAppStore(state => state.currentWorkspace);
+
+  // Check if user is Workspace Admin
+  // (Might keep this if needed for other things, but removing for now to clean up if unused)
+  /*
+  const isWorkspaceAdmin = React.useMemo(() => {
+    if (!currentWorkspace || !user) return false;
+    if (currentWorkspace.owner === user._id) return true;
+    const member = currentWorkspace.members?.find((m: { user: string | { _id: string }; role: string }) => 
+      (typeof m.user === 'string' ? m.user : m.user._id) === user._id
+    );
+    return member?.role === 'admin';
+  }, [currentWorkspace, user]);
+  */
 
   // Initialize form when editing
   useEffect(() => {
@@ -67,35 +81,42 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
 
     try {
       if (isEditing && currentProject) {
-        updateProject(currentProject._id, {
-          name: formData.name,
-          description: formData.description,
-          color: formData.color,
-          updatedAt: new Date().toISOString(),
+        // Appeler l'API PATCH
+        const response = await fetch(`/api/projects?id=${currentProject._id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            description: formData.description,
+            color: formData.color,
+          }),
         });
-        toast.success('Projet mis à jour !');
-        onClose();
+
+        const data = await response.json();
+
+        if (data.success) {
+          updateProject(currentProject._id, data.data);
+          toast.success('Projet mis à jour !');
+          onClose();
+        } else {
+          toast.error(data.error || 'Erreur lors de la mise à jour');
+        }
       } else {
         if (!token || !user) {
           toast.error('Vous devez être connecté');
           return;
         }
 
-        // Récupérer le workspace de l'utilisateur
-        const workspaceResponse = await fetch('/api/workspaces', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        const workspaceData = await workspaceResponse.json();
+        // Récupérer le workspace
+        const targetWorkspaceId = workspaceId || currentWorkspace?._id;
         
-        if (!workspaceData.success || !workspaceData.data || workspaceData.data.length === 0) {
+        if (!targetWorkspaceId) {
           toast.error('Workspace non trouvé');
           return;
         }
-
-        const workspace = workspaceData.data[0]; // Premier workspace
 
         // Créer le projet via l'API
         const response = await fetch('/api/projects', {
@@ -109,7 +130,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
             description: formData.description,
             color: formData.color,
             icon: 'folder',
-            workspace: workspace._id,
+            workspace: targetWorkspaceId,
           }),
         });
 
@@ -153,7 +174,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50"
           >
-            <div className="glass-card p-6 m-4">
+            <div className="glass-card p-6 m-4 hover:!bg-[var(--bg-card)]">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-white">
@@ -233,6 +254,8 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                     ))}
                   </div>
                 </div>
+
+
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-2">

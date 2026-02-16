@@ -1,18 +1,96 @@
-
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, 
   Mail, 
   Trash2, 
   Crown, 
   UserPlus, 
-  Search
+  Search,
+  ChevronDown,
+  Check,
+  Shield,
+  User
 } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import { useAuthStore, useAppStore } from '@/store';
 import toast from 'react-hot-toast';
 import InviteMemberModal from '@/components/modals/InviteMemberModal';
+
+// Sub-component for Role Selector to manage its own state
+const RoleSelector = ({ 
+    member, 
+    onUpdate 
+}: { 
+    member: any, 
+    onUpdate: (userId: string, role: string) => void 
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Close on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const roles = [
+        { value: 'admin', label: 'Admin', icon: Crown, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+        { value: 'editor', label: 'Éditeur', icon: User, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+        { value: 'visitor', label: 'Visiteur', icon: Shield, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' }
+    ];
+
+    const currentRole = roles.find(r => r.value === member.role) || roles[1];
+
+    return (
+        <div className="relative" ref={containerRef}>
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase border flex items-center gap-2 transition-all hover:bg-white/5 ${currentRole.bg} ${currentRole.color} ${currentRole.border}`}
+            >
+                {currentRole.label}
+                <ChevronDown className="w-3 h-3 opacity-50" />
+            </button>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 top-full mt-2 w-48 bg-[#1a1a24] border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden"
+                    >
+                        {roles.map((role) => (
+                            <button
+                                key={role.value}
+                                onClick={() => {
+                                    onUpdate(member.user._id, role.value);
+                                    setIsOpen(false);
+                                }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/5 transition-colors ${member.role === role.value ? 'bg-white/[0.02]' : ''}`}
+                            >
+                                <div className={`p-1.5 rounded-lg ${role.bg} ${role.color}`}>
+                                    <role.icon className="w-4 h-4" />
+                                </div>
+                                <span className={`text-sm font-medium ${member.role === role.value ? 'text-white' : 'text-gray-400'}`}>
+                                    {role.label}
+                                </span>
+                                {member.role === role.value && (
+                                    <Check className="w-3 h-3 ml-auto text-indigo-400" />
+                                )}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 export default function WorkspaceMembers() {
   const { token, user } = useAuthStore();
@@ -99,6 +177,38 @@ export default function WorkspaceMembers() {
     }
   };
 
+  const updateRole = async (userId: string, newRole: string) => {
+    try {
+        // Optimistic update
+        setMembers(prev => prev.map(m => m.user._id === userId ? { ...m, role: newRole } : m));
+
+        const response = await fetch('/api/workspaces/members', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+                workspaceId: currentWorkspace?._id, 
+                userId, 
+                role: newRole 
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            toast.success('Rôle mis à jour');
+        } else {
+            toast.error(data.error);
+            fetchMembers(); // Revert on error
+        }
+    } catch {
+        toast.error('Erreur mise à jour rôle');
+        fetchMembers();
+    }
+  };
+
   // Filter logic
   const filteredMembers = members.filter(m => 
     m.user?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -116,12 +226,6 @@ export default function WorkspaceMembers() {
   const isOwner = ownerId === user?._id;
   
   // Find current user in members list to check role (if not owner)
-  // Note: owner might not be in members array depending on implementation, but in API we populate it separately or include it.
-  // In API route: `workspace.members.some(...) || workspace.owner === ...`
-  // The API returns { members, owner }
-  
-  // In fetchMembers, we set `members` from `data.data.members`.
-  // We should check if current user is in there with role admin.
   const currentUserMember = members.find((m: any) => m.user._id === user?._id);
   const isAdmin = isOwner || (currentUserMember && currentUserMember.role === 'admin');
 
@@ -224,13 +328,19 @@ export default function WorkspaceMembers() {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className={`px-2 py-1 rounded-lg text-xs font-bold uppercase border ${
-                                member.role === 'admin' 
-                                    ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' 
-                                    : 'bg-green-500/10 text-green-400 border-green-500/20'
-                            }`}>
-                                {member.role}
-                            </span>
+                            {isAdmin && member.user._id !== ownerId && member.user._id !== user?._id ? (
+                                <RoleSelector member={member} onUpdate={updateRole} />
+                            ) : (
+                                <span className={`px-2 py-1 rounded-lg text-xs font-bold uppercase border ${
+                                    member.role === 'admin' 
+                                        ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' 
+                                        : member.role === 'editor'
+                                        ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                        : 'bg-green-500/10 text-green-400 border-green-500/20'
+                                }`}>
+                                    {member.role === 'admin' ? 'Admin' : member.role === 'editor' ? 'Éditeur' : 'Visiteur'}
+                                </span>
+                            )}
                             
                             {isAdmin && member.user._id !== ownerId && member.user._id !== user?._id && (
                                 <button 

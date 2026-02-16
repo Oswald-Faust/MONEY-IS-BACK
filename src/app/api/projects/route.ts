@@ -72,6 +72,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check Plan Limits
+    const Workspace = (await import('@/models/Workspace')).default;
+    const { PLAN_LIMITS } = await import('@/lib/limits');
+    
+    const ws = await Workspace.findById(workspace);
+    if (!ws) {
+      return NextResponse.json({ success: false, error: 'Workspace non trouvé' }, { status: 404 });
+    }
+
+    const projectCount = await Project.countDocuments({ workspace });
+    const limit = PLAN_LIMITS[ws.subscriptionPlan as keyof typeof PLAN_LIMITS]?.maxProjects || 0;
+
+    if (projectCount >= limit) {
+      return NextResponse.json({ 
+        success: false, 
+        error: `Limite de projets atteinte pour le plan ${ws.subscriptionPlan}. Veuillez passer au plan supérieur.` 
+      }, { status: 403 });
+    }
+
     const project = await Project.create({
       name,
       description,
@@ -81,6 +100,7 @@ export async function POST(request: NextRequest) {
       owner: auth.userId,
       members: [{ user: auth.userId, role: 'admin', joinedAt: new Date() }],
       status: 'active',
+      securePassword: body.securePassword || undefined,
       tasksCount: 0,
       completedTasksCount: 0,
     });
@@ -96,6 +116,74 @@ export async function POST(request: NextRequest) {
     console.error('Create project error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Erreur lors de la création du projet' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    await connectDB();
+    
+    const auth = await verifyAuth(request);
+    if (!auth.success) {
+      return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID du projet requis' }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const { name, description, color, status, securePassword } = body;
+
+    const project = await Project.findById(id);
+    if (!project) {
+      return NextResponse.json({ success: false, error: 'Projet non trouvé' }, { status: 404 });
+    }
+
+    // Vérifier les permissions : Projet Admin ou Workspace Admin
+    const Workspace = (await import('@/models/Workspace')).default;
+    const ws = await Workspace.findById(project.workspace);
+    
+    const isWorkspaceAdmin = ws?.members.some(
+      (m: any) => m.user.toString() === auth.userId && m.role === 'admin'
+    ) || ws?.owner.toString() === auth.userId;
+
+    const isProjectAdmin = project.members.some(
+      (m: any) => m.user.toString() === auth.userId && m.role === 'admin'
+    ) || project.owner.toString() === auth.userId;
+
+    if (!isWorkspaceAdmin && !isProjectAdmin) {
+      return NextResponse.json({ success: false, error: 'Permissions insuffisantes' }, { status: 403 });
+    }
+
+    // Si on veut changer le mot de passe, seul l'admin du workspace peut le faire (selon la demande client)
+    if (securePassword !== undefined && !isWorkspaceAdmin) {
+        return NextResponse.json({ success: false, error: 'Seul l\'administrateur du workspace peut modifier le mot de passe sécurisé' }, { status: 403 });
+    }
+
+    // Mise à jour des champs
+    if (name) project.name = name;
+    if (description !== undefined) project.description = description;
+    if (color) project.color = color;
+    if (status) project.status = status;
+    if (securePassword) project.securePassword = securePassword;
+
+    await project.save();
+
+    return NextResponse.json({
+      success: true,
+      data: project,
+      message: 'Projet mis à jour avec succès',
+    });
+  } catch (error: any) {
+    console.error('Update project error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Erreur lors de la mise à jour du projet' },
       { status: 500 }
     );
   }

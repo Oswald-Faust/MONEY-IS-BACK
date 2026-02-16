@@ -152,6 +152,37 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
       {/* Footer / Stats */}
       <div className="pt-4 border-t border-glass-border flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
+           {/* Assignees Avatars */}
+           {(idea.assignees?.length > 0 || idea.assignee) && (
+                <div className="flex -space-x-2 mr-2">
+                   {/* Normalizing assignees array */}
+                   {(() => {
+                      let users: any[] = [];
+                      if (idea.assignees && idea.assignees.length > 0) {
+                          users = idea.assignees;
+                      } else if (idea.assignee) {
+                          users = [idea.assignee];
+                      }
+                      
+                      return users.slice(0, 3).map((u, i) => (
+                        <div key={i} className="w-5 h-5 rounded-full border-2 border-[#12121a] overflow-hidden" title={`${u.firstName} ${u.lastName}`}>
+                            {u.avatar ? (
+                                <img src={u.avatar} alt={u.firstName} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full bg-amber-500/20 flex items-center justify-center text-[7px] text-amber-500 font-bold">
+                                    {u.firstName?.[0]}{u.lastName?.[0]}
+                                </div>
+                            )}
+                        </div>
+                      )).concat(users.length > 3 ? [
+                        <div key="more" className="w-5 h-5 rounded-full border-2 border-[#12121a] bg-glass-hover flex items-center justify-center text-[7px] text-dim">
+                            +{users.length - 3}
+                        </div>
+                      ] : []);
+                   })()}
+                </div>
+            )}
+            
           <div className="flex items-center gap-1.5 text-[10px] font-bold text-dim uppercase tracking-widest">
             <Paperclip className="w-3 h-3" /> {idea.attachments?.length || 0}
           </div>

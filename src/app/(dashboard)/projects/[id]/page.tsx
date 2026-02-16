@@ -11,6 +11,7 @@ import {
   Link as LinkIcon, 
   Lightbulb,
   ArrowLeft,
+  Users,
   LucideIcon,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -29,7 +30,7 @@ export default function ProjectDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { projects, tasks, objectives, setTaskModalOpen, setTasks, setObjectives } = useAppStore();
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   
   // Helper to check if project matches, handling both string ID and populated object
@@ -92,6 +93,22 @@ export default function ProjectDetailPage() {
     ];
   }, [selectedDate, projectTasks, projectObjectives]);
 
+  const isProjectAdmin = useMemo(() => {
+    if (!project || !user) return false;
+    
+    // Check if owner (handle both string and populated object)
+    const ownerId = typeof project.owner === 'string' ? project.owner : (project.owner as any)._id;
+    if (ownerId === user._id) return true;
+
+    // Check if admin member
+    const member = project.members.find(m => {
+        const memberId = typeof m.user === 'string' ? m.user : m.user._id;
+        return memberId === user._id;
+    });
+    
+    return member?.role === 'admin';
+  }, [project, user]);
+
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -112,8 +129,25 @@ export default function ProjectDetailPage() {
     { label: 'OBJECTIFS', icon: Target, color: '#ef4444', href: `/objectives?project=${id}` },
     { label: 'DONNÉES', icon: LinkIcon, color: '#94a3b8', href: `/drive?project=${id}` },
     { label: 'IDÉES', icon: Lightbulb, color: '#eab308', href: `/ideas?project=${id}` },
-    { label: '', icon: null, color: '', href: '#' },
   ];
+
+  if (isProjectAdmin) {
+    menuItems.push({ label: 'ÉQUIPE', icon: Users, color: '#8b5cf6', href: `/projects/${id}/team` });
+  }
+
+  // Fill up grid to 6 items if needed for layout symmetry, 
+  // but if we have 6 items (with Equipe), no need for filler.
+  // If we have 5 items, we need 1 filler.
+  if (menuItems.length % 3 !== 0) {
+      // Add empty items to fill row if needed?
+      // The original code had a filler: { label: '', icon: null, color: '', href: '#' }
+      // If we have 5 items, we want 6.
+      // If we have 6 items (with equipe), we want 6.
+      // So checking length is easiest.
+      while (menuItems.length % 3 !== 0) {
+        menuItems.push({ label: '', icon: null, color: '', href: '#' });
+      }
+  }
 
   return (
     <div className="page-fade space-y-10 pb-20">

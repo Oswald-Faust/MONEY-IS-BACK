@@ -1,25 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import dbConnect from '@/lib/mongodb';
 import SystemLog from '@/models/SystemLog';
 import { verifyAuth } from '@/lib/auth';
-import '@/models/User'; // Import user model to ensure it's registered
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await verifyAuth(req);
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const auth = await verifyAuth(req);
+    if (!auth || auth.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
+
+    await dbConnect();
 
     const logs = await SystemLog.find()
-      .populate('user', 'firstName lastName email details status ip createdAt')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .skip(skip)
+      .limit(limit)
+      .populate('user', 'firstName lastName email');
 
-    return NextResponse.json({ success: true, data: logs });
+    const total = await SystemLog.countDocuments();
+
+    return NextResponse.json({
+      success: true,
+      data: logs,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,54 +1,39 @@
 'use client';
 
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
   Menu,
   X,
-  ChevronRight,
   Layout,
   MessageSquare,
   Target,
   FileText,
   Zap,
   Users,
-  Bell,
-  Search,
-  Settings,
-  Calendar,
-  BarChart3,
-  List,
-  Kanban,
-  CreditCard,
-  Globe,
-  Smartphone,
-  Shield,
   ArrowRight,
-  ChevronDown,
   LogOut,
-  User as UserIcon,
-  Briefcase,
-  Cpu,
-  Lock,
-  Box,
-  PieChart,
   Check,
   Twitter,
   Github,
   Linkedin,
-  Instagram
+  Instagram,
+  BarChart3,
+  Shield,
+  List,
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useRouter } from 'next/navigation';
 
 // --- Components ---
 
 const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { isAuthenticated, user, logout } = useAuthStore();
+    const { isAuthenticated, logout } = useAuthStore();
     
     const [isMobile, setIsMobile] = useState(false);
     
@@ -111,7 +96,7 @@ const Navbar = () => {
                                     transition={{ duration: 0.2 }}
                                     className="text-lg font-bold text-white tracking-tight hidden sm:block whitespace-nowrap overflow-hidden origin-left"
                                 >
-                                    Edwin
+                                    MONEY IS BACK
                                 </motion.span>
                             )}
                         </AnimatePresence>
@@ -321,7 +306,7 @@ const Hero = () => {
                     transition={{ duration: 0.8, delay: 0.4 }}
                     className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-12 font-light"
                 >
-                    Retrouvez vos Tâches, Docs, Chat, Objectifs, et bien plus encore sur une seule plateforme unifiée. L'OS de votre réussite.
+                    Retrouvez vos Tâches, Docs, Chat, Objectifs, et bien plus encore sur une seule plateforme unifiée. L&apos;OS de votre réussite.
                 </motion.p>
 
                 <motion.div 
@@ -362,7 +347,7 @@ const Hero = () => {
                             <div className="w-3 h-3 rounded-full bg-green-500/20 text-green-500 border border-transparent" />
                         </div>
                         <div className="mx-auto w-[40%] h-5 bg-white/5 rounded-md text-[10px] flex items-center justify-center text-zinc-600">
-                            edwin.app
+                            moneyisback.app
                         </div>
                     </div>
                     {/* Content Preview */}
@@ -471,7 +456,7 @@ const BentoGrid = () => {
                     {/* Large Card */}
                     <div className="md:col-span-2 relative h-[400px] rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden group">
                          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10" />
-                         <img src="https://images.unsplash.com/photo-1614064641938-3bcee52636c4?q=80&w=2671&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Feature" />
+                         <Image src="https://images.unsplash.com/photo-1614064641938-3bcee52636c4?q=80&w=2671&auto=format&fit=crop" fill className="object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Feature" />
                          <div className="absolute bottom-0 left-0 p-10 z-20 max-w-lg">
                              <div className="text-[#00FFB2] font-mono text-xs mb-2">DRIVE</div>
                              <h3 className="text-3xl font-medium text-white mb-2">Stockage & Partage Sécurisé</h3>
@@ -619,7 +604,7 @@ const Services = () => {
                         >
                             {/* Background Image */}
                             <div className="absolute inset-0 z-0 opacity-40">
-                                <img src={TAB_CONTENT[activeTab].image} alt={TAB_CONTENT[activeTab].title} className="w-full h-full object-cover grayscale mix-blend-overlay" />
+                                <Image src={TAB_CONTENT[activeTab].image} alt={TAB_CONTENT[activeTab].title} fill className="object-cover grayscale mix-blend-overlay" />
                                 <div className={`absolute inset-0 bg-gradient-to-br ${TAB_CONTENT[activeTab].gradient} mix-blend-soft-light`} />
                             </div>
 
@@ -644,24 +629,57 @@ const Services = () => {
     );
 };
 
-const PricingCard = ({ plan, price, highlight = false }: { plan: string; price: string; highlight?: boolean }) => (
+const PricingCard = ({ plan, price, highlight = false, billingCycle, originalPrice, features }: { plan: string; price: string | null; highlight?: boolean; billingCycle: 'monthly' | 'yearly'; originalPrice?: string; features: string[] }) => (
     <div className={`
         p-10 rounded-[40px] border flex flex-col h-full transition-all duration-300
         ${highlight 
-            ? 'bg-[#1A1A1A] border-[#D7FE03]/50 shadow-[0_0_40px_rgba(215,254,3,0.1)]' 
+            ? 'bg-[#1A1A1A] border-[#00FFB2]/50 shadow-[0_0_40px_rgba(0,255,178,0.1)]' 
             : 'bg-[#0A0A0A] border-white/5 hover:border-white/10'
         }
     `}>
         <div className="mb-8">
             <h3 className="text-2xl text-white font-medium mb-2">{plan}</h3>
-            <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-medium text-white">${price}</span>
-                <span className="text-[#666]">/mo</span>
+            <div className="flex items-baseline gap-2 h-20 overflow-visible flex-wrap">
+                {price === null ? (
+                    <span className="text-4xl font-medium text-white">Sur devis</span>
+                ) : (
+                    <div className="flex flex-col">
+                        {originalPrice && (
+                            <div className="text-zinc-500 line-through text-lg font-medium">
+                                ${originalPrice}
+                            </div>
+                        )}
+                        <div className="flex items-baseline">
+                            {price === '0' || price === 'FREE' || price === 'GRATUIT' ? (
+                                <span className="text-5xl font-medium text-white uppercase tracking-tight">Gratuit</span>
+                            ) : (
+                                <span className="text-5xl font-medium text-white flex">
+                                    $
+                                    <AnimatePresence mode="wait">
+                                        <motion.span
+                                            key={billingCycle + price}
+                                            initial={{ y: 20, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            exit={{ y: -20, opacity: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="block"
+                                        >
+                                            {price}
+                                        </motion.span>
+                                    </AnimatePresence>
+                                </span>
+                            )}
+                            {(price !== '0' && price !== 'FREE' && price !== 'GRATUIT') && (
+                                <span className="text-[#666] ml-1">{plan === 'Team' ? '/mois' : '/user/mois'}</span>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
 
         <div className="space-y-4 mb-10 flex-1">
-            {['Unlimited transactions', 'Analytics dashboard', 'Support 24/7', 'Virtual cards'].map((f, i) => (
+            {features.map((f, i) => (
                 <div key={i} className="flex items-center gap-3 text-[#A8A8A8]">
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center ${highlight ? 'bg-[#D7FE03] text-black' : 'bg-[#242424] text-white'}`}>
                         <Check className="w-3 h-3" />
@@ -671,31 +689,85 @@ const PricingCard = ({ plan, price, highlight = false }: { plan: string; price: 
             ))}
         </div>
 
-        <button className={`
-            w-full py-4 rounded-[20px] font-bold text-lg transition-all
-            ${highlight 
-                ? 'bg-[#D7FE03] text-black hover:bg-[#c2e503]' 
-                : 'bg-[#242424] text-white hover:bg-white hover:text-black'
-            }
-        `}>
-            Choose Plan
-        </button>
+        <Link href={`/register?plan=${plan.toLowerCase()}&billing=${billingCycle}`} className="block w-full">
+            <button className={`
+                w-full py-4 rounded-[20px] font-bold text-lg transition-all
+                ${highlight 
+                    ? 'bg-[#D7FE03] text-black hover:bg-[#c2e503]' 
+                    : 'bg-[#242424] text-white hover:bg-white hover:text-black'
+                }
+            `}>
+                Commencer
+            </button>
+        </Link>
     </div>
 );
 
 const SimplePricing = () => {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
-    const prices = {
-        basic: { monthly: '0', yearly: '0' },
-        pro: { monthly: '29', yearly: '24' },
-        enterprise: { monthly: '99', yearly: '79' }
-    };
+    const plans = [
+        {
+            plan: "Starter",
+            price: "GRATUIT",
+            originalPrice: "19.99",
+            features: [
+                "3 Utilisateurs inclus",
+                "3 Projets actifs",
+                "2 Go de stockage Drive",
+                "5 IDs Sécurisés",
+                "Support par email (48h)"
+            ],
+            highlight: false
+        },
+        {
+            plan: "Pro",
+            price: billingCycle === 'monthly' ? "10" : "7.9",
+            originalPrice: billingCycle === 'monthly' ? "15" : "10",
+            features: [
+                "5 Utilisateurs inclus",
+                "Puis $10/user supplémentaire",
+                "Stockage illimité",
+                "Time Tracking natif",
+                "Vues Gantt & Formulaires",
+                "Support Prioritaire"
+            ],
+            highlight: true
+        },
+        {
+            plan: "Business",
+            price: billingCycle === 'monthly' ? "19" : "12",
+            originalPrice: billingCycle === 'monthly' ? "29" : "19",
+            features: [
+                "10 Utilisateurs inclus",
+                "Puis $19/user supplémentaire",
+                "Dashboards personnalisés",
+                "Mind Maps & Timelines",
+                "Gestion de charge (Workload)",
+                "Google SSO intégré",
+                "Permissions granulaires"
+            ],
+            highlight: false
+        },
+        {
+            plan: "Enterprise",
+            price: null,
+            features: [
+                "Utilisateurs illimités",
+                "White Label complet",
+                "Logs d'Audit & Sécurité",
+                "SAML SSO / Okta",
+                "API illimitée",
+                "Success Manager dédié"
+            ],
+            highlight: false
+        }
+    ];
 
     return (
-        <section className="py-32 px-4 max-w-[1400px] mx-auto">
+        <section id="pricing" className="py-32 px-4 max-w-[1400px] mx-auto">
             <div className="text-center mb-20">
-                <h2 className="text-[60px] text-white font-medium mb-6">Simple Pricing</h2>
+                <h2 className="text-4xl md:text-[60px] text-white font-medium mb-6">Tarifs Simples</h2>
                 
                 {/* Toggle */}
                 <div className="inline-flex items-center p-1 bg-[#1A1A1A] rounded-full border border-white/5">
@@ -703,21 +775,29 @@ const SimplePricing = () => {
                         onClick={() => setBillingCycle('monthly')}
                         className={`px-8 py-3 rounded-full font-bold text-sm transition-all ${billingCycle === 'monthly' ? 'bg-[#333] text-white shadow-lg' : 'text-[#666] hover:text-white'}`}
                     >
-                        Monthly
+                        Mensuel
                     </button>
                     <button 
                         onClick={() => setBillingCycle('yearly')}
                         className={`px-8 py-3 rounded-full font-bold text-sm transition-all ${billingCycle === 'yearly' ? 'bg-[#333] text-white shadow-lg' : 'text-[#666] hover:text-white'}`}
                     >
-                        Yearly (-20%)
+                        Annuel (-25%)
                     </button>
                 </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-                <PricingCard plan="Basic" price={prices.basic[billingCycle]} />
-                <PricingCard plan="Pro" price={prices.pro[billingCycle]} highlight={true} />
-                <PricingCard plan="Enterprise" price={prices.enterprise[billingCycle]} />
+            <div className="grid md:grid-cols-4 gap-6">
+                {plans.map((p, i) => (
+                    <PricingCard 
+                        key={i}
+                        plan={p.plan} 
+                        price={p.price} 
+                        originalPrice={p.originalPrice} 
+                        billingCycle={billingCycle} 
+                        features={p.features}
+                        highlight={p.highlight}
+                    />
+                ))}
             </div>
         </section>
     );
@@ -732,7 +812,7 @@ const Footer = () => (
                         <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
                             <span className="text-white font-bold text-xs">E</span>
                         </div>
-                        <span className="text-white font-bold text-xl">Edwin</span>
+                        <span className="text-white font-bold text-xl">MONEY IS BACK</span>
                     </Link>
                     <p className="text-zinc-500 text-sm mb-6 max-w-sm">
                         La plateforme tout-en-un pour gérer vos projets, vos équipes et votre croissance. 
@@ -801,7 +881,7 @@ const Footer = () => (
 
             <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="text-zinc-600 text-sm">
-                    © 2026 Edwin Inc. Tous droits réservés.
+                    © 2026 MONEY IS BACK Inc. Tous droits réservés.
                 </div>
                 <div className="flex gap-8 text-sm font-medium text-zinc-500">
                     <span>Fait avec ❤️ à Paris</span>

@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface IProject extends Document {
   _id: mongoose.Types.ObjectId;
@@ -18,11 +19,13 @@ export interface IProject extends Document {
     allowComments: boolean;
     defaultTaskPriority: 'important' | 'less_important' | 'waiting';
   };
+  securePassword?: string;
   status: 'active' | 'archived' | 'paused';
   tasksCount: number;
   completedTasksCount: number;
   createdAt: Date;
   updatedAt: Date;
+  compareSecurePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const ProjectSchema = new Schema<IProject>(
@@ -89,6 +92,10 @@ const ProjectSchema = new Schema<IProject>(
         default: 'less_important',
       },
     },
+    securePassword: {
+      type: String,
+      select: false,
+    },
     status: {
       type: String,
       enum: ['active', 'archived', 'paused'],
@@ -107,6 +114,24 @@ const ProjectSchema = new Schema<IProject>(
     timestamps: true,
   }
 );
+
+// Hash password before saving
+ProjectSchema.pre('save', async function () {
+  if (!this.isModified('securePassword') || !this.securePassword) return;
+  
+  try {
+    const salt = await bcrypt.genSalt(12);
+    this.securePassword = await bcrypt.hash(this.securePassword, salt);
+  } catch (error) {
+    throw error;
+  }
+});
+
+// Compare password method
+ProjectSchema.methods.compareSecurePassword = async function (candidatePassword: string): Promise<boolean> {
+  if (!this.securePassword) return false;
+  return bcrypt.compare(candidatePassword, this.securePassword);
+};
 
 // Index for faster queries
 ProjectSchema.index({ workspace: 1, status: 1 });

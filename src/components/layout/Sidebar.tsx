@@ -25,6 +25,12 @@ import {
   X,
   MessageCircle,
   UserPlus,
+  Sparkles,
+  Zap,
+  Star,
+  ShieldCheck,
+  Rocket,
+  Command,
 } from 'lucide-react';
 
 const mainNavItems = [
@@ -42,15 +48,52 @@ const secondaryNavItems = [
   { icon: Key, label: 'IDs Sécurisés', href: '/secure-ids', view: 'ids' as const },
   { icon: HardDrive, label: 'Drive', href: '/drive', view: 'drive' as const },
   { icon: UserPlus, label: 'Inviter', href: '/invite', view: 'invite' as const },
+  { icon: Sparkles, label: 'Mettre à niveau', href: '/upgrade', view: 'upgrade' as const },
 ];
 
 import Image from 'next/image';
+
+const PlanBadge = ({ plan }: { plan?: string }) => {
+  const getPlanStyles = (planId: string = 'starter') => {
+    switch (planId) {
+      case 'pro':
+        return { label: 'PRO', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-400', icon: Zap };
+      case 'business':
+        return { label: 'BIZ', bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400', icon: Star };
+      case 'enterprise':
+        return { label: 'ENT', bg: 'bg-[#00FFB2]/10', border: 'border-[#00FFB2]/20', text: 'text-[#00FFB2]', icon: ShieldCheck };
+      case 'admin':
+        return { label: 'ADMIN', bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', icon: ShieldCheck };
+      default:
+        return { label: 'FREE', bg: 'bg-white/5', border: 'border-white/10', text: 'text-gray-500', icon: Rocket };
+    }
+  };
+
+  const config = getPlanStyles(plan);
+  const Icon = config.icon;
+
+  return (
+    <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border ${config.bg} ${config.border} ${config.text}`}>
+      <Icon className="w-3 h-3" />
+      <span className="text-[10px] font-bold tracking-wider">{config.label}</span>
+    </div>
+  );
+};
 
 
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { sidebarCollapsed, toggleSidebar, projects, setProjectModalOpen, isMobileMenuOpen, setMobileMenuOpen, currentWorkspace } = useAppStore();
+  const { 
+    sidebarCollapsed, 
+    toggleSidebar, 
+    projects, 
+    setProjectModalOpen, 
+    isMobileMenuOpen, 
+    setMobileMenuOpen, 
+    currentWorkspace,
+    setSearchModalOpen
+  } = useAppStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
@@ -102,8 +145,24 @@ export default function Sidebar() {
                 exit={{ opacity: 0 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">MB</span>
+                <div 
+                  className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden flex-shrink-0"
+                  style={{ 
+                    backgroundColor: currentWorkspace?.settings?.image ? 'transparent' : (currentWorkspace?.settings?.defaultProjectColor || '#6366f1')
+                  }}
+                >
+                  {currentWorkspace?.settings?.image ? (
+                    <Image 
+                      src={currentWorkspace.settings.image} 
+                      alt="" 
+                      fill 
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-white font-bold text-sm">
+                      {currentWorkspace?.name ? currentWorkspace.name.substring(0, 2).toUpperCase() : 'MB'}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <h1 className="font-semibold text-main text-sm truncate max-w-[160px]">
@@ -131,15 +190,27 @@ export default function Sidebar() {
 
       {/* Search */}
       {(!sidebarCollapsed || isMobile) && (
-        <div className="px-4 py-4">
-          <div className="relative group">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-indigo-400 transition-colors duration-200" />
-            <input
-              type="text"
-              placeholder="Rechercher..."
-              className="w-full pl-11 pr-4 py-3 text-sm bg-white/5 border border-white/10 rounded-2xl text-main placeholder-dim focus:bg-glass-hover focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300"
-            />
+        <div className="px-4 py-4 space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[10px] font-bold text-dim uppercase tracking-widest flex items-center gap-2">
+              <Search className="w-3 h-3" />
+              Quick search
+            </span>
+            <PlanBadge plan={currentWorkspace?.subscriptionPlan} />
           </div>
+          <button 
+            onClick={() => setSearchModalOpen(true)}
+            className="relative group w-full flex items-center"
+          >
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-hover:text-indigo-400 transition-colors duration-200" />
+            <div className="w-full pl-11 pr-4 py-2.5 text-sm bg-white/5 border border-white/10 rounded-xl text-dim text-left group-hover:bg-glass-hover group-hover:border-indigo-500/40 transition-all duration-300 shadow-inner flex items-center justify-between">
+              <span>Rechercher...</span>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] font-mono text-gray-500">
+                <Command className="w-2.5 h-2.5" />
+                <span>K</span>
+              </div>
+            </div>
+          </button>
         </div>
       )}
 
@@ -179,6 +250,31 @@ export default function Sidebar() {
               </Link>
             );
           })}
+
+          {/* Admin Switcher */}
+          {user?.role === 'admin' && (
+            <Link href="/admin/dashboard">
+              <motion.div
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.98 }}
+                className="mt-4 flex items-center gap-3 px-3 py-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all cursor-pointer group"
+              >
+                <ShieldCheck className="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                <AnimatePresence mode="wait">
+                  {(!sidebarCollapsed || isMobile) && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: 'auto' }}
+                      exit={{ opacity: 0, width: 0 }}
+                      className="text-sm font-bold whitespace-nowrap uppercase tracking-wider"
+                    >
+                      Mode Créateur
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </Link>
+          )}
         </div>
 
         {/* Projects Section */}
@@ -249,7 +345,10 @@ export default function Sidebar() {
               </div>
             )}
             <div className="space-y-1">
-              {secondaryNavItems.map((item) => {
+              {secondaryNavItems.filter(item => {
+                if (item.label === 'Mettre à niveau' && user?.role === 'admin') return false;
+                return true;
+              }).map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link key={item.href} href={item.href}>

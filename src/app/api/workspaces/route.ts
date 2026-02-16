@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const userId = decoded.userId;
 
     const body = await request.json();
-    const { name, description, useCase, theme, icon, image, defaultProjectColor, invitedEmails } = body;
+    const { name, description, useCase, theme, icon, image, defaultProjectColor, invitedEmails, subscriptionPlan } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
       owner: userId,
       members: [{ user: userId, role: 'admin', joinedAt: new Date() }],
       useCase: useCase || 'other',
+      subscriptionPlan: subscriptionPlan || 'starter',
       settings: {
         defaultProjectColor: defaultProjectColor || '#6366f1',
         allowInvitations: true,

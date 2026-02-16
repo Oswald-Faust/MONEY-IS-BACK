@@ -80,7 +80,7 @@ export default function CreateFolderModal({ isOpen, onClose }: CreateFolderModal
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-[#12121a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-md bg-[#12121a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden hover:!bg-[#12121a]"
         >
           <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
             <div className="flex items-center gap-3">

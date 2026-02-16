@@ -79,6 +79,7 @@ interface AppState {
   isCreateFolderModalOpen: boolean;
   isIdeaModalOpen: boolean;
   isCreateUserModalOpen: boolean;
+  isSearchModalOpen: boolean;
   taskProjectId?: string;
   objectiveProjectId?: string;
   uploadProjectId?: string;
@@ -93,6 +94,7 @@ interface AppState {
   setCreateFolderModalOpen: (open: boolean, projectId?: string, parentId?: string) => void;
   setIdeaModalOpen: (open: boolean) => void;
   setCreateUserModalOpen: (open: boolean) => void;
+  setSearchModalOpen: (open: boolean) => void;
   
   // Loading states
   isLoading: boolean;
@@ -206,6 +208,7 @@ export const useAppStore = create<AppState>()(
       isCreateFolderModalOpen: false,
       isIdeaModalOpen: false,
       isCreateUserModalOpen: false,
+      isSearchModalOpen: false,
       taskProjectId: undefined,
       objectiveProjectId: undefined,
       uploadProjectId: undefined,
@@ -228,6 +231,7 @@ export const useAppStore = create<AppState>()(
       }),
       setIdeaModalOpen: (open) => set({ isIdeaModalOpen: open }),
       setCreateUserModalOpen: (open) => set({ isCreateUserModalOpen: open }),
+      setSearchModalOpen: (open) => set({ isSearchModalOpen: open }),
       
       // Loading
       isLoading: false,
@@ -238,6 +242,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         sidebarCollapsed: state.sidebarCollapsed,
         activeView: state.activeView,
+        currentWorkspace: state.currentWorkspace,
         projects: state.projects,
         tasks: state.tasks,
         routines: state.routines,

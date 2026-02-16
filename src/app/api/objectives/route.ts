@@ -5,6 +5,8 @@ import Project from '@/models/Project';
 import User from '@/models/User';
 import { verifyAuth } from '@/lib/auth';
 
+// ... imports
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -25,7 +27,8 @@ export async function GET(request: NextRequest) {
       const objective = await Objective.findById(id)
         .populate('project', 'name color')
         .populate('creator', 'firstName lastName avatar')
-        .populate('assignee', 'firstName lastName avatar');
+        .populate('assignee', 'firstName lastName avatar')
+        .populate('assignees', 'firstName lastName avatar');
 
       if (!objective) {
         return NextResponse.json({ success: false, error: 'Objectif non trouvé' }, { status: 404 });
@@ -70,6 +73,7 @@ export async function GET(request: NextRequest) {
       .populate('project', 'name color')
       .populate('creator', 'firstName lastName avatar')
       .populate('assignee', 'firstName lastName avatar')
+      .populate('assignees', 'firstName lastName avatar')
       .sort({ createdAt: -1 });
 
     // Add project info to objectives to match frontend type
@@ -110,7 +114,8 @@ export async function POST(request: NextRequest) {
       priority = 'medium',
       status = 'not_started',
       targetDate,
-      assignee,
+      assignee, // Single (deprecated but supported)
+      assignees, // Array
       checkpoints = [],
     } = body;
 
@@ -145,6 +150,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Handle assignees logic
+    let finalAssignees = assignees || [];
+    if (!assignees && assignee) {
+      finalAssignees = [assignee];
+    }
+    finalAssignees = [...new Set(finalAssignees)];
+    const finalAssignee = finalAssignees.length > 0 ? finalAssignees[0] : undefined;
+
     const objective = await Objective.create({
       title,
       description,
@@ -155,13 +168,15 @@ export async function POST(request: NextRequest) {
       status,
       targetDate: targetDate ? new Date(targetDate) : undefined,
       checkpoints,
-      assignee,
+      assignee: finalAssignee,
+      assignees: finalAssignees,
       progress: 0,
     });
 
     await objective.populate('project', 'name color');
     await objective.populate('creator', 'firstName lastName avatar');
     await objective.populate('assignee', 'firstName lastName avatar');
+    await objective.populate('assignees', 'firstName lastName avatar');
 
     // Add explicit project info for frontend convenience
     const objectiveResponse = {
@@ -202,6 +217,20 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
     
+    // Handle assignees update logic if present
+    if (body.assignees || body.assignee) {
+      let finalAssignees = body.assignees;
+      
+      if (!finalAssignees && body.assignee) {
+        finalAssignees = [body.assignee];
+      }
+      
+      if (finalAssignees) {
+        body.assignees = [...new Set(finalAssignees)];
+        body.assignee = body.assignees.length > 0 ? body.assignees[0] : null;
+      }
+    }
+    
     // Calculate progress if checkpoints are updated
     if (body.checkpoints) {
       const total = body.checkpoints.length;
@@ -219,7 +248,8 @@ export async function PATCH(request: NextRequest) {
     const updatedObjective = await Objective.findByIdAndUpdate(id, body, { new: true })
       .populate('project', 'name color')
       .populate('creator', 'firstName lastName avatar')
-      .populate('assignee', 'firstName lastName avatar');
+      .populate('assignee', 'firstName lastName avatar')
+      .populate('assignees', 'firstName lastName avatar');
 
     if (!updatedObjective) {
         return NextResponse.json({ success: false, error: 'Objectif non trouvé' }, { status: 404 });

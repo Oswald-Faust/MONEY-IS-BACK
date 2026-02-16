@@ -8,6 +8,7 @@ export interface IIdea extends Document {
   project?: mongoose.Types.ObjectId;
   workspace?: mongoose.Types.ObjectId;
   creator: mongoose.Types.ObjectId;
+  assignees: mongoose.Types.ObjectId[];
   assignee?: mongoose.Types.ObjectId;
   attachments: {
     id: string;
@@ -60,6 +61,10 @@ const IdeaSchema = new Schema<IIdea>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    assignees: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    }],
     attachments: [{
       id: {
         type: String,

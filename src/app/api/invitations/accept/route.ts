@@ -1,5 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Invitation from '@/models/Invitation';
 import Workspace from '@/models/Workspace';
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // Add to workspace
     workspace.members.push({
-        user: auth.userId,
+        user: new mongoose.Types.ObjectId(auth.userId),
         role: invitation.role,
         joinedAt: new Date()
     });

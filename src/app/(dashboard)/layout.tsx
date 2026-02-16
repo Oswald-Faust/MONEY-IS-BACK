@@ -14,6 +14,7 @@ import {
   CreateIdeaModal,
   CreateUserModal
 } from '@/components/modals';
+import GlobalSearch from '@/components/search/GlobalSearch';
 import React from 'react';
 import { Menu } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard';
@@ -209,6 +210,7 @@ export default function DashboardLayout({
           onClose={() => setIdeaModalOpen(false)} 
         />
         <CreateUserModal />
+        <GlobalSearch />
       </div>
     </AuthGuard>
   );

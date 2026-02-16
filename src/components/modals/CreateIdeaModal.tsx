@@ -30,20 +30,28 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
     project: '', 
     status: 'raw' as 'raw' | 'standby' | 'in_progress' | 'implemented' | 'archived',
     tags: [] as string[],
-    assignee: ''
+    assignees: [] as string[]
   });
 
   // Pre-select project or populate from initialData
   React.useEffect(() => {
     if (isOpen) {
       if (initialData) {
+        // Handle assignees: try to get list, fallback to single assignee
+        let loadedAssignees: string[] = [];
+        if (initialData.assignees && Array.isArray(initialData.assignees)) {
+            loadedAssignees = initialData.assignees.map((u: any) => typeof u === 'object' ? u._id : u);
+        } else if (initialData.assignee) {
+            loadedAssignees = [typeof initialData.assignee === 'object' ? initialData.assignee._id : initialData.assignee];
+        }
+
         setFormData({
             title: initialData.title,
             content: initialData.content,
             project: typeof initialData.project === 'object' ? initialData.project._id : initialData.project || '',
             status: initialData.status,
             tags: initialData.tags || [],
-            assignee: typeof initialData.assignee === 'object' ? initialData.assignee._id : initialData.assignee || ''
+            assignees: loadedAssignees
         });
         // We might want to handle existing attachments here too, but skipped for simplicity
       } else if (defaultProjectId) {
@@ -117,7 +125,7 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
           status: formData.status,
           tags: formData.tags,
           attachments: processedAttachments, // Note: this overwrites if PATCH, strictly one needs to merge.
-          assignee: formData.assignee || undefined
+          assignees: formData.assignees
         }),
       });
 
@@ -138,7 +146,7 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
           project: '',
           status: 'raw',
           tags: [],
-          assignee: '',
+          assignees: [],
         });
         setAttachments([]);
       } else {
@@ -168,7 +176,7 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg bg-[#12121a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-lg bg-[#12121a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden hover:!bg-[#12121a]"
         >
           {/* Header */}
           <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
@@ -228,8 +236,9 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
               {/* Assignee */}
               <div>
                 <UserSelector 
-                  value={formData.assignee}
-                  onChange={(userId) => setFormData({ ...formData, assignee: userId })}
+                  value={formData.assignees}
+                  onChange={(userIds) => setFormData({ ...formData, assignees: userIds })}
+                  multiple={true}
                 />
               </div>
 

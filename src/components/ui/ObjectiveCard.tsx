@@ -128,9 +128,41 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
 
       {/* Progress */}
       <div className="space-y-3 pt-4 border-t border-glass-border">
-        <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider">
-          <span className="text-dim">Progression</span>
-          <span className="text-main">{objective.progress}%</span>
+         <div className="flex items-center justify-between">
+            {/* Assignees Avatars */}
+            {(objective.assignees?.length > 0 || objective.assignee) && (
+                <div className="flex -space-x-2 mr-2">
+                   {/* Normalizing assignees array */}
+                   {(() => {
+                      let users: any[] = [];
+                      if (objective.assignees && objective.assignees.length > 0) {
+                          users = objective.assignees;
+                      } else if (objective.assignee) {
+                          users = [objective.assignee];
+                      }
+                      
+                      return users.slice(0, 3).map((u, i) => (
+                        <div key={i} className="w-6 h-6 rounded-full border-2 border-[#12121a] overflow-hidden" title={`${u.firstName} ${u.lastName}`}>
+                            {u.avatar ? (
+                                <img src={u.avatar} alt={u.firstName} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full bg-indigo-500/20 flex items-center justify-center text-[8px] text-indigo-300 font-bold">
+                                    {u.firstName?.[0]}{u.lastName?.[0]}
+                                </div>
+                            )}
+                        </div>
+                      )).concat(users.length > 3 ? [
+                        <div key="more" className="w-6 h-6 rounded-full border-2 border-[#12121a] bg-glass-hover flex items-center justify-center text-[8px] text-dim">
+                            +{users.length - 3}
+                        </div>
+                      ] : []);
+                   })()}
+                </div>
+            )}
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider ml-auto">
+                <span className="text-dim">Progression</span>
+                <span className="text-main">{objective.progress}%</span>
+            </div>
         </div>
         <div className="h-2 w-full bg-glass-bg rounded-full overflow-hidden">
           <motion.div

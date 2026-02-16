@@ -149,7 +149,7 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
           >
-            <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto">
+            <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto hover:!bg-[var(--bg-card)]">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-white">Nouvelle routine</h2>
                 <button

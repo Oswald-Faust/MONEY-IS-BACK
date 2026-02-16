@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
     const originalName = file.name;
 
     // 1. Check Module Access (Skip for avatars and admins)
-    if (uploadType !== 'avatar' && userObj?.role !== 'admin') {
+    const skipChecks = ['avatar', 'workspace-icon'].includes(uploadType || '');
+    if (!skipChecks && userObj?.role !== 'admin') {
        const isGlobalDriveDisabled = settings?.permissions?.driveAccess === false;
        const isUserDriveDisabled = userObj?.driveAccess === false;
 
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Check File Type (Skip for avatars and admins)
     const allowedExtensions = settings?.permissions?.allowedFileTypes || [];
-    if (uploadType !== 'avatar' && allowedExtensions.length > 0 && userObj?.role !== 'admin') {
+    if (!skipChecks && allowedExtensions.length > 0 && userObj?.role !== 'admin') {
       const parts = originalName.split('.');
       const extension = (parts.length > 1 ? '.' + parts.pop() : '').toLowerCase();
       
@@ -71,11 +72,11 @@ export async function POST(request: NextRequest) {
       // The token is automatically picked up from process.env.BLOB_READ_WRITE_TOKEN
     });
 
-    if (uploadType === 'avatar') {
+    if (skipChecks) {
         return NextResponse.json({ 
             success: true, 
             url: blob.url,
-            message: 'Avatar uploadé avec succès' 
+            message: `${uploadType === 'avatar' ? 'Avatar' : 'Icône'} uploadé avec succès` 
         });
     }
 

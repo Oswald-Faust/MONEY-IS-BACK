@@ -122,6 +122,37 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
 
             {/* Meta Info - Well spaced */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-dim">
+              {/* Assignees Avatars */}
+              {(task.assignees?.length > 0 || task.assignee) && (
+                <div className="flex -space-x-2 mr-2">
+                   {/* Normalizing assignees array */}
+                   {(() => {
+                      let users: any[] = [];
+                      if (task.assignees && task.assignees.length > 0) {
+                          users = task.assignees;
+                      } else if (task.assignee) {
+                          users = [task.assignee];
+                      }
+                      
+                      return users.slice(0, 3).map((u, i) => (
+                        <div key={i} className="w-6 h-6 rounded-full border-2 border-[#12121a] overflow-hidden" title={`${u.firstName} ${u.lastName}`}>
+                            {u.avatar ? (
+                                <img src={u.avatar} alt={u.firstName} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full bg-indigo-500/20 flex items-center justify-center text-[8px] text-indigo-300 font-bold">
+                                    {u.firstName?.[0]}{u.lastName?.[0]}
+                                </div>
+                            )}
+                        </div>
+                      )).concat(users.length > 3 ? [
+                        <div key="more" className="w-6 h-6 rounded-full border-2 border-[#12121a] bg-glass-hover flex items-center justify-center text-[8px] text-dim">
+                            +{users.length - 3}
+                        </div>
+                      ] : []);
+                   })()}
+                </div>
+              )}
+
               {task.dueDate && (
                 <div className="flex items-center gap-1.5 py-1 px-2 bg-glass-bg rounded-lg">
                   <Calendar className="w-3.5 h-3.5" />

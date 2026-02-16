@@ -23,6 +23,7 @@ export interface Project {
   workspace: string;
   owner: string;
   members: ProjectMember[];
+  securePassword?: string;
   status: 'active' | 'archived' | 'paused';
   tasksCount: number;
   completedTasksCount: number;
@@ -47,6 +48,7 @@ export interface Task {
   projectName?: string;
   projectColor?: string;
   assignee?: string | User;
+  assignees?: (string | User)[];
   creator: string | User;
   priority: TaskPriority;
   status: TaskStatus;
@@ -119,6 +121,19 @@ export interface Workspace {
   description?: string;
   owner: string;
   members: WorkspaceMember[];
+  useCase: 'personal' | 'work' | 'school' | 'agency' | 'startup' | 'other';
+  settings: {
+    defaultProjectColor: string;
+    allowInvitations: boolean;
+    icon: string;
+    image?: string;
+    theme: 'dark' | 'light' | 'system';
+  };
+  subscriptionPlan: 'starter' | 'pro' | 'business' | 'enterprise';
+  subscriptionStatus?: string;
+  subscriptionInterval?: 'month' | 'year';
+  subscriptionEnd?: string;
+  stripeCustomerId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -138,6 +153,7 @@ export interface Objective {
   projectColor?: string;
   creator: string;
   assignee?: string | User;
+  assignees?: (string | User)[];
   targetDate?: string;
   progress: number;
   checkpoints: ObjectiveCheckpoint[];
@@ -168,6 +184,7 @@ export interface Idea {
   project?: string;
   creator: string | User;
   assignee?: string | User;
+  assignees?: (string | User)[];
   attachments: Attachment[];
   tags: string[];
   status: 'raw' | 'standby' | 'in_progress' | 'implemented' | 'archived';

@@ -2,20 +2,22 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const { setAuth } = useAuthStore();
   
+  // Check for email in search params for prefill
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const emailPrefill = searchParams ? searchParams.get('email') : '';
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    email: emailPrefill || '',
     password: '',
     confirmPassword: '',
     accountType: 'user' as 'user' | 'admin',
@@ -60,12 +62,23 @@ export default function RegisterPage() {
       if (data.success) {
         setAuth(data.data.user, data.data.token);
         toast.success('Compte créé avec succès !');
-        // Utiliser replace pour éviter les problèmes d'hydratation
-        window.location.replace('/onboarding');
+        
+        // Check for callbackUrl
+        const urlParams = new URLSearchParams(window.location.search);
+        const callbackUrl = urlParams.get('callbackUrl');
+
+        if (callbackUrl) {
+            window.location.replace(callbackUrl);
+        } else {
+            const plan = urlParams.get('plan');
+            const billing = urlParams.get('billing');
+            const onboardingUrl = plan ? `/onboarding?plan=${plan}&billing=${billing || 'monthly'}` : '/onboarding';
+            window.location.replace(onboardingUrl);
+        }
       } else {
         toast.error(data.error || 'Erreur lors de l\'inscription');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erreur de connexion au serveur');
     } finally {
       setIsSubmitting(false);

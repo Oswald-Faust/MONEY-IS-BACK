@@ -7,6 +7,7 @@ export interface IObjective extends Document {
   project?: mongoose.Types.ObjectId;
   workspace?: mongoose.Types.ObjectId;
   creator: mongoose.Types.ObjectId;
+  assignees: mongoose.Types.ObjectId[];
   assignee?: mongoose.Types.ObjectId;
   targetDate?: Date;
   progress: number; // 0-100
@@ -51,6 +52,10 @@ const ObjectiveSchema = new Schema<IObjective>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    assignees: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    }],
     targetDate: {
       type: Date,
     },

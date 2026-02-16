@@ -34,7 +34,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
     priority: 'medium' as 'low' | 'medium' | 'high',
     checkpoints: [{ id: '1', title: '', completed: false }],
     targetDate: '',
-    assignee: ''
+    assignees: [] as string[]
   });
 
 
@@ -45,6 +45,14 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
   React.useEffect(() => {
     if (isOpen) {
       if (initialData) {
+        // Handle assignees: try to get list, fallback to single assignee
+        let loadedAssignees: string[] = [];
+        if ((initialData as any).assignees && Array.isArray((initialData as any).assignees)) {
+            loadedAssignees = (initialData as any).assignees.map((u: any) => typeof u === 'object' ? u._id : u);
+        } else if (initialData.assignee) {
+            loadedAssignees = [typeof initialData.assignee === 'object' ? (initialData.assignee as any)._id : initialData.assignee];
+        }
+
         setFormData({
           title: initialData.title,
           description: initialData.description || '',
@@ -52,7 +60,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
           priority: initialData.priority as 'low' | 'medium' | 'high',
           checkpoints: initialData.checkpoints || [],
           targetDate: initialData.targetDate ? new Date(initialData.targetDate).toISOString().split('T')[0] : '',
-          assignee: typeof initialData.assignee === 'object' && initialData.assignee ? (initialData.assignee as any)._id : (initialData.assignee as string) || ''
+          assignees: loadedAssignees
         });
       } else {
         setFormData({
@@ -62,7 +70,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
             priority: 'medium' as 'low' | 'medium' | 'high',
             checkpoints: [{ id: '1', title: '', completed: false }],
             targetDate: '',
-            assignee: ''
+            assignees: []
         });
       }
     }
@@ -120,7 +128,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
           workspace: workspaceId,
           priority: formData.priority,
           targetDate: formData.targetDate,
-          assignee: formData.assignee || undefined,
+          assignees: formData.assignees,
           checkpoints: formData.checkpoints.filter(cp => cp.title.trim() !== ''),
         }),
       });
@@ -142,7 +150,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
           project: '',
           priority: 'medium',
           targetDate: '',
-          assignee: '',
+          assignees: [],
           checkpoints: [{ id: '1', title: '', completed: false }]
         });
       } else {
@@ -173,7 +181,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-2xl bg-[#12121a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-2xl bg-[#12121a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden hover:!bg-[#12121a]"
         >
           {/* Header */}
           <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
@@ -235,8 +243,9 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
             {/* Assignee */}
             <div>
                <UserSelector 
-                  value={formData.assignee}
-                  onChange={(userId) => setFormData({ ...formData, assignee: userId })}
+                  value={formData.assignees}
+                  onChange={(userIds) => setFormData({ ...formData, assignees: userIds })}
+                  multiple={true}
                />
             </div>
 

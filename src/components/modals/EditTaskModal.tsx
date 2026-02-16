@@ -31,20 +31,28 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
     project: '',
     priority: 'less_important' as TaskPriority,
     dueDate: '',
-    assignee: '',
+    assignees: [] as string[],
     tags: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (task) {
+      // Handle assignees: try to get list, fallback to single assignee
+      let loadedAssignees: string[] = [];
+      if (task.assignees && Array.isArray(task.assignees)) {
+        loadedAssignees = task.assignees.map((u: any) => typeof u === 'object' ? u._id : u);
+      } else if (task.assignee) {
+        loadedAssignees = [typeof task.assignee === 'object' ? task.assignee._id : task.assignee];
+      }
+
       setFormData({
         title: task.title || '',
         description: task.description || '',
         project: task.project?._id || task.project || '',
         priority: task.priority || 'less_important',
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
-        assignee: task.assignee?._id || task.assignee || '',
+        assignees: loadedAssignees,
         tags: task.tags ? task.tags.join(', ') : '',
       });
     }
@@ -83,7 +91,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
           project: formData.project,
           priority: formData.priority,
           dueDate: formData.dueDate || undefined,
-          assignee: formData.assignee || undefined,
+          assignees: formData.assignees,
           tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
         }),
       });
@@ -246,9 +254,10 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
                 {/* Assignee */}
                 <div>
                    <UserSelector 
-                      value={formData.assignee}
-                      onChange={(userId) => setFormData({ ...formData, assignee: userId })}
+                      value={formData.assignees}
+                      onChange={(userIds) => setFormData({ ...formData, assignees: userIds })}
                       className="mb-4"
+                      multiple={true}
                    />
                 </div>
 

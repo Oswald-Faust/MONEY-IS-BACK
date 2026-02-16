@@ -5,6 +5,8 @@ import Project from '@/models/Project';
 import User from '@/models/User';
 import { verifyAuth } from '@/lib/auth';
 
+// ... imports
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -25,6 +27,7 @@ export async function GET(request: NextRequest) {
       const task = await Task.findById(id)
         .populate('project', 'name color')
         .populate('assignee', 'firstName lastName avatar')
+        .populate('assignees', 'firstName lastName avatar')
         .populate('creator', 'firstName lastName avatar')
         .populate('comments.user', 'firstName lastName avatar');
 
@@ -71,6 +74,7 @@ export async function GET(request: NextRequest) {
     const tasks = await Task.find(query)
       .populate('project', 'name color')
       .populate('assignee', 'firstName lastName avatar')
+      .populate('assignees', 'firstName lastName avatar')
       .populate('creator', 'firstName lastName avatar')
       .sort({ priority: -1, order: 1, createdAt: -1 });
 
@@ -111,7 +115,8 @@ export async function POST(request: NextRequest) {
       priority = 'less_important',
       status = 'todo',
       dueDate,
-      assignee,
+      assignee, // Single (deprecated but supported)
+      assignees, // Array
       tags = [],
     } = body;
 
@@ -131,6 +136,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Handle assignees logic
+    let finalAssignees = assignees || [];
+    if (!assignees && assignee) {
+      finalAssignees = [assignee];
+    }
+    // Ensure uniqueness
+    finalAssignees = [...new Set(finalAssignees)];
+    
+    // Backward compatibility: set single assignee to first of assignees
+    const finalAssignee = finalAssignees.length > 0 ? finalAssignees[0] : undefined;
+
     // Get max order for this project
     const maxOrderTask = await Task.findOne({ project: projectId }).sort({ order: -1 });
     const order = maxOrderTask ? maxOrderTask.order + 1 : 0;
@@ -142,7 +158,8 @@ export async function POST(request: NextRequest) {
       projectName: project.name,
       projectColor: project.color,
       creator: auth.userId,
-      assignee,
+      assignee: finalAssignee,
+      assignees: finalAssignees,
       priority,
       status,
       dueDate: dueDate ? new Date(dueDate) : undefined,
@@ -160,6 +177,7 @@ export async function POST(request: NextRequest) {
 
     await task.populate('project', 'name color');
     await task.populate('creator', 'firstName lastName avatar');
+    await task.populate('assignees', 'firstName lastName avatar');
 
     return NextResponse.json({
       success: true,
@@ -198,6 +216,22 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Tâche non trouvée' }, { status: 404 });
     }
 
+    // Handle assignees update logic if present
+    if (body.assignees || body.assignee) {
+      let finalAssignees = body.assignees;
+      
+      // If assignees not provided but assignee is, update assignees array to just this one
+      // OR should we append? No, usually selector replaces.
+      if (!finalAssignees && body.assignee) {
+        finalAssignees = [body.assignee];
+      }
+      
+      if (finalAssignees) {
+        body.assignees = [...new Set(finalAssignees)];
+        body.assignee = body.assignees.length > 0 ? body.assignees[0] : null;
+      }
+    }
+
     // Update status and handle project counts
     if (body.status && body.status !== task.status) {
       const isNowDone = body.status === 'done';
@@ -213,6 +247,8 @@ export async function PATCH(request: NextRequest) {
     const updatedTask = await Task.findByIdAndUpdate(id, body, { new: true })
       .populate('project', 'name color')
       .populate('creator', 'firstName lastName avatar')
+      .populate('assignee', 'firstName lastName avatar')
+      .populate('assignees', 'firstName lastName avatar')
       .populate('comments.user', 'firstName lastName avatar');
 
     return NextResponse.json({

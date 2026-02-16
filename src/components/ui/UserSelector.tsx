@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store';
 import { User as UserIcon, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 interface User {
   _id: string;
@@ -14,13 +15,14 @@ interface User {
 }
 
 interface UserSelectorProps {
-  value?: string;
-  onChange: (userId: string) => void;
+  value?: string | string[];
+  onChange: (value: any) => void;
   label?: string;
   className?: string;
+  multiple?: boolean;
 }
 
-export default function UserSelector({ value, onChange, label = "Assigné à", className = "" }: UserSelectorProps) {
+export default function UserSelector({ value, onChange, label = "Assigné à", className = "", multiple = false }: UserSelectorProps) {
   const { token } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +54,33 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
     fetchUsers();
   }, [token]);
 
-  const selectedUser = users.find(u => u._id === value);
+  // Helper to check if a user is selected
+  const isSelected = (userId: string) => {
+    if (multiple && Array.isArray(value)) {
+      return value.includes(userId);
+    }
+    return value === userId;
+  };
+
+  // Helper to handle selection
+  const handleSelect = (userId: string) => {
+    if (multiple) {
+      const currentValues = Array.isArray(value) ? value : [];
+      let newValues;
+      if (currentValues.includes(userId)) {
+        newValues = currentValues.filter(id => id !== userId);
+      } else {
+        newValues = [...currentValues, userId];
+      }
+      onChange(newValues);
+    } else {
+      onChange(userId);
+      setIsOpen(false);
+    }
+  };
+
+  const selectedUsers = users.filter(u => isSelected(u._id));
+  
   const filteredUsers = users.filter(user => 
     `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -78,22 +106,34 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
             ${isOpen ? 'ring-2 ring-indigo-500/20 border-indigo-500/50' : ''}
           `}
         >
-          <div className="flex items-center gap-3">
-            {selectedUser ? (
-              <>
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold overflow-hidden">
-                  {selectedUser.avatar ? (
-                    <img src={selectedUser.avatar} alt={selectedUser.firstName} className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{selectedUser.firstName[0]}{selectedUser.lastName[0]}</span>
+          <div className="flex items-center gap-3 overflow-hidden">
+            {selectedUsers.length > 0 ? (
+              <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex -space-x-2 overflow-hidden p-1">
+                  {selectedUsers.slice(0, 5).map((user) => (
+                    <div key={user._id} className="relative w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold overflow-hidden border border-[#12121a]">
+                      {user.avatar ? (
+                        <Image src={user.avatar} alt={user.firstName} fill className="object-cover" />
+                      ) : (
+                        <span>{user.firstName[0]}{user.lastName[0]}</span>
+                      )}
+                    </div>
+                  ))}
+                  {selectedUsers.length > 5 && (
+                    <div className="w-6 h-6 rounded-full bg-glass-bg border border-glass-border flex items-center justify-center text-xs font-bold text-gray-400">
+                      +{selectedUsers.length - 5}
+                    </div>
                   )}
                 </div>
-                <span className="text-sm font-medium">
-                  {selectedUser.firstName} {selectedUser.lastName}
+                <span className="text-sm font-medium truncate">
+                  {multiple 
+                    ? `${selectedUsers.length} utilisateur${selectedUsers.length > 1 ? 's' : ''}`
+                    : `${selectedUsers[0].firstName} ${selectedUsers[0].lastName}`
+                  }
                 </span>
-              </>
+              </div>
             ) : (
-              <span className="text-gray-400 text-sm">Sélectionner un utilisateur</span>
+              <span className="text-gray-400 text-sm">Sélectionner {multiple ? 'des utilisateurs' : 'un utilisateur'}</span>
             )}
           </div>
           {isLoading ? (
@@ -107,16 +147,16 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
           {isOpen && (
             <>
               <div 
-                className="fixed inset-0 z-10" 
+                className="fixed inset-0 z-40" 
                 onClick={() => setIsOpen(false)}
               />
               <motion.div
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 right-0 mt-2 p-2 bg-secondary border border-glass-border rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto custom-scrollbar"
+                className="absolute top-full left-0 right-0 mt-2 p-2 bg-[var(--bg-secondary)] border border-glass-border rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto custom-scrollbar"
               >
-                <div className="px-2 pb-2">
+                <div className="px-2 pb-2 bg-[var(--bg-secondary)] sticky top-0 z-10">
                   <input
                     type="text"
                     placeholder="Rechercher..."
@@ -128,49 +168,58 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                 </div>
                 
                 <div className="space-y-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onChange('');
-                      setIsOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-glass-hover transition-colors text-left"
-                  >
-                    <div className="w-8 h-8 rounded-full border border-dashed border-gray-600 flex items-center justify-center">
-                      <UserIcon className="w-4 h-4 text-gray-500" />
-                    </div>
-                    <span className="text-sm text-gray-400">Non assigné</span>
-                    {!value && <Check className="w-4 h-4 text-indigo-400 ml-auto" />}
-                  </button>
-
-                  {filteredUsers.map((user) => (
+                  {!multiple && (
                     <button
-                      key={user._id}
                       type="button"
                       onClick={() => {
-                        onChange(user._id);
+                        onChange('');
                         setIsOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-glass-hover transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-glass-hover transition-colors text-left"
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
-                        {user.avatar ? (
-                          <img src={user.avatar} alt={user.firstName} className="w-full h-full object-cover" />
-                        ) : (
-                          <span>{user.firstName[0]}{user.lastName[0]}</span>
-                        )}
+                      <div className="w-8 h-8 rounded-full border border-dashed border-gray-600 flex items-center justify-center">
+                        <UserIcon className="w-4 h-4 text-gray-500" />
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-white group-hover:text-indigo-400 transition-colors">
-                          {user.firstName} {user.lastName}
-                        </span>
-                        <span className="text-xs text-dim truncate max-w-[150px]">
-                          {user.email}
-                        </span>
-                      </div>
-                      {value === user._id && <Check className="w-4 h-4 text-indigo-400 ml-auto" />}
+                      <span className="text-sm text-gray-400">Non assigné</span>
+                      {!value && <Check className="w-4 h-4 text-indigo-400 ml-auto" />}
                     </button>
-                  ))}
+                  )}
+
+                  {filteredUsers.map((user) => {
+                    const active = isSelected(user._id);
+                    return (
+                      <button
+                        key={user._id}
+                        type="button"
+                        onClick={() => handleSelect(user._id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group ${active ? 'bg-indigo-500/10' : 'hover:bg-glass-hover'}`}
+                      >
+                        <div className="relative">
+                          <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+                            {user.avatar ? (
+                              <Image src={user.avatar} alt={user.firstName} fill className="object-cover" />
+                            ) : (
+                              <span>{user.firstName[0]}{user.lastName[0]}</span>
+                            )}
+                          </div>
+                          {active && multiple && (
+                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-indigo-500 border-2 border-[#12121a] flex items-center justify-center">
+                              <Check className="w-2 h-2 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className={`text-sm font-medium transition-colors ${active ? 'text-indigo-400' : 'text-white group-hover:text-indigo-400'}`}>
+                            {user.firstName} {user.lastName}
+                          </span>
+                          <span className="text-xs text-dim truncate max-w-[150px]">
+                            {user.email}
+                          </span>
+                        </div>
+                        {active && !multiple && <Check className="w-4 h-4 text-indigo-400 ml-auto" />}
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             </>

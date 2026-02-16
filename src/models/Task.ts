@@ -10,7 +10,8 @@ export interface ITask extends Document {
   project: mongoose.Types.ObjectId;
   projectName?: string;
   projectColor?: string;
-  assignee?: mongoose.Types.ObjectId;
+  assignees: mongoose.Types.ObjectId[];
+  assignee?: mongoose.Types.ObjectId; // Deprecated, kept for backward compatibility
   creator: mongoose.Types.ObjectId;
   priority: TaskPriority;
   status: TaskStatus;
@@ -71,6 +72,10 @@ const TaskSchema = new Schema<ITask>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    assignees: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    }],
     creator: {
       type: Schema.Types.ObjectId,
       ref: 'User',

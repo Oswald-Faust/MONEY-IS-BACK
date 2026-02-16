@@ -16,11 +16,13 @@ import {
   Key, 
   ExternalLink,
   ShieldAlert,
-  ArrowLeft
+  ArrowLeft,
+  Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore, useAuthStore } from '@/store';
 import { Project } from '@/types';
+import toast from 'react-hot-toast';
 
 interface SecureId {
   _id: string;
@@ -36,13 +38,14 @@ interface SecureId {
 export default function SecureIdsPage() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get('project');
-  const { projects } = useAppStore();
-  const { token } = useAuthStore();
+  const { projects, currentWorkspace, updateProject } = useAppStore();
+  const { token, user } = useAuthStore();
   const router = useRouter();
 
   // State
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -61,6 +64,22 @@ export default function SecureIdsPage() {
     category: 'Général'
   });
 
+  // Project Password Modal
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [newProjectPassword, setNewProjectPassword] = useState('');
+  const [showNewProjectPassword, setShowNewProjectPassword] = useState(false);
+
+  // Check if Workspace Admin
+  const isWorkspaceAdmin = React.useMemo(() => {
+    if (!currentWorkspace || !user) return false;
+    if (currentWorkspace.owner === user._id) return true;
+    const member = currentWorkspace.members?.find((m) => {
+      const memberUserId = typeof m.user === 'string' ? m.user : m.user._id;
+      return memberUserId === user._id;
+    });
+    return member?.role === 'admin';
+  }, [currentWorkspace, user]);
+
   const fetchSecureIds = React.useCallback(async () => {
     if (!projectId || !token) return;
     try {
@@ -69,7 +88,7 @@ export default function SecureIdsPage() {
       });
       
       if (res.status === 403) {
-          setError('Accès refusé. Vous devez être administrateur du projet.');
+          setError('Accés refusé. Vous devez être administrateur du projet.');
           setIsUnlocked(false); // Re-lock or show error state
           return;
       }
@@ -102,7 +121,7 @@ export default function SecureIdsPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ password: adminPassword }),
+        body: JSON.stringify({ password: adminPassword, projectId }),
       });
 
       const data = await res.json();
@@ -117,7 +136,7 @@ export default function SecureIdsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [adminPassword, token]);
+  }, [adminPassword, token, projectId]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,9 +204,39 @@ export default function SecureIdsPage() {
     }
   };
 
+  const handleUpdateProjectPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProjectPassword || !projectId || !token) return;
+
+    try {
+      const res = await fetch(`/api/projects?id=${projectId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ securePassword: newProjectPassword }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        updateProject(projectId, data.data);
+        toast.success('Mot de passe du projet mis à jour !');
+        setIsPasswordModalOpen(false);
+        setNewProjectPassword('');
+      } else {
+        const d = await res.json();
+        toast.error(d.error || 'Erreur lors de la mise à jour');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Erreur de connexion');
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // Could add toast notification here
+    toast.success('Copié !');
   };
 
   if (!isUnlocked) {
@@ -212,17 +261,24 @@ export default function SecureIdsPage() {
 
           <form onSubmit={handleUnlock} className="w-full space-y-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-dim uppercase tracking-wider">Mot de passe Admin</label>
+              <label className="text-xs font-bold text-dim uppercase tracking-wider">Mot de passe sécurisé</label>
               <div className="relative">
                 <Input 
-                  type="password" 
+                  type={showAdminPassword ? "text" : "password"} 
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   placeholder="Votre mot de passe..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-dim focus:outline-none focus:border-red-500/50 transition-all pl-10"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-dim focus:outline-none focus:border-red-500/50 transition-all pl-10 pr-10"
                   autoFocus
                 />
                 <Key className="w-5 h-5 text-dim absolute left-3 top-1/2 -translate-y-1/2" />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminPassword(!showAdminPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-white transition-colors"
+                >
+                  {showAdminPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 
@@ -339,13 +395,24 @@ export default function SecureIdsPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="btn-primary bg-red-600 hover:bg-red-700 flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          AJOUTER UN ACCÈS
-        </button>
+        <div className="flex items-center gap-3">
+          {isWorkspaceAdmin && (
+            <button
+              onClick={() => setIsPasswordModalOpen(true)}
+              className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-dim hover:text-white transition-all border border-white/5"
+              title="Gérer le mot de passe du projet"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+          )}
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="btn-primary bg-red-600 hover:bg-red-700 flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            AJOUTER UN ACCÈS
+          </button>
+        </div>
       </div>
 
       {/* Content */}
@@ -571,6 +638,82 @@ export default function SecureIdsPage() {
                             >
                                 <Save className="w-4 h-4" />
                                 Enregistrer la clé
+                            </button>
+                        </div>
+                    </form>
+                </motion.div>
+            </div>
+        )}
+      </AnimatePresence>
+
+      {/* Project Password Modal */}
+      <AnimatePresence>
+        {isPasswordModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                    onClick={() => setIsPasswordModalOpen(false)}
+                />
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    className="glass-card w-full max-w-md p-0 border-indigo-500/20 shadow-2xl relative z-10 overflow-hidden"
+                >
+                    <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <Key className="w-5 h-5 text-indigo-400" />
+                            Mot de passe du projet
+                        </h3>
+                        <button onClick={() => setIsPasswordModalOpen(false)} className="text-dim hover:text-white transition-colors">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    
+                    <form onSubmit={handleUpdateProjectPassword} className="p-6 space-y-4">
+                        <p className="text-sm text-dim">
+                            Définissez un mot de passe spécifique pour ce projet. S&apos;il est vide, le mot de passe de votre compte sera utilisé par défaut.
+                        </p>
+                        
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-dim uppercase">Nouveau mot de passe</label>
+                            <div className="relative">
+                                <input 
+                                    type={showNewProjectPassword ? "text" : "password"} 
+                                    value={newProjectPassword}
+                                    onChange={(e) => setNewProjectPassword(e.target.value)}
+                                    placeholder="Nouveau secret..."
+                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-dim focus:outline-none focus:border-indigo-500/50 transition-all pr-12"
+                                    autoFocus
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNewProjectPassword(!showNewProjectPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-white"
+                                >
+                                    {showNewProjectPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="pt-4 flex justify-end gap-3">
+                            <button 
+                                type="button" 
+                                onClick={() => setIsPasswordModalOpen(false)}
+                                className="px-4 py-2 rounded-lg text-dim hover:text-white hover:bg-white/5 transition-all font-medium"
+                            >
+                                Annuler
+                            </button>
+                            <button 
+                                type="submit" 
+                                disabled={!newProjectPassword}
+                                className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                <Save className="w-4 h-4" />
+                                Mettre à jour
                             </button>
                         </div>
                     </form>

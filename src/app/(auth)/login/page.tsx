@@ -12,7 +12,11 @@ export default function LoginPage() {
   const router = useRouter();
   const { setAuth, setLoading } = useAuthStore();
   
-  const [email, setEmail] = useState('');
+  // Check for email in search params for prefill
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const emailPrefill = searchParams ? searchParams.get('email') : '';
+
+  const [email, setEmail] = useState(emailPrefill || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,8 +37,11 @@ export default function LoginPage() {
       if (data.success) {
         setAuth(data.data.user, data.data.token);
         toast.success('Connexion réussie !');
-        // Utiliser replace pour éviter les problèmes d'hydratation
-        window.location.replace('/dashboard');
+        // Check for callbackUrl
+        const urlParams = new URLSearchParams(window.location.search);
+        const callbackUrl = urlParams.get('callbackUrl') || '/dashboard';
+        
+        window.location.replace(callbackUrl);
       } else {
         toast.error(data.error || 'Erreur de connexion');
       }

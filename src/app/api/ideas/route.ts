@@ -4,6 +4,8 @@ import Idea from '@/models/Idea';
 import User from '@/models/User';
 import { verifyAuth } from '@/lib/auth';
 
+// ... imports
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -23,6 +25,7 @@ export async function GET(request: NextRequest) {
       const idea = await Idea.findById(id)
         .populate('creator', 'firstName lastName avatar')
         .populate('assignee', 'firstName lastName avatar')
+        .populate('assignees', 'firstName lastName avatar')
         .populate('project', 'name color');
       
       if (!idea) {
@@ -41,13 +44,6 @@ export async function GET(request: NextRequest) {
     } else if (workspaceId) {
         query.workspace = workspaceId;
     } else {
-         // Optionally return all if no filter, or require workspace for safety.
-         // Let's require workspace or project to prevent leaking all ideas.
-         // But "Boîte à idées" means finding ideas.
-         // Previous code didn't filter strictly if no project provided?
-         // Previous code: `if (projectId) query.project = projectId;` -> implied if no project, return ALL ideas (likely scoped to user via auth? No, auth check only).
-         // This is a security risk if not careful. Filter by workspace is safer.
-         // Since I am enforcing workspace now, I should require it.
          return NextResponse.json({ success: false, error: 'Projet ou Workspace requis' }, { status: 400 });
     }
 
@@ -56,6 +52,7 @@ export async function GET(request: NextRequest) {
     const ideas = await Idea.find(query)
       .populate('creator', 'firstName lastName avatar')
       .populate('assignee', 'firstName lastName avatar')
+      .populate('assignees', 'firstName lastName avatar')
       .populate('project', 'name color')
       .sort({ createdAt: -1 });
 
@@ -90,7 +87,8 @@ export async function POST(request: NextRequest) {
       status = 'raw',
       tags = [],
       attachments = [],
-      assignee
+      assignee,
+      assignees
     } = body;
 
     if (!title || !content) {
@@ -115,6 +113,15 @@ export async function POST(request: NextRequest) {
        }
     }
 
+    // Handle assignees logic
+    let finalAssignees = assignees || [];
+    if (!assignees && assignee) {
+      finalAssignees = [assignee];
+    }
+    finalAssignees = [...new Set(finalAssignees)];
+    const finalAssignee = finalAssignees.length > 0 ? finalAssignees[0] : undefined;
+
+
     const idea = await Idea.create({
       title,
       content,
@@ -126,11 +133,13 @@ export async function POST(request: NextRequest) {
       attachments,
       votes: [],
       comments: [],
-      assignee
+      assignee: finalAssignee,
+      assignees: finalAssignees,
     });
 
     await idea.populate('creator', 'firstName lastName avatar');
     await idea.populate('assignee', 'firstName lastName avatar');
+    await idea.populate('assignees', 'firstName lastName avatar');
     if (projectId) {
       await idea.populate('project', 'name color');
     }
@@ -167,9 +176,24 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
     
+    // Handle assignees update logic if present
+    if (body.assignees || body.assignee) {
+      let finalAssignees = body.assignees;
+      
+      if (!finalAssignees && body.assignee) {
+        finalAssignees = [body.assignee];
+      }
+      
+      if (finalAssignees) {
+        body.assignees = [...new Set(finalAssignees)];
+        body.assignee = body.assignees.length > 0 ? body.assignees[0] : null;
+      }
+    }
+
     const updatedIdea = await Idea.findByIdAndUpdate(id, body, { new: true })
       .populate('creator', 'firstName lastName avatar')
       .populate('assignee', 'firstName lastName avatar')
+      .populate('assignees', 'firstName lastName avatar')
       .populate('project', 'name color');
 
     if (!updatedIdea) {

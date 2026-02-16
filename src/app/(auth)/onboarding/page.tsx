@@ -17,8 +17,10 @@ import {
   Plus,
   X,
   Link as LinkIcon,
-  Copy
+  Copy,
+  Upload
 } from 'lucide-react';
+import { useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store';
 import { useRouter } from 'next/navigation';
@@ -88,9 +90,10 @@ export default function OnboardingPage() {
   
   // Local state for Step 3 (Personalization mode)
   const [personalizationMode, setPersonalizationMode] = useState<'color' | 'image'>('color');
+  const [isUploadingIcon, setIsUploadingIcon] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // Local state for Step 4 (Invitations)
   const [emailInput, setEmailInput] = useState('');
-  const [inviteLink, setInviteLink] = useState('');
 
   const [data, setData] = useState<OnboardingData>({
     workspaceName: '',
@@ -100,9 +103,29 @@ export default function OnboardingPage() {
     invitedEmails: []
   });
 
+  const [inviteLink] = useState(() => `https://moneyisback.com/invite/ws-${Math.random().toString(36).substr(2, 6)}`);
+
   useEffect(() => {
-     setInviteLink(`https://moneyisback.com/invite/ws-${Math.random().toString(36).substr(2, 6)}`);
-  }, []);
+     // Check if user already has workspaces (e.g. invited user)
+     const checkWorkspaces = async () => {
+         if (!token) return;
+         try {
+             const response = await fetch('/api/workspaces', {
+                 headers: { 'Authorization': `Bearer ${token}` }
+             });
+             const data = await response.json();
+             if (data.success && data.data.length > 0) {
+                 // User already has workspaces, skip onboarding
+                 toast('Vous avez déjà rejoint un workspace !', { icon: '👋' });
+                 router.replace('/dashboard');
+             }
+         } catch (e) {
+             console.error('Error checking workspaces', e);
+         }
+     };
+
+     checkWorkspaces();
+  }, [token, router]);
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 5) as Step);
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1) as Step);
@@ -127,6 +150,43 @@ export default function OnboardingPage() {
     toast.success('Lien copié dans le presse-papier !');
   };
 
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 5MB for icon)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('L\'image est trop volumineuse (max 5 Mo)');
+      return;
+    }
+
+    setIsUploadingIcon(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload?type=workspace-icon', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+      });
+
+      const resData = await response.json();
+      if (resData.success) {
+        updateData('image', resData.url);
+        toast.success('Icône importée !');
+      } else {
+        toast.error(resData.error || 'Erreur lors de l\'importation');
+      }
+    } catch (error) {
+      toast.error('Erreur de connexion');
+    } finally {
+      setIsUploadingIcon(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!data.workspaceName.trim()) {
       toast.error('Veuillez donner un nom à votre workspace');
@@ -135,8 +195,12 @@ export default function OnboardingPage() {
     }
 
     setIsSubmitting(true);
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedPlan = urlParams.get('plan') || 'starter';
+    const billingCycle = urlParams.get('billing') || 'monthly';
 
     try {
+      console.log('Creating workspace with data:', data);
       const response = await fetch('/api/workspaces', {
         method: 'POST',
         headers: {
@@ -147,27 +211,64 @@ export default function OnboardingPage() {
           name: data.workspaceName,
           description: `Espace de travail pour ${data.useCase}`,
           useCase: data.useCase,
-          theme: 'dark', // We keep theme dark but use defaultProjectColor for personalization
+          theme: 'dark',
           defaultProjectColor: data.themeColor,
           image: data.image,
           icon: data.icon,
-          invitedEmails: data.invitedEmails
+          invitedEmails: data.invitedEmails,
+          subscriptionPlan: selectedPlan // Passing the selected plan
         }),
       });
 
       const resData = await response.json();
+      console.log('Workspace creation response:', resData);
 
       if (resData.success) {
         toast.success('Workspace configuré avec succès !');
+        
+        const workspaceId = resData.data._id;
+        
+        // Redirect to Stripe Checkout
+        try {
+          console.log('Initiating checkout for workspace:', workspaceId, 'plan:', selectedPlan);
+          const checkoutResponse = await fetch('/api/stripe/checkout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              workspaceId,
+              planId: selectedPlan,
+              billingCycle
+            })
+          });
+
+          const checkoutData = await checkoutResponse.json();
+          console.log('Checkout response:', checkoutData);
+
+          if (checkoutData.url) {
+            window.location.href = checkoutData.url;
+            return;
+          } else {
+            console.error('No checkout URL returned:', checkoutData);
+            toast.error(checkoutData.error || 'Erreur lors de la redirection vers le paiement');
+          }
+        } catch (checkoutError) {
+          console.error('Checkout error:', checkoutError);
+          toast.error('Impossible de contacter Stripe');
+        }
+
+        // Fallback if checkout fails
         setTimeout(() => {
-          router.push('/messages'); // Direct to messages or dashboard
-        }, 800);
+          router.push('/dashboard');
+        }, 1500);
       } else {
         toast.error(resData.error || 'Erreur lors de la création');
         setIsSubmitting(false);
       }
-    } catch (error: unknown) {
-      console.error(error);
+    } catch (error: any) {
+      console.error('Submit error:', error);
       toast.error('Erreur de connexion au serveur');
       setIsSubmitting(false);
     }
@@ -397,6 +498,48 @@ export default function OnboardingPage() {
                           )}
                         </button>
                       ))}
+
+                      {/* Upload Button */}
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingIcon}
+                        className={`
+                          relative aspect-video rounded-xl overflow-hidden group border-2 transition-all flex flex-col items-center justify-center gap-2
+                          ${!PRESET_IMAGES.includes(data.image || '') && data.image 
+                            ? 'border-indigo-500 bg-indigo-500/5' 
+                            : 'border-dashed border-white/20 hover:border-indigo-500/50 hover:bg-white/10 bg-white/5'}
+                          ${isUploadingIcon ? 'opacity-50 cursor-not-allowed' : ''}
+                        `}
+                      >
+                        {isUploadingIcon ? (
+                          <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
+                        ) : !PRESET_IMAGES.includes(data.image || '') && data.image ? (
+                          <>
+                             {/* eslint-disable-next-line @next/next/no-img-element */}
+                             <img src={data.image} alt="Uploaded icon" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-500" />
+                             <div className="relative z-10 flex flex-col items-center gap-1">
+                                <div className="bg-indigo-500 rounded-full p-1 shadow-lg shadow-indigo-500/50">
+                                   <Check className="w-4 h-4 text-white" />
+                                </div>
+                                <span className="text-[10px] font-bold text-white uppercase tracking-wider drop-shadow-md">Perso</span>
+                             </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="p-2 rounded-full bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
+                              <Upload className="w-6 h-6" />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Importer</span>
+                          </>
+                        )}
+                        <input 
+                          type="file" 
+                          ref={fileInputRef} 
+                          onChange={handleIconUpload} 
+                          className="hidden" 
+                          accept="image/*" 
+                        />
+                      </button>
                     </div>
                   </motion.div>
                 )}
@@ -533,9 +676,9 @@ export default function OnboardingPage() {
                         <span className="text-gray-500">Usage</span>
                         <span className="font-medium capitalize">{data.useCase}</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Invitations</span>
-                        <span className="font-medium">{data.invitedEmails.length} membre(s)</span>
+                       <div className="flex items-center justify-between text-sm">
+                        <span className="text-zinc-500">Plan</span>
+                        <span className="font-medium text-emerald-400 capitalize">{new URLSearchParams(window.location.search).get('plan') || 'Starter'}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-500">Style</span>
@@ -545,8 +688,8 @@ export default function OnboardingPage() {
                         </div>
                       </div>
                     </div>
-                 </div>
-              </motion.div>
+                  </div>
+               </motion.div>
             )}
             </AnimatePresence>
           </motion.div>
