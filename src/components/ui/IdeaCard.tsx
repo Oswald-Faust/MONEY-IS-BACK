@@ -153,7 +153,7 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
       <div className="pt-4 border-t border-glass-border flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
            {/* Assignees Avatars */}
-           {(idea.assignees?.length > 0 || idea.assignee) && (
+           {((idea.assignees?.length ?? 0) > 0 || idea.assignee) && (
                 <div className="flex -space-x-2 mr-2">
                    {/* Normalizing assignees array */}
                    {(() => {

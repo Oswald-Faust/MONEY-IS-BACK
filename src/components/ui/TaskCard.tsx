@@ -123,7 +123,7 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
             {/* Meta Info - Well spaced */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-dim">
               {/* Assignees Avatars */}
-              {(task.assignees?.length > 0 || task.assignee) && (
+              {((task.assignees?.length ?? 0) > 0 || task.assignee) && (
                 <div className="flex -space-x-2 mr-2">
                    {/* Normalizing assignees array */}
                    {(() => {

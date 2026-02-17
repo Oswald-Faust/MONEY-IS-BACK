@@ -130,7 +130,7 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
       <div className="space-y-3 pt-4 border-t border-glass-border">
          <div className="flex items-center justify-between">
             {/* Assignees Avatars */}
-            {(objective.assignees?.length > 0 || objective.assignee) && (
+            {((objective.assignees?.length ?? 0) > 0 || objective.assignee) && (
                 <div className="flex -space-x-2 mr-2">
                    {/* Normalizing assignees array */}
                    {(() => {
