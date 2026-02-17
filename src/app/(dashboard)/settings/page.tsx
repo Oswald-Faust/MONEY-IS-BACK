@@ -14,20 +14,21 @@ import {
   Check,
   RotateCcw,
   Users,
-  ShieldCheck
+  ShieldCheck,
+  Briefcase
 } from 'lucide-react';
-import { useAuthStore } from '@/store';
+import { useAuthStore, useAppStore } from '@/store';
 import toast from 'react-hot-toast';
 import UsersManagement from '@/components/admin/UsersManagement';
 import AccessControl from '@/components/admin/AccessControl';
 import Avatar from '@/components/ui/Avatar';
 import WorkspaceMembers from '@/components/settings/WorkspaceMembers';
-import { useAppStore } from '@/store';
+import WorkspaceSettings from '@/components/settings/WorkspaceSettings';
 
 type SidebarItem = {
   id: string;
   label: string;
-  icon: any;
+  icon: React.ElementType;
   adminOnly?: boolean;
   workspaceOnly?: boolean;
 };
@@ -35,6 +36,7 @@ type SidebarItem = {
 const sidebarItems: SidebarItem[] = [
   { id: 'profile', label: 'Profil Personnel', icon: User },
   { id: 'security', label: 'Sécurité & Accès', icon: Shield },
+  { id: 'workspace', label: 'Espace de travail', icon: Briefcase, workspaceOnly: true },
   { id: 'members', label: 'Personnes', icon: Users, workspaceOnly: true },
   { id: 'access', label: 'Accès & Vérifications', icon: ShieldCheck, adminOnly: true },
   { id: 'users', label: 'Gestion des utilisateurs', icon: Users, adminOnly: true },
@@ -455,6 +457,10 @@ export default function SettingsPage() {
 
             {activeTab === 'users' && user?.role === 'admin' && (
               <UsersManagement />
+            )}
+
+            {activeTab === 'workspace' && currentWorkspace && (
+              <WorkspaceSettings />
             )}
 
             {/* Footer Actions */}

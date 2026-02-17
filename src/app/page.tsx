@@ -3,8 +3,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
-  Menu,
-  X,
   Layout,
   MessageSquare,
   Target,
@@ -12,12 +10,7 @@ import {
   Zap,
   Users,
   ArrowRight,
-  LogOut,
   Check,
-  Twitter,
-  Github,
-  Linkedin,
-  Instagram,
   BarChart3,
   Shield,
   List,
@@ -30,166 +23,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 
 // --- Components ---
 
-const Navbar = () => {
-    const [scrolled, setScrolled] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { isAuthenticated, logout } = useAuthStore();
-    
-    const [isMobile, setIsMobile] = useState(false);
-    
-    // Mobile detection
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-        handleResize(); // Initial check
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            if (window.scrollY > 40) {
-                setScrolled(true);
-            } else if (window.scrollY < 20) {
-                setScrolled(false);
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    return (
-        <>
-            <motion.nav 
-                initial={{ y: -100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 pointers-events-none"
-            >
-                <motion.div 
-                    layout
-                    initial={{ width: "100%", maxWidth: "64rem", borderRadius: "9999px" }}
-                    animate={{ 
-                        width: isMobile ? "100%" : (scrolled ? "auto" : "100%"), 
-                        maxWidth: isMobile ? "100%" : (scrolled ? "800px" : "1024px"),
-                        y: isMobile ? 0 : (scrolled ? 10 : 0),
-                        padding: isMobile ? "12px 16px" : (scrolled ? "8px 24px" : "12px 32px")
-                    }}
-                    transition={{ 
-                        type: "spring", 
-                        stiffness: 260, 
-                        damping: 20,
-                    }}
-                    className="bg-[#0A0A0F]/80 backdrop-blur-xl border border-white/10 flex items-center justify-between shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
-                >
-                    <Link href="/" className="flex items-center gap-2 group shrink-0">
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:border-[#00FFB2]/50 transition-colors">
-                            <span className="text-white font-bold text-xs">M</span>
-                        </div>
-                        <AnimatePresence mode="popLayout" initial={false}>
-                            {!scrolled && (
-                                <motion.span 
-                                    initial={{ opacity: 0, width: 0, x: -10 }}
-                                    animate={{ opacity: 1, width: "auto", x: 0 }}
-                                    exit={{ opacity: 0, width: 0, x: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="text-lg font-bold text-white tracking-tight hidden sm:block whitespace-nowrap overflow-hidden origin-left"
-                                >
-                                    MONEY IS BACK
-                                </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </Link>
-
-                    {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-400 mx-4">
-                        <Link href="#features" className="hover:text-white transition-colors">Produit</Link>
-                        <Link href="#solutions" className="hover:text-white transition-colors">Solutions</Link>
-                        <Link href="#pricing" className="hover:text-white transition-colors">Tarifs</Link>
-                        <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
-                    </div>
-
-                    {/* Auth / Mobile Toggle */}
-                    <div className="flex items-center gap-3 shrink-0">
-                        {isAuthenticated ? (
-                             <>
-                                <Link 
-                                    href="/dashboard"
-                                    className="hidden md:flex px-4 py-2 rounded-full bg-white/5 text-white text-xs font-bold hover:bg-white/10 border border-white/10 transition-all items-center gap-2"
-                                >   
-                                    <Layout className="w-3 h-3" />
-                                    <AnimatePresence mode="popLayout" initial={false}>
-                                        {!scrolled && (
-                                            <motion.span
-                                                initial={{ opacity: 0, width: 0, x: -10 }}
-                                                animate={{ opacity: 1, width: "auto", x: 0 }}
-                                                exit={{ opacity: 0, width: 0, x: -10 }}
-                                                transition={{ duration: 0.2 }}
-                                                className="overflow-hidden whitespace-nowrap"
-                                            >
-                                                Dashboard
-                                            </motion.span>
-                                        )}
-                                    </AnimatePresence>
-                                </Link>
-                                <button onClick={() => logout()} className="hidden md:flex w-8 h-8 rounded-full bg-red-500/10 text-red-400 items-center justify-center hover:bg-red-500/20 transition-colors">
-                                    <LogOut className="w-4 h-4" />
-                                </button>
-                             </>
-                        ) : (
-                            <motion.div 
-                                layout
-                                className={`hidden md:flex items-center gap-3 ${!scrolled ? "pl-4 border-l border-white/10" : ""}`}
-                            >
-                                <Link href="/login" className="text-white text-sm font-medium hover:text-[#00FFB2] transition-colors">
-                                    Connexion
-                                </Link>
-                                <Link 
-                                    href="/register" 
-                                    className="bg-[#00FFB2] text-black px-5 py-2 rounded-full text-xs font-bold hover:bg-[#00e6a0] transition-colors hover:shadow-[0_0_20px_rgba(0,255,178,0.3)]"
-                                >
-                                    Commencer
-                                </Link>
-                            </motion.div>
-                        )}
-
-                        <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                        </button>
-                    </div>
-                </motion.div>
-            </motion.nav>
-
-             {/* Mobile Menu Overlay */}
-            <AnimatePresence>
-                {mobileMenuOpen && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-40 flex flex-col pt-32 px-6 gap-8 md:hidden"
-                    >
-                        <div className="flex flex-col gap-6 items-center text-center">
-                            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Produit</Link>
-                            <Link href="#solutions" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Solutions</Link>
-                            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Tarifs</Link>
-                            <hr className="w-20 border-white/10" />
-                            {isAuthenticated ? (
-                                <Link href="/dashboard" className="text-xl font-bold text-[#00FFB2]">Accéder au Dashboard</Link>
-                            ) : (
-                                <>
-                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-xl text-zinc-400">Connexion</Link>
-                                    <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-[#00FFB2]">Commencer</Link>
-                                </>
-                            )}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </>
-    );
-};
+import { LandingNavbar } from '@/components/layout/LandingNavbar';
+import { LandingFooter } from '@/components/layout/LandingFooter';
 
 const ReplaceAllSection = () => {
     const tools = [
@@ -316,7 +151,7 @@ const Hero = () => {
                     className="flex flex-col sm:flex-row items-center justify-center gap-6"
                 >
                     <Link 
-                        href="/register" 
+                        href="#pricing" 
                         className="px-10 py-4 rounded-full bg-[#00FFB2] text-black font-bold text-sm tracking-wide hover:shadow-[0_0_40px_rgba(0,255,178,0.4)] transition-all hover:scale-105"
                     >
                         COMMENCER GRATUITEMENT
@@ -422,14 +257,20 @@ const Hero = () => {
 };
 
 
-const FeatureCard = ({ title, desc, icon: Icon, delay = 0 }: { title: string, desc: string, icon: React.ElementType, delay?: number }) => (
+const FeatureCard = ({ title, desc, icon: Icon, delay = 0, image }: { title: string, desc: string, icon: React.ElementType, delay?: number, image?: string }) => (
     <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay }}
-        className="group relative p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-[#00FFB2]/30 hover:bg-white/[0.04] transition-all duration-300"
+        className="group relative p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-[#00FFB2]/30 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden"
     >
+        {image && (
+            <>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10" />
+                <Image src={image} fill className="object-cover opacity-10 grayscale group-hover:opacity-20 group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110" alt={title} />
+            </>
+        )}
         <div className="absolute inset-0 bg-gradient-to-br from-[#00FFB2]/5 to-transparent opacity-0 group-hover:opacity-100 transition-all rounded-3xl" />
         <div className="relative z-10">
             <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -456,7 +297,7 @@ const BentoGrid = () => {
                     {/* Large Card */}
                     <div className="md:col-span-2 relative h-[400px] rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden group">
                          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10" />
-                         <Image src="https://images.unsplash.com/photo-1558494949-ef010cbdcc48?q=80&w=2670&auto=format&fit=crop" fill className="object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Drive Storage" />
+                         <Image src="/secure-drive.png" fill className="object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Drive Storage" />
                          <div className="absolute bottom-0 left-0 p-10 z-20 max-w-lg">
                              <div className="text-[#00FFB2] font-mono text-xs mb-2">DRIVE</div>
                              <h3 className="text-3xl font-medium text-white mb-2">Stockage & Partage Sécurisé</h3>
@@ -465,13 +306,18 @@ const BentoGrid = () => {
                     </div>
 
                     {/* Tall Card */}
-                    <div className="md:row-span-2 rounded-3xl bg-white/[0.02] border border-white/5 p-8 flex flex-col items-center text-center group hover:border-[#00FFB2]/20 transition-colors">
-                        <div className="w-full h-48 bg-gradient-to-tr from-[#00FFB2]/20 to-blue-500/20 rounded-2xl mb-8 flex items-center justify-center relative overflow-hidden">
-                             <div className="absolute inset-0 bg-grid-white/[0.05]" />
-                             <BarChart3 className="w-16 h-16 text-white relative z-10" />
+                    <div className="md:row-span-2 rounded-3xl bg-white/[0.02] border border-white/5 p-8 flex flex-col items-center text-center group hover:border-[#00FFB2]/20 transition-colors relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/90 z-10" />
+                        <Image src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop" fill className="object-cover opacity-10 grayscale group-hover:opacity-20 group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110" alt="Dashboards" />
+                        
+                        <div className="relative z-20 flex flex-col items-center">
+                            <div className="w-full h-48 bg-gradient-to-tr from-[#00FFB2]/20 to-blue-500/20 rounded-2xl mb-8 flex items-center justify-center relative overflow-hidden">
+                                 <div className="absolute inset-0 bg-grid-white/[0.05]" />
+                                 <BarChart3 className="w-16 h-16 text-white relative z-10" />
+                            </div>
+                            <h3 className="text-2xl font-medium text-white mb-4">Tableaux de Bord Dynamiques</h3>
+                            <p className="text-zinc-500 font-light text-sm">Visualisez l&apos;avancement de vos projets, suivez vos budgets et analysez la performance de vos équipes en un coup d&apos;œil.</p>
                         </div>
-                        <h3 className="text-2xl font-medium text-white mb-4">Tableaux de Bord Dynamiques</h3>
-                        <p className="text-zinc-500 font-light text-sm">Visualisez l&apos;avancement de vos projets, suivez vos budgets et analysez la performance de vos équipes en un coup d&apos;œil.</p>
                     </div>
 
                     {/* Small Cards */}
@@ -480,12 +326,14 @@ const BentoGrid = () => {
                         desc="Travaillez ensemble sur les mêmes documents et tâches sans conflit." 
                         icon={Users}
                         delay={0.1}
+                        image="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2670&auto=format&fit=crop"
                     />
                     <FeatureCard 
                         title="Messagerie Intégrée" 
                         desc="Discutez avec votre équipe directement dans le contexte de vos projets." 
                         icon={MessageSquare}
                         delay={0.2}
+                        image="https://images.unsplash.com/photo-1577563908411-5077b6ac7624?q=80&w=2670&auto=format&fit=crop"
                     />
 
                     {/* New Content */}
@@ -494,13 +342,16 @@ const BentoGrid = () => {
                         desc="Organisez votre travail avec des listes, des tableaux kanban et des calendriers." 
                         icon={List}
                         delay={0.3}
+                        image="https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=2670&auto=format&fit=crop"
                     />
                     
                      <div className="md:col-span-2 relative h-[320px] rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden group p-10 flex flex-col justify-between hover:border-[#00FFB2]/20 transition-colors">
-                         <div className="absolute top-0 right-0 p-16 opacity-10 group-hover:opacity-20 transition-opacity">
+                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/90 z-10" />
+                         <Image src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2670&auto=format&fit=crop" fill className="object-cover opacity-10 grayscale group-hover:opacity-20 group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Security" />
+                         <div className="absolute top-0 right-0 p-16 opacity-10 group-hover:opacity-20 transition-opacity z-20">
                              <Shield className="w-64 h-64 text-[#00FFB2]" />
                          </div>
-                         <div className="relative z-10">
+                         <div className="relative z-20">
                              <div className="w-12 h-12 rounded-xl bg-[#00FFB2]/20 flex items-center justify-center mb-6">
                                  <Shield className="w-6 h-6 text-[#00FFB2]" />
                              </div>
@@ -803,104 +654,115 @@ const SimplePricing = () => {
     );
 };
 
-const Footer = () => (
-    <footer className="py-20 px-6 bg-[#050505] border-t border-white/5">
-        <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-10 mb-20">
-                <div className="col-span-2 lg:col-span-2">
-                    <Link href="/" className="flex items-center gap-2 mb-6">
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
-                            <span className="text-white font-bold text-xs">E</span>
-                        </div>
-                        <span className="text-white font-bold text-xl">MONEY IS BACK</span>
-                    </Link>
-                    <p className="text-zinc-500 text-sm mb-6 max-w-sm">
-                        La plateforme tout-en-un pour gérer vos projets, vos équipes et votre croissance. 
-                        Construit pour les bâtisseurs.
+const FAQSection = () => {
+    const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+    const faqs = [
+        {
+            question: "Qu'est-ce que MONEY IS BACK ?",
+            answer: "MONEY IS BACK est une plateforme de gestion de projet révolutionnaire qui centralise vos tâches, vos documents, votre stockage drive, vos objectifs et votre communication d'équipe dans une interface unique et ultra-rapide."
+        },
+        {
+            question: "Mes données sont-elles en sécurité ?",
+            answer: "Absolument. Nous utilisons un chiffrement de bout en bout de niveau bancaire (AES-256) pour tous vos fichiers et bases de données. Vos documents sensibles sont protégés par des protocoles d'accès granulaires et une infrastructure sécurisée."
+        },
+        {
+            question: "Puis-je inviter mon équipe ?",
+            answer: "Oui, la plateforme est conçue pour la collaboration. Selon votre plan, vous pouvez inviter un nombre variable de collaborateurs avec des rôles et des permissions spécifiques (Admin, Membre, Invité)."
+        },
+        {
+            question: "Le stockage Drive est-il illimité ?",
+            answer: "Le stockage dépend de votre abonnement. Le plan Gratuit inclut 1 Go, le plan Pro 10 Go, et le plan Team offre un stockage illimité pour accompagner la croissance de votre entreprise sans contraintes."
+        },
+        {
+            question: "Comment fonctionne la transition vers MONEY IS BACK ?",
+            answer: "Nous proposons des outils d'importation fluides pour Trello, Asana et Notion. Vous pouvez migrer vos tâches et votre historique en quelques clics pour ne rien perdre de votre progression."
+        },
+        {
+            question: "Puis-je annuler mon abonnement à tout moment ?",
+            answer: "Oui, nos abonnements sont sans engagement de durée pour les formats mensuels. Vous pouvez passer d'un plan à un autre ou résilier directement depuis vos paramètres sans frais cachés."
+        }
+    ];
+
+    return (
+        <section id="faq" className="py-32 px-6 bg-[#050505] relative overflow-hidden">
+            {/* Background Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none" />
+            
+            <div className="max-w-4xl mx-auto relative z-10">
+                <div className="text-center mb-20">
+                    <h2 className="text-4xl md:text-5xl font-medium text-white mb-6">Questions Fréquentes</h2>
+                    <p className="text-zinc-500 font-light max-w-xl mx-auto">
+                        Tout ce que vous devez savoir sur la plateforme pour booster votre productivité.
                     </p>
-                    <div className="flex gap-4">
-                        <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white transition-colors">
-                            <Twitter className="w-4 h-4" />
-                        </a>
-                        <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white transition-colors">
-                            <Github className="w-4 h-4" />
-                        </a>
-                        <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white transition-colors">
-                            <Linkedin className="w-4 h-4" />
-                        </a>
-                        <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white transition-colors">
-                            <Instagram className="w-4 h-4" />
-                        </a>
-                    </div>
-                </div>
-                
-                {/* Columns */}
-                <div>
-                    <h4 className="text-white font-bold mb-6">Produit</h4>
-                    <ul className="space-y-4 text-sm text-zinc-500">
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Fonctionnalités</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Tarifs</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Sécurité</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Changelog</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Intégrations</a></li>
-                    </ul>
                 </div>
 
-                <div>
-                    <h4 className="text-white font-bold mb-6">Entreprise</h4>
-                    <ul className="space-y-4 text-sm text-zinc-500">
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">À propos</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Carrières</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Blog</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Contact</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Partenaires</a></li>
-                    </ul>
+                <div className="space-y-4">
+                    {faqs.map((faq, i) => (
+                        <div 
+                            key={i}
+                            className={`rounded-3xl border transition-all duration-300 ${
+                                openIndex === i 
+                                ? 'bg-white/[0.03] border-white/10' 
+                                : 'bg-transparent border-white/5 hover:border-white/10'
+                            }`}
+                        >
+                            <button 
+                                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                                className="w-full text-left p-6 md:p-8 flex items-center justify-between gap-4"
+                            >
+                                <span className={`text-lg md:text-xl font-medium transition-colors ${openIndex === i ? 'text-[#00FFB2]' : 'text-zinc-300'}`}>
+                                    {faq.question}
+                                </span>
+                                <div className={`shrink-0 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center transition-transform duration-300 ${openIndex === i ? 'rotate-180 bg-[#00FFB2]/10 border-[#00FFB2]/20' : ''}`}>
+                                    <ArrowRight className={`w-4 h-4 transition-colors ${openIndex === i ? 'text-[#00FFB2] rotate-90' : 'text-zinc-500'}`} />
+                                </div>
+                            </button>
+                            
+                            <AnimatePresence>
+                                {openIndex === i && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="px-6 md:px-8 pb-8 text-zinc-400 font-light leading-relaxed">
+                                            {faq.answer}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
                 </div>
 
-                <div>
-                    <h4 className="text-white font-bold mb-6">Ressources</h4>
-                    <ul className="space-y-4 text-sm text-zinc-500">
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Documentation</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Communauté</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Help Center</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Status</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">API</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 className="text-white font-bold mb-6">Légal</h4>
-                    <ul className="space-y-4 text-sm text-zinc-500">
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Confidentialité</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">CGU</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Cookies</a></li>
-                        <li><a href="#" className="hover:text-[#00FFB2] transition-colors">Licences</a></li>
-                    </ul>
+                {/* Support CTA */}
+                <div className="mt-20 p-8 rounded-[32px] bg-gradient-to-r from-indigo-500/10 to-emerald-500/10 border border-white/5 text-center">
+                    <h3 className="text-white font-medium mb-2">Vous n&apos;avez pas trouvé votre réponse ?</h3>
+                    <p className="text-zinc-500 text-sm mb-6">Notre équipe est disponible 24/7 pour vous aider.</p>
+                    <button className="px-6 py-2 rounded-full border border-white/10 text-white text-sm font-medium hover:bg-white/5 transition-colors">
+                        Contacter le Support
+                    </button>
                 </div>
             </div>
+        </section>
+    );
+};
 
-            <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="text-zinc-600 text-sm">
-                    © 2026 MONEY IS BACK Inc. Tous droits réservés.
-                </div>
-                <div className="flex gap-8 text-sm font-medium text-zinc-500">
-                    <span>Fait avec ❤️ à Paris</span>
-                </div>
-            </div>
-        </div>
-    </footer>
-);
 
 export default function HomePage() {
   return (
     <main className="bg-[#050505] min-h-screen text-white font-sans selection:bg-[#00FFB2] selection:text-black">
-        <Navbar />
+        <LandingNavbar />
         <Hero />
         <ReplaceAllSection />
         <BentoGrid />
         <Services />
         <SimplePricing />
-        <Footer />
+        <FAQSection />
+        <LandingFooter />
     </main>
   );
 }

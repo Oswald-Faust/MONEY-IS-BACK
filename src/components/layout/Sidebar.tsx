@@ -214,7 +214,22 @@ export default function Sidebar() {
                             </p>
                             <p className="text-[10px] text-dim">{ws.subscriptionPlan.toUpperCase()}</p>
                           </div>
-                          {currentWorkspace?._id === ws._id && <div className="w-2 h-2 rounded-full bg-indigo-500" />}
+                          
+                          {currentWorkspace?._id === ws._id && (
+                            <Link 
+                                href="/settings" 
+                                onClick={(e) => {
+                                    // Prevents triggering the workspace switch if already on it
+                                    e.stopPropagation();
+                                    // We might want to set a specific active tab in store if we had that, 
+                                    // but for now going to settings is fine.
+                                }}
+                                className="p-1.5 rounded-lg hover:bg-white/10 text-dim hover:text-white transition-all mr-1"
+                            >
+                                <Settings className="w-3.5 h-3.5" />
+                            </Link>
+                          )}
+                          {currentWorkspace?._id === ws._id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
                         </button>
                       ))}
                     </div>
