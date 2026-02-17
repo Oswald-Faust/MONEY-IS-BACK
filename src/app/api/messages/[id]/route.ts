@@ -32,7 +32,7 @@ export async function DELETE(
     }
 
     const isSender = message.sender.toString() === auth.userId;
-    const isRecipient = message.recipient.toString() === auth.userId;
+    const isRecipient = message.recipient?.toString() === auth.userId;
 
     if (!isSender && !isRecipient) {
         return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 403 });

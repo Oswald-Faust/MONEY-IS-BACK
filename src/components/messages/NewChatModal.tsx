@@ -56,25 +56,7 @@ export default function NewChatModal({ isOpen, onClose, onSelectUser }: NewChatM
     }
   };
 
-  const generateDemoUsers = async () => {
-    setIsLoading(true);
-    try {
-        const res = await fetch('/api/debug/seed-users', { 
-            method: 'POST',
-            headers: {
-               'Authorization': `Bearer ${token}`
-            }
-        });
-        const data = await res.json();
-        if (data.success) {
-            await fetchUsers(''); // Reload list
-        }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        setIsLoading(false);
-    }
-  };
+
 
   return (
     <AnimatePresence>
@@ -126,17 +108,9 @@ export default function NewChatModal({ isOpen, onClose, onSelectUser }: NewChatM
                          Aucun utilisateur trouvé pour &quot;{searchQuery}&quot;
                      </div>
                   ) : (
-                    <>
-                      <div className="text-gray-500 text-sm max-w-[200px]">
-                        Aucun autre utilisateur disponible.
-                      </div>
-                      <button 
-                        onClick={generateDemoUsers}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-500 transition-colors"
-                      >
-                        Générer des utilisateurs démo
-                      </button>
-                    </>
+                    <div className="text-gray-500 text-sm max-w-[200px]">
+                      Aucun autre utilisateur disponible.
+                    </div>
                   )}
                 </div>
               ) : (

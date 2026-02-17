@@ -261,11 +261,13 @@ export interface MessageAttachment {
 
 export interface Message {
   _id: string;
-  sender: string;
-  recipient: string;
+  sender: string | User;
+  recipient?: string;
+  conversation?: string;
   content: string;
   attachments: MessageAttachment[];
   read: boolean;
+  readBy?: string[];
   deletedForSender?: boolean;
   deletedForRecipient?: boolean;
   deletedForEveryone?: boolean;
@@ -276,5 +278,29 @@ export interface Message {
 export interface Contact extends User {
   lastMessage?: Message;
   unreadCount: number;
+}
+
+export interface ConversationMember {
+  user: string | User;
+  role: 'admin' | 'member';
+  joinedAt: string;
+}
+
+export interface Conversation {
+  _id: string;
+  name: string;
+  type: 'group';
+  workspace: string;
+  creator: string;
+  members: ConversationMember[];
+  avatar?: string;
+  lastMessage?: {
+    content: string;
+    sender: string | User;
+    createdAt: string;
+  };
+  unreadCount?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 

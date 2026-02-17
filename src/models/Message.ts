@@ -8,10 +8,12 @@ export interface IAttachment {
 
 export interface IMessage extends Document {
   sender: mongoose.Types.ObjectId;
-  recipient: mongoose.Types.ObjectId;
+  recipient?: mongoose.Types.ObjectId;
+  conversation?: mongoose.Types.ObjectId;
   content: string;
   attachments: IAttachment[];
   read: boolean;
+  readBy: mongoose.Types.ObjectId[];
   deletedForSender: boolean;
   deletedForRecipient: boolean;
   deletedForEveryone: boolean;
@@ -29,7 +31,12 @@ const MessageSchema = new Schema<IMessage>(
     recipient: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
+    },
+    conversation: {
+      type: Schema.Types.ObjectId,
+      ref: 'Conversation',
+      required: false,
     },
     content: {
       type: String,
@@ -59,6 +66,10 @@ const MessageSchema = new Schema<IMessage>(
       type: Boolean,
       default: false,
     },
+    readBy: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    }],
     deletedForSender: {
       type: Boolean,
       default: false,
@@ -80,6 +91,8 @@ const MessageSchema = new Schema<IMessage>(
 // Add index for faster message retrieval between two users
 MessageSchema.index({ sender: 1, recipient: 1, createdAt: -1 });
 MessageSchema.index({ recipient: 1, sender: 1, createdAt: -1 });
+// Index for group conversation messages
+MessageSchema.index({ conversation: 1, createdAt: -1 });
 
 const Message: Model<IMessage> = mongoose.models.Message || mongoose.model<IMessage>('Message', MessageSchema);
 
