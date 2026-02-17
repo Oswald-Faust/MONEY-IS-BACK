@@ -20,6 +20,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from '@/lib/i18n';
 
 // --- Components ---
 
@@ -27,6 +28,7 @@ import { LandingNavbar } from '@/components/layout/LandingNavbar';
 import { LandingFooter } from '@/components/layout/LandingFooter';
 
 const ReplaceAllSection = () => {
+    const { t } = useTranslation();
     const tools = [
         { name: 'Trello', icon: Layout },
         { name: 'Asana', icon: List },
@@ -39,9 +41,9 @@ const ReplaceAllSection = () => {
     return (
         <section className="py-24 border-t border-glass-border bg-bg-deep overflow-hidden">
              <div className="text-center mb-16 px-6">
-                <h2 className="text-3xl font-bold text-text-main mb-4">Remplacez-les tous</h2>
+                <h2 className="text-3xl font-bold text-text-main mb-4">{t.replaceAll.title}</h2>
                 <p className="text-text-dim max-w-xl mx-auto">
-                    Ne perdez plus de contexte entre vos outils.
+                    {t.replaceAll.subtitle}
                 </p>
             </div>
             
@@ -78,7 +80,8 @@ const ReplaceAllSection = () => {
 };
 
 const AnimatedText = () => {
-    const words = ["remplacer.", "contrôler.", "créer."];
+    const { t } = useTranslation();
+    const words = t.hero.animatedWords;
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
@@ -99,7 +102,7 @@ const AnimatedText = () => {
                     transition={{ duration: 0.6, ease: "circOut" }}
                     className="block text-center whitespace-nowrap"
                 >
-                    pour tout {words[index]}
+                    {t.hero.animatedPrefix} {words[index]}
                 </motion.span>
             </AnimatePresence>
         </span>
@@ -107,6 +110,7 @@ const AnimatedText = () => {
 };
 
 const Hero = () => {
+    const { t } = useTranslation();
     return (
         <section className="relative min-h-[100vh] flex flex-col items-center justify-center pt-32 px-6 overflow-hidden">
             {/* Background Effects */}
@@ -122,7 +126,7 @@ const Hero = () => {
                     className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-glass-border bg-glass-bg text-[10px] font-mono text-[#00FFB2] tracking-widest uppercase mb-8"
                 >
                     <span className="w-2 h-2 rounded-full bg-[#00FFB2] animate-pulse shadow-[0_0_10px_#00FFB2]" />
-                    V2.0 Mainnet Live
+                    {t.hero.badgeText}
                 </motion.div>
 
                 <motion.h1 
@@ -131,7 +135,7 @@ const Hero = () => {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="text-4xl sm:text-6xl md:text-8xl font-medium tracking-tight text-text-main mb-8 leading-[0.9]"
                 >
-                    Une seule app <br/>
+                    {t.hero.title} <br/>
                     <AnimatedText />
                 </motion.h1>
 
@@ -141,7 +145,7 @@ const Hero = () => {
                     transition={{ duration: 0.8, delay: 0.4 }}
                     className="text-lg md:text-xl text-text-dim max-w-2xl mx-auto mb-12 font-light"
                 >
-                    Retrouvez vos Tâches, Docs, Chat, Objectifs, et bien plus encore sur une seule plateforme unifiée. L&apos;OS de votre réussite.
+                    {t.hero.subtitle}
                 </motion.p>
 
                 <motion.div 
@@ -154,13 +158,13 @@ const Hero = () => {
                         href="#pricing" 
                         className="px-10 py-4 rounded-full bg-accent-primary text-white font-bold text-sm tracking-wide hover:shadow-[0_0_40px_rgba(99,102,241,0.4)] transition-all hover:scale-105"
                     >
-                        COMMENCER GRATUITEMENT
+                        {t.common.getStartedFree}
                     </Link>
                     <button className="px-10 py-4 rounded-full border border-glass-border text-text-main font-medium text-sm hover:bg-glass-hover transition-colors flex items-center gap-2 group">
                         <span className="w-8 h-8 rounded-full bg-glass-bg flex items-center justify-center group-hover:bg-glass-hover transition-colors">
                             <span className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-text-main border-b-[5px] border-b-transparent ml-0.5" />
                         </span>
-                        Voir la démo
+                        {t.common.viewDemo}
                     </button>
                 </motion.div>
             </div>
@@ -244,8 +248,8 @@ const Hero = () => {
                                      <CheckCircle2 className="w-5 h-5 text-green-500" />
                                  </div>
                                  <div>
-                                     <div className="text-white text-sm font-bold">Tâche terminée</div>
-                                     <div className="text-zinc-500 text-xs">Il y a 2 min</div>
+                                     <div className="text-white text-sm font-bold">{t.mockup.taskCompleted}</div>
+                                     <div className="text-zinc-500 text-xs">{t.mockup.timeAgo}</div>
                                  </div>
                              </div>
                          </motion.div>
@@ -283,13 +287,14 @@ const FeatureCard = ({ title, desc, icon: Icon, delay = 0, image }: { title: str
 );
 
 const BentoGrid = () => {
+    const { t } = useTranslation();
     return (
         <section id="features" className="py-32 px-6 bg-bg-deep relative z-20">
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-24 max-w-3xl mx-auto">
-                    <h2 className="text-4xl md:text-5xl font-medium text-text-main mb-6">Tout ce dont vous avez besoin.</h2>
+                    <h2 className="text-4xl md:text-5xl font-medium text-text-main mb-6">{t.features.sectionTitle}</h2>
                     <p className="text-text-dim font-light">
-                        Nous avons déconstruit le chaos du travail moderne pour en faire un système fluide et intégré.
+                        {t.features.sectionSubtitle}
                     </p>
                 </div>
 
@@ -299,9 +304,9 @@ const BentoGrid = () => {
                          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-bg-secondary to-transparent z-10" />
                          <Image src="/secure-drive.png" fill className="object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Drive Storage" />
                          <div className="absolute bottom-0 left-0 p-10 z-20 max-w-lg">
-                             <div className="text-accent-primary font-mono text-xs mb-2">DRIVE</div>
-                             <h3 className="text-3xl font-medium text-text-main mb-2">Stockage & Partage Sécurisé</h3>
-                             <p className="text-text-dim font-light">Un espace centralisé pour tous vos fichiers. Partagez des documents avec des liens sécurisés et gérez les permissions d&apos;accès.</p>
+                             <div className="text-accent-primary font-mono text-xs mb-2">{t.features.driveLabel}</div>
+                             <h3 className="text-3xl font-medium text-text-main mb-2">{t.features.driveTitle}</h3>
+                             <p className="text-text-dim font-light">{t.features.driveDesc}</p>
                          </div>
                     </div>
 
@@ -315,22 +320,22 @@ const BentoGrid = () => {
                                  <div className="absolute inset-0 bg-grid-white/[0.05]" />
                                  <BarChart3 className="w-16 h-16 text-accent-primary relative z-10" />
                             </div>
-                            <h3 className="text-2xl font-medium text-text-main mb-4">Tableaux de Bord Dynamiques</h3>
-                            <p className="text-text-dim font-light text-sm">Visualisez l&apos;avancement de vos projets, suivez vos budgets et analysez la performance de vos équipes en un coup d&apos;œil.</p>
+                            <h3 className="text-2xl font-medium text-text-main mb-4">{t.features.dashboardTitle}</h3>
+                            <p className="text-text-dim font-light text-sm">{t.features.dashboardDesc}</p>
                         </div>
                     </div>
 
                     {/* Small Cards */}
                     <FeatureCard 
-                        title="Collaboration en Temps Réel" 
-                        desc="Travaillez ensemble sur les mêmes documents et tâches sans conflit." 
+                        title={t.features.collaborationTitle} 
+                        desc={t.features.collaborationDesc} 
                         icon={Users}
                         delay={0.1}
                         image="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2670&auto=format&fit=crop"
                     />
                     <FeatureCard 
-                        title="Messagerie Intégrée" 
-                        desc="Discutez avec votre équipe directement dans le contexte de vos projets." 
+                        title={t.features.messagingTitle} 
+                        desc={t.features.messagingDesc} 
                         icon={MessageSquare}
                         delay={0.2}
                         image="https://images.unsplash.com/photo-1577563908411-5077b6ac7624?q=80&w=2670&auto=format&fit=crop"
@@ -338,8 +343,8 @@ const BentoGrid = () => {
 
                     {/* New Content */}
                     <FeatureCard 
-                        title="Gestion de Tâches Avancée" 
-                        desc="Organisez votre travail avec des listes, des tableaux kanban et des calendriers." 
+                        title={t.features.taskTitle} 
+                        desc={t.features.taskDesc} 
                         icon={List}
                         delay={0.3}
                         image="https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=2670&auto=format&fit=crop"
@@ -355,8 +360,8 @@ const BentoGrid = () => {
                              <div className="w-12 h-12 rounded-xl bg-accent-primary/20 flex items-center justify-center mb-6">
                                  <Shield className="w-6 h-6 text-accent-primary" />
                              </div>
-                             <h3 className="text-2xl font-medium text-text-main mb-3">Contrôle d&apos;Accès Sécurisé</h3>
-                             <p className="text-text-dim font-light max-w-md">Définissez précisément qui peut voir et modifier quoi. Protégez vos informations sensibles avec des rôles et des permissions granulaires.</p>
+                             <h3 className="text-2xl font-medium text-text-main mb-3">{t.features.securityTitle}</h3>
+                             <p className="text-text-dim font-light max-w-md">{t.features.securityDesc}</p>
                          </div>
                     </div>
                 </div>
@@ -365,59 +370,60 @@ const BentoGrid = () => {
     );
 };
 
-const TAB_CONTENT = [
-    {
-        id: 'docs',
-        title: 'Documents',
-        desc: 'Créez des documents magnifiques, des wikis et des bases de connaissances connectés à vos tâches.',
-        icon: FileText,
-        gradient: 'from-[#00FFB2]/20 to-emerald-500/20',
-        image: 'https://images.unsplash.com/photo-1618044733300-9472054094ee?auto=format&fit=crop&q=80&w=2670' // Updated Image
-    },
-    {
-        id: 'dashboards',
-        title: 'Tableaux de bord',
-        desc: 'Obtenez une vue d’ensemble complète avec des graphiques en temps réel et des rapports personnalisables.',
-        icon: Layout,
-        gradient: 'from-blue-500/20 to-cyan-500/20',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2670' 
-    },
-    {
-        id: 'chat',
-        title: 'Discussion',
-        desc: 'Communiquez en temps réel avec votre équipe, partagez des fichiers et restez connectés.',
-        icon: MessageSquare,
-        gradient: 'from-purple-500/20 to-pink-500/20',
-        image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80&w=2670'
-    },
-    {
-        id: 'goals',
-        title: 'Objectifs',
-        desc: 'Définissez des objectifs stratégiques, suivez la progression et alignez votre équipe.',
-        icon: Target,
-        gradient: 'from-red-500/20 to-orange-500/20',
-        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426'
-    },
-    {
-        id: 'whiteboards',
-        title: 'Routines',
-        desc: 'Automatisez vos processus récurrents et maintenez la cohérence de vos opérations.',
-        icon: Zap,
-        gradient: 'from-yellow-400/20 to-amber-500/20',
-        image: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=2670'
-    }
-];
-
 const Services = () => {
     const [activeTab, setActiveTab] = useState(0);
     const { isAuthenticated } = useAuthStore();
+    const { t } = useTranslation();
+
+    const TAB_CONTENT = [
+        {
+            id: 'docs',
+            title: t.tabContent.documents.title,
+            desc: t.tabContent.documents.desc,
+            icon: FileText,
+            gradient: 'from-[#00FFB2]/20 to-emerald-500/20',
+            image: 'https://images.unsplash.com/photo-1618044733300-9472054094ee?auto=format&fit=crop&q=80&w=2670'
+        },
+        {
+            id: 'dashboards',
+            title: t.tabContent.dashboards.title,
+            desc: t.tabContent.dashboards.desc,
+            icon: Layout,
+            gradient: 'from-blue-500/20 to-cyan-500/20',
+            image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2670' 
+        },
+        {
+            id: 'chat',
+            title: t.tabContent.chat.title,
+            desc: t.tabContent.chat.desc,
+            icon: MessageSquare,
+            gradient: 'from-purple-500/20 to-pink-500/20',
+            image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80&w=2670'
+        },
+        {
+            id: 'goals',
+            title: t.tabContent.goals.title,
+            desc: t.tabContent.goals.desc,
+            icon: Target,
+            gradient: 'from-red-500/20 to-orange-500/20',
+            image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426'
+        },
+        {
+            id: 'whiteboards',
+            title: t.tabContent.routines.title,
+            desc: t.tabContent.routines.desc,
+            icon: Zap,
+            gradient: 'from-yellow-400/20 to-amber-500/20',
+            image: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=2670'
+        }
+    ];
 
     return (
         <section className="py-32 px-4 max-w-[1400px] mx-auto">
             <div className="bg-bg-deep rounded-[48px] p-8 md:p-16 border border-glass-border flex flex-col md:flex-row gap-16 min-h-[600px]">
                 {/* Left: Tabs */}
                 <div className="w-full md:w-1/3 flex flex-col gap-4">
-                    <div className="text-[#D7FE03] font-bold uppercase tracking-widest mb-8">Services</div>
+                    <div className="text-[#D7FE03] font-bold uppercase tracking-widest mb-8">{t.common.services}</div>
                     <div className="space-y-4">
                         {TAB_CONTENT.map((tab, i) => (
                             <button 
@@ -469,7 +475,7 @@ const Services = () => {
                                     href={isAuthenticated ? "/dashboard" : "/login"}
                                     className="px-8 py-3 bg-white text-black rounded-full font-bold hover:bg-[#D7FE03] transition-colors inline-block"
                                 >
-                                    Explore Feature
+                                    {t.common.exploreFeature}
                                 </Link>
                             </div>
                         </motion.div>
@@ -480,137 +486,113 @@ const Services = () => {
     );
 };
 
-const PricingCard = ({ plan, price, highlight = false, billingCycle, originalPrice, features }: { plan: string; price: string | null; highlight?: boolean; billingCycle: 'monthly' | 'yearly'; originalPrice?: string; features: string[] }) => (
-    <div className={`
-        p-10 rounded-[40px] border flex flex-col h-full transition-all duration-300
-        ${highlight 
-            ? 'bg-bg-tertiary border-[#00FFB2]/50 shadow-[0_0_40px_rgba(0,255,178,0.1)]' 
-            : 'bg-bg-secondary border-glass-border hover:border-text-muted/30'
-        }
-    `}>
-        <div className="mb-8">
-            <h3 className="text-2xl text-text-main font-medium mb-2">{plan}</h3>
-            <div className="flex items-baseline gap-2 h-20 overflow-visible flex-wrap">
-                {price === null ? (
-                    <span className="text-4xl font-medium text-text-main">Sur devis</span>
-                ) : (
-                    <div className="flex flex-col">
-                        {originalPrice && (
-                            <div className="text-text-muted line-through text-lg font-medium">
-                                ${originalPrice}
+const PricingCard = ({ plan, price, highlight = false, billingCycle, originalPrice, features }: { plan: string; price: string | null; highlight?: boolean; billingCycle: 'monthly' | 'yearly'; originalPrice?: string; features: string[] }) => {
+    const { t } = useTranslation();
+    return (
+        <div className={`
+            p-10 rounded-[40px] border flex flex-col h-full transition-all duration-300
+            ${highlight 
+                ? 'bg-bg-tertiary border-[#00FFB2]/50 shadow-[0_0_40px_rgba(0,255,178,0.1)]' 
+                : 'bg-bg-secondary border-glass-border hover:border-text-muted/30'
+            }
+        `}>
+            <div className="mb-8">
+                <h3 className="text-2xl text-text-main font-medium mb-2">{plan}</h3>
+                <div className="flex items-baseline gap-2 h-20 overflow-visible flex-wrap">
+                    {price === null ? (
+                        <span className="text-4xl font-medium text-text-main">{t.common.onQuote}</span>
+                    ) : (
+                        <div className="flex flex-col">
+                            {originalPrice && (
+                                <div className="text-text-muted line-through text-lg font-medium">
+                                    ${originalPrice}
+                                </div>
+                            )}
+                            <div className="flex items-baseline">
+                                {price === '0' || price === 'FREE' || price === 'GRATUIT' ? (
+                                    <span className="text-5xl font-medium text-text-main uppercase tracking-tight">{t.common.free}</span>
+                                ) : (
+                                    <span className="text-5xl font-medium text-text-main flex">
+                                        €
+                                        <AnimatePresence mode="wait">
+                                            <motion.span
+                                                key={billingCycle + price}
+                                                initial={{ y: 20, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                exit={{ y: -20, opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="block"
+                                            >
+                                                {price}
+                                            </motion.span>
+                                        </AnimatePresence>
+                                    </span>
+                                )}
+                                {(price !== '0' && price !== 'FREE' && price !== 'GRATUIT') && (
+                                    <span className="text-text-muted ml-1">{plan === 'Team' ? t.common.perMonth : t.common.perUserMonth}</span>
+                                )}
                             </div>
-                        )}
-                        <div className="flex items-baseline">
-                            {price === '0' || price === 'FREE' || price === 'GRATUIT' ? (
-                                <span className="text-5xl font-medium text-text-main uppercase tracking-tight">Gratuit</span>
-                            ) : (
-                                <span className="text-5xl font-medium text-text-main flex">
-                                    €
-                                    <AnimatePresence mode="wait">
-                                        <motion.span
-                                            key={billingCycle + price}
-                                            initial={{ y: 20, opacity: 0 }}
-                                            animate={{ y: 0, opacity: 1 }}
-                                            exit={{ y: -20, opacity: 0 }}
-                                            transition={{ duration: 0.2 }}
-                                            className="block"
-                                        >
-                                            {price}
-                                        </motion.span>
-                                    </AnimatePresence>
-                                </span>
-                            )}
-                            {(price !== '0' && price !== 'FREE' && price !== 'GRATUIT') && (
-                                <span className="text-text-muted ml-1">{plan === 'Team' ? '/mois' : '/user/mois'}</span>
-                            )}
                         </div>
-                    </div>
-                )}
-            </div>
-        </div>
-
-        <div className="space-y-4 mb-10 flex-1">
-            {features.map((f, i) => (
-                <div key={i} className="flex items-center gap-3 text-text-dim">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${highlight ? 'bg-[#D7FE03] text-black' : 'bg-[#242424] text-white'}`}>
-                        <Check className="w-3 h-3" />
-                    </div>
-                    {f}
+                    )}
                 </div>
-            ))}
-        </div>
+            </div>
 
-        <Link href={`/register?plan=${plan.toLowerCase()}&billing=${billingCycle}`} className="block w-full">
-            <button className={`
-                w-full py-4 rounded-[20px] font-bold text-lg transition-all shadow-lg
-                ${highlight 
-                    ? 'bg-accent-primary text-white hover:opacity-90 shadow-accent-primary/20' 
-                    : 'bg-glass-bg text-text-main border border-glass-border hover:bg-accent-primary hover:text-white hover:border-accent-primary'
-                }
-            `}>
-                Commencer
-            </button>
-        </Link>
-    </div>
-);
+            <div className="space-y-4 mb-10 flex-1">
+                {features.map((f, i) => (
+                    <div key={i} className="flex items-center gap-3 text-text-dim">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${highlight ? 'bg-[#D7FE03] text-black' : 'bg-[#242424] text-white'}`}>
+                            <Check className="w-3 h-3" />
+                        </div>
+                        {f}
+                    </div>
+                ))}
+            </div>
+
+            <Link href={`/register?plan=${plan.toLowerCase()}&billing=${billingCycle}`} className="block w-full">
+                <button className={`
+                    w-full py-4 rounded-[20px] font-bold text-lg transition-all shadow-lg
+                    ${highlight 
+                        ? 'bg-accent-primary text-white hover:opacity-90 shadow-accent-primary/20' 
+                        : 'bg-glass-bg text-text-main border border-glass-border hover:bg-accent-primary hover:text-white hover:border-accent-primary'
+                    }
+                `}>
+                    {t.common.getStarted}
+                </button>
+            </Link>
+        </div>
+    );
+};
 
 const SimplePricing = () => {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+    const { t } = useTranslation();
 
     const plans = [
         {
-            plan: "Gratuit",
+            plan: t.pricing.plans.free.name,
             price: "GRATUIT",
             originalPrice: "0",
-            features: [
-                "1 Utilisateur maximum",
-                "1 Projet maximum",
-                "1 Go de stockage Drive",
-                "7 Tâches max par projet",
-                "Routines limitées"
-            ],
+            features: t.pricing.plans.free.features,
             highlight: false
         },
         {
-            plan: "Pro",
+            plan: t.pricing.plans.pro.name,
             price: billingCycle === 'monthly' ? "9.99" : "8.99",
             originalPrice: billingCycle === 'monthly' ? "15" : "12",
-            features: [
-                "3 Utilisateurs inclus",
-                "€6.99/user supplémentaire",
-                "3 Projets inclus",
-                "€4.99/projet supplémentaire",
-                "10 Go de stockage Drive",
-                "Tâches & Routines illimitées"
-            ],
+            features: t.pricing.plans.pro.features,
             highlight: true
         },
         {
-            plan: "Team",
+            plan: t.pricing.plans.team.name,
             price: billingCycle === 'monthly' ? "29.99" : "24.99",
             originalPrice: billingCycle === 'monthly' ? "39" : "29",
-            features: [
-                "10 Utilisateurs inclus",
-                "€4.99/user supplémentaire",
-                "5 Projets inclus",
-                "€4.99/projet supplémentaire",
-                "Stockage illimité",
-                "Dashboard personnalisés",
-                "Mindmaps & Timelines"
-            ],
+            features: t.pricing.plans.team.features,
             highlight: false
         },
         {
-            plan: "Enterprise",
+            plan: t.pricing.plans.enterprise.name,
             price: null,
-            features: [
-                "Utilisateurs illimités",
-                "White Label complet",
-                "Logs d'Audit & Sécurité",
-                "SAML SSO / Okta",
-                "API illimitée",
-                "Success Manager dédié"
-            ],
+            features: t.pricing.plans.enterprise.features,
             highlight: false
         }
     ];
@@ -618,7 +600,7 @@ const SimplePricing = () => {
     return (
         <section id="pricing" className="py-32 px-4 max-w-[1400px] mx-auto">
             <div className="text-center mb-20">
-                <h2 className="text-4xl md:text-[60px] text-text-main font-medium mb-6">Tarifs Simples</h2>
+                <h2 className="text-4xl md:text-[60px] text-text-main font-medium mb-6">{t.pricing.title}</h2>
                 
                 {/* Toggle */}
                 <div className="inline-flex items-center p-1 bg-bg-tertiary rounded-full border border-glass-border">
@@ -626,13 +608,13 @@ const SimplePricing = () => {
                         onClick={() => setBillingCycle('monthly')}
                         className={`px-8 py-3 rounded-full font-bold text-sm transition-all ${billingCycle === 'monthly' ? 'bg-bg-secondary text-text-main shadow-lg' : 'text-text-muted hover:text-text-dim'}`}
                     >
-                        Mensuel
+                        {t.common.monthly}
                     </button>
                     <button 
                         onClick={() => setBillingCycle('yearly')}
                         className={`px-8 py-3 rounded-full font-bold text-sm transition-all ${billingCycle === 'yearly' ? 'bg-bg-secondary text-text-main shadow-lg' : 'text-text-muted hover:text-text-dim'}`}
                     >
-                        Annuel (-25%)
+                        {t.common.yearly}
                     </button>
                 </div>
             </div>
@@ -656,33 +638,7 @@ const SimplePricing = () => {
 
 const FAQSection = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
-
-    const faqs = [
-        {
-            question: "Qu'est-ce que MONEY IS BACK ?",
-            answer: "MONEY IS BACK est une plateforme de gestion de projet révolutionnaire qui centralise vos tâches, vos documents, votre stockage drive, vos objectifs et votre communication d'équipe dans une interface unique et ultra-rapide."
-        },
-        {
-            question: "Mes données sont-elles en sécurité ?",
-            answer: "Absolument. Nous utilisons un chiffrement de bout en bout de niveau bancaire (AES-256) pour tous vos fichiers et bases de données. Vos documents sensibles sont protégés par des protocoles d'accès granulaires et une infrastructure sécurisée."
-        },
-        {
-            question: "Puis-je inviter mon équipe ?",
-            answer: "Oui, la plateforme est conçue pour la collaboration. Selon votre plan, vous pouvez inviter un nombre variable de collaborateurs avec des rôles et des permissions spécifiques (Admin, Membre, Invité)."
-        },
-        {
-            question: "Le stockage Drive est-il illimité ?",
-            answer: "Le stockage dépend de votre abonnement. Le plan Gratuit inclut 1 Go, le plan Pro 10 Go, et le plan Team offre un stockage illimité pour accompagner la croissance de votre entreprise sans contraintes."
-        },
-        {
-            question: "Comment fonctionne la transition vers MONEY IS BACK ?",
-            answer: "Nous proposons des outils d'importation fluides pour Trello, Asana et Notion. Vous pouvez migrer vos tâches et votre historique en quelques clics pour ne rien perdre de votre progression."
-        },
-        {
-            question: "Puis-je annuler mon abonnement à tout moment ?",
-            answer: "Oui, nos abonnements sont sans engagement de durée pour les formats mensuels. Vous pouvez passer d'un plan à un autre ou résilier directement depuis vos paramètres sans frais cachés."
-        }
-    ];
+    const { t } = useTranslation();
 
     return (
         <section id="faq" className="py-32 px-6 bg-bg-deep relative overflow-hidden">
@@ -691,14 +647,14 @@ const FAQSection = () => {
             
             <div className="max-w-4xl mx-auto relative z-10">
                 <div className="text-center mb-20">
-                    <h2 className="text-4xl md:text-5xl font-medium text-text-main mb-6">Questions Fréquentes</h2>
+                    <h2 className="text-4xl md:text-5xl font-medium text-text-main mb-6">{t.faq.title}</h2>
                     <p className="text-text-dim font-light max-w-xl mx-auto">
-                        Tout ce que vous devez savoir sur la plateforme pour booster votre productivité.
+                        {t.faq.subtitle}
                     </p>
                 </div>
 
                 <div className="space-y-4">
-                    {faqs.map((faq, i) => (
+                    {t.faq.items.map((faq, i) => (
                         <div 
                             key={i}
                             className={`rounded-3xl border transition-all duration-300 ${
@@ -740,10 +696,10 @@ const FAQSection = () => {
 
                 {/* Support CTA */}
                 <div className="mt-20 p-8 rounded-[32px] bg-gradient-to-r from-indigo-500/10 to-emerald-500/10 border border-glass-border text-center">
-                    <h3 className="text-text-main font-medium mb-2">Vous n&apos;avez pas trouvé votre réponse ?</h3>
-                    <p className="text-text-dim text-sm mb-6">Notre équipe est disponible 24/7 pour vous aider.</p>
+                    <h3 className="text-text-main font-medium mb-2">{t.faq.noAnswer}</h3>
+                    <p className="text-text-dim text-sm mb-6">{t.faq.teamAvailable}</p>
                     <button className="px-6 py-2 rounded-full border border-glass-border text-text-main text-sm font-medium hover:bg-glass-hover transition-colors">
-                        Contacter le Support
+                        {t.common.contactSupport}
                     </button>
                 </div>
             </div>

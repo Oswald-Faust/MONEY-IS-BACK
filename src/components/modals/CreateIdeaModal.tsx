@@ -176,19 +176,19 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg bg-[#12121a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden hover:!bg-[#12121a]"
+          className="relative w-full max-w-lg bg-bg-secondary border border-glass-border rounded-3xl shadow-2xl overflow-hidden hover:!bg-bg-secondary"
         >
           {/* Header */}
-          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <div className="p-6 border-b border-glass-border flex items-center justify-between bg-bg-secondary/20">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-500">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
                 <Lightbulb className="w-6 h-6" />
               </div>
-              <h2 className="text-xl font-bold text-white">Nouvelle Idée</h2>
+              <h2 className="text-xl font-bold text-text-main">Nouvelle Idée</h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+              className="p-2 rounded-xl hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
@@ -197,39 +197,39 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
           <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Titre de l&apos;idée</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Titre de l&apos;idée</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Ex: Refonte du tunnel de vente"
-                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-white outline-none focus:border-amber-500/50"
+                  className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main outline-none focus:border-amber-500/50 transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Projet</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Projet</label>
                 <select
                   value={formData.project}
                   onChange={e => setFormData({ ...formData, project: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#1a1a24] border border-white/10 rounded-2xl text-white outline-none focus:border-amber-500/50 appearance-none"
+                  className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main outline-none focus:border-amber-500/50 appearance-none"
                 >
-                  <option value="">Idée Libre</option>
+                  <option value="" className="bg-bg-secondary text-text-muted">Idée Libre</option>
                   {projects.map(p => (
-                    <option key={p._id} value={p._id}>{p.name}</option>
+                    <option key={p._id} value={p._id} className="bg-bg-secondary text-text-main">{p.name}</option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Contenu / Description</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Contenu / Description</label>
                 <textarea
                   value={formData.content}
                   onChange={e => setFormData({ ...formData, content: e.target.value })}
                   placeholder="Décrivez votre idée en quelques mots..."
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-white outline-none focus:border-amber-500/50 resize-none"
+                  className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main outline-none focus:border-amber-500/50 resize-none transition-all"
                 />
               </div>
 
@@ -243,16 +243,16 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Tags</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Tags</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {formData.tags.map(tag => (
                     <span 
                       key={tag}
-                      className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-gray-400 flex items-center gap-1"
+                      className="px-2 py-1 rounded-lg bg-bg-tertiary border border-glass-border text-[10px] font-bold text-text-muted flex items-center gap-1"
                     >
                       {tag}
                       <button type="button" onClick={() => handleRemoveTag(tag)}>
-                        <X className="w-3 h-3 hover:text-white" />
+                        <X className="w-3 h-3 hover:text-text-main" />
                       </button>
                     </span>
                   ))}
@@ -264,12 +264,12 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
                     onChange={e => setNewTag(e.target.value)}
                     onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
                     placeholder="Ajouter un tag..."
-                    className="flex-1 px-4 py-2 bg-white/[0.02] border border-white/10 rounded-xl text-sm text-white outline-none focus:border-amber-500/30"
+                    className="flex-1 px-4 py-2 bg-bg-tertiary border border-glass-border rounded-xl text-sm text-text-main focus:border-amber-500/30 outline-none transition-all"
                   />
                   <button
                     type="button"
                     onClick={handleAddTag}
-                    className="p-2 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white"
+                    className="p-2 rounded-xl bg-bg-tertiary border border-glass-border text-text-muted hover:text-text-main hover:bg-glass-hover"
                   >
                     <Plus className="w-5 h-5" />
                   </button>
@@ -277,51 +277,51 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Statut</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Statut</label>
                 <select
                   value={formData.status}
                   onChange={e => setFormData({ ...formData, status: e.target.value as any })}
-                  className="w-full px-4 py-3 bg-[#1a1a24] border border-white/10 rounded-2xl text-white outline-none focus:border-amber-500/50 appearance-none"
+                  className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main outline-none focus:border-amber-500/50 appearance-none"
                 >
-                  <option value="raw">Premier degré (Idée brute)</option>
-                  <option value="standby">Standby (Mise de côté)</option>
-                  <option value="in_progress">En cours (Mise en place)</option>
-                  <option value="implemented">Terminé (Mis en place)</option>
+                  <option value="raw" className="bg-bg-secondary text-text-main">Premier degré (Idée brute)</option>
+                  <option value="standby" className="bg-bg-secondary text-text-main">Standby (Mise de côté)</option>
+                  <option value="in_progress" className="bg-bg-secondary text-text-main">En cours (Mise en place)</option>
+                  <option value="implemented" className="bg-bg-secondary text-text-main">Terminé (Mis en place)</option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Pièces Jointes</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Pièces Jointes</label>
                 <div className="grid grid-cols-1 gap-2">
                   {attachments.map((file, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/10 rounded-xl group/file">
+                    <div key={idx} className="flex items-center justify-between p-3 bg-bg-tertiary/50 border border-glass-border rounded-xl group/file">
                       <div className="flex items-center gap-3 min-w-0">
                         {file.type.startsWith('image/') ? (
                           <ImageIcon className="w-4 h-4 text-amber-500" />
                         ) : (
-                          <FileIcon className="w-4 h-4 text-gray-400" />
+                          <FileIcon className="w-4 h-4 text-text-muted" />
                         )}
-                        <span className="text-xs text-gray-300 truncate">{file.name}</span>
+                        <span className="text-xs text-text-dim truncate">{file.name}</span>
                       </div>
                       <button 
                         type="button" 
                         onClick={() => removeAttachment(idx)}
-                        className="p-1 rounded-md hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition-colors"
+                        className="p-1 rounded-md hover:bg-red-500/10 text-text-muted hover:text-red-500 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
                   
-                  <label className="relative flex flex-col items-center justify-center p-4 py-6 bg-white/[0.02] border-2 border-dashed border-white/10 rounded-2xl hover:bg-white/[0.04] hover:border-amber-500/30 transition-all cursor-pointer group">
+                  <label className="relative flex flex-col items-center justify-center p-4 py-6 bg-bg-tertiary/20 border-2 border-dashed border-glass-border rounded-2xl hover:bg-glass-hover hover:border-amber-500/30 transition-all cursor-pointer group">
                     <input
                       type="file"
                       multiple
                       onChange={handleFileChange}
                       className="absolute inset-0 opacity-0 cursor-pointer"
                     />
-                    <Paperclip className="w-6 h-6 text-gray-600 group-hover:text-amber-500 transition-colors mb-2" />
-                    <span className="text-xs text-gray-500 group-hover:text-gray-400">Ajouter des photos ou documents</span>
+                    <Paperclip className="w-6 h-6 text-text-muted group-hover:text-amber-500 transition-colors mb-2" />
+                    <span className="text-xs text-text-muted group-hover:text-text-dim">Ajouter des photos ou documents</span>
                   </label>
                 </div>
               </div>

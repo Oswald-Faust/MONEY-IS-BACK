@@ -112,10 +112,10 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <p className="text-dim">Projet non trouvé ou chargement...</p>
+        <p className="text-text-muted">Projet non trouvé ou chargement...</p>
         <button 
           onClick={() => router.push('/dashboard')}
-          className="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-2"
+          className="text-accent-primary hover:underline font-medium flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" /> Retour au dashboard
         </button>
@@ -156,13 +156,13 @@ export default function ProjectDetailPage() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.push('/projects')}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-dim hover:text-white transition-all"
+            className="p-2 rounded-xl bg-bg-tertiary border border-glass-border hover:bg-glass-hover text-text-muted hover:text-text-main transition-all"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <p className="text-xs font-bold text-dim uppercase tracking-widest mb-1">Détails du projet</p>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <p className="text-xs font-bold text-text-muted uppercase tracking-widest mb-1">Détails du projet</p>
+            <h1 className="text-3xl font-bold text-text-main flex items-center gap-3">
               <div 
                 className="w-3 h-3 rounded-full shadow-[0_0_10px_currentcolor]" 
                 style={{ backgroundColor: project.color, color: project.color }} 
@@ -188,12 +188,12 @@ export default function ProjectDetailPage() {
           return item.label ? (
             <Link key={index} href={item.href}>
               <motion.div
-                whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                whileHover={{ scale: 1.02, backgroundColor: 'var(--glass-hover)' }}
                 whileTap={{ scale: 0.98 }}
                 className="glass-card flex items-center justify-center gap-4 py-8 group transition-all"
               >
                 {Icon && <Icon className="w-6 h-6 group-hover:scale-110 transition-transform" style={{ color: item.color }} />}
-                <span className="text-lg font-bold text-white tracking-wide">{item.label}</span>
+                <span className="text-lg font-bold text-text-main tracking-wide group-hover:text-accent-primary">{item.label}</span>
               </motion.div>
             </Link>
           ) : (
@@ -205,8 +205,8 @@ export default function ProjectDetailPage() {
       {/* Project Calendar */}
       <section className="space-y-6 pt-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <h2 className="section-title !mb-0 flex items-center gap-2">
-            <CalendarIcon className="w-6 h-6 text-indigo-400" />
+          <h2 className="section-title !mb-0 flex items-center gap-2 text-text-main">
+            <CalendarIcon className="w-6 h-6 text-accent-primary" />
             Calendrier du projet
           </h2>
           
@@ -222,7 +222,7 @@ export default function ProjectDetailPage() {
 
         {/* Selected Date Events */}
         <div className="space-y-6">
-           <h2 className="section-title !mb-0 flex items-center gap-2">
+           <h2 className="section-title !mb-0 flex items-center gap-2 text-text-main">
             Événements du {selectedDate?.toLocaleDateString()}
           </h2>
           <div className="space-y-4">
@@ -233,18 +233,18 @@ export default function ProjectDetailPage() {
                   href={event.type === 'task' ? `/tasks/${event._id}` : `/objectives/${event._id}`}
                   className="block"
                 >
-                  <div className="glass-card p-4 hover:bg-white/5 transition-colors border-l-4" style={{ borderLeftColor: event.type === 'task' ? '#10b981' : '#ef4444' }}>
+                  <div className="glass-card p-4 hover:bg-glass-hover transition-colors border-l-4" style={{ borderLeftColor: event.type === 'task' ? '#10b981' : '#ef4444' }}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${event.type === 'task' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${event.type === 'task' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
                         {event.type === 'task' ? 'Tâche' : 'Objectif'}
                       </span>
                     </div>
-                    <h4 className="text-white font-medium truncate">{event.title}</h4>
+                    <h4 className="text-text-main font-medium truncate">{event.title}</h4>
                   </div>
                 </Link>
               ))
             ) : (
-              <div className="glass-card p-8 text-center text-dim italic">
+              <div className="glass-card p-8 text-center text-text-muted italic bg-bg-tertiary/20">
                 Aucun événement ce jour-là
               </div>
             )}

@@ -82,7 +82,7 @@ export default function AdminLogsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02]">
+              <tr className="border-b border-glass-border bg-bg-tertiary/50">
                 <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Statut</th>
                 <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Action</th>
                 <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Utilisateur</th>
@@ -91,7 +91,7 @@ export default function AdminLogsPage() {
                 <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider text-right uppercase">IP</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 font-mono text-[11px]">
+            <tbody className="divide-y divide-glass-border font-mono text-[11px]">
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-dim font-sans">
@@ -106,7 +106,7 @@ export default function AdminLogsPage() {
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log._id} className="hover:bg-white/[0.01] transition-colors group">
+                  <tr key={log._id} className="hover:bg-glass-hover transition-colors group">
                     <td className="px-6 py-3">
                       <div className={`p-1.5 rounded-lg border w-fit ${statusColors[log.status]}`}>
                         {statusIcons[log.status]}
@@ -146,7 +146,7 @@ export default function AdminLogsPage() {
 
         {/* Pagination */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-white/5 flex items-center justify-between">
+          <div className="px-6 py-4 border-t border-glass-border flex items-center justify-between">
             <p className="text-xs text-dim font-sans">
               Page <span className="text-main font-bold">{page}</span> sur <span className="text-main font-bold">{pagination.totalPages}</span>
             </p>
@@ -154,14 +154,14 @@ export default function AdminLogsPage() {
               <button
                 disabled={page === 1}
                 onClick={() => setPage(page - 1)}
-                className="p-2 rounded-xl bg-white/5 border border-white/10 text-dim disabled:opacity-30 hover:text-main hover:bg-white/10 transition-all"
+                className="p-2 rounded-xl bg-bg-secondary border border-glass-border text-dim disabled:opacity-30 hover:text-main hover:bg-bg-tertiary transition-all"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 disabled={page === pagination.totalPages}
                 onClick={() => setPage(page + 1)}
-                className="p-2 rounded-xl bg-white/5 border border-white/10 text-dim disabled:opacity-30 hover:text-main hover:bg-white/10 transition-all"
+                className="p-2 rounded-xl bg-bg-secondary border border-glass-border text-dim disabled:opacity-30 hover:text-main hover:bg-bg-tertiary transition-all"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

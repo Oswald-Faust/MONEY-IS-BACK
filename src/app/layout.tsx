@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/lib/i18n";
 
 export default function RootLayout({
   children,
@@ -32,20 +33,22 @@ export default function RootLayout({
     <html lang="fr" className={inter.variable} suppressHydrationWarning>
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                background: 'var(--bg-secondary)',
-                color: 'var(--text-main)',
-                border: '1px solid var(--glass-border)',
-                borderRadius: '12px',
-                backdropFilter: 'blur(10px)',
-              },
-            }}
-          />
-          {children}
+          <LanguageProvider>
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: '12px',
+                  backdropFilter: 'blur(10px)',
+                },
+              }}
+            />
+            {children}
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

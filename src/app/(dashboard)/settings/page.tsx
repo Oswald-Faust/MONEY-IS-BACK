@@ -190,7 +190,7 @@ export default function SettingsPage() {
     <div className="max-w-6xl mx-auto space-y-8 pb-20 page-fade">
       {/* Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Paramètres</h1>
+        <h1 className="text-3xl font-bold text-main tracking-tight">Paramètres</h1>
         <p className="text-dim">Gérez votre profil, vos préférences et la sécurité de votre compte.</p>
       </div>
 
@@ -204,7 +204,7 @@ export default function SettingsPage() {
           <div className="flex justify-end mb-2">
              <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-lg hover:bg-white/5 text-dim hover:text-white transition-colors"
+              className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
             >
               {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
@@ -223,7 +223,7 @@ export default function SettingsPage() {
                 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 overflow-hidden whitespace-nowrap
                 ${activeTab === item.id 
                   ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-lg shadow-indigo-500/5' 
-                  : 'text-dim hover:bg-white/5 hover:text-white border border-transparent'}
+                  : 'text-dim hover:bg-bg-secondary hover:text-main border border-transparent'}
               `}
             >
               <item.icon className="w-5 h-5 shrink-0" />
@@ -264,7 +264,7 @@ export default function SettingsPage() {
                 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
                 ${activeTab === item.id 
                   ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-lg shadow-indigo-500/5' 
-                  : 'text-dim hover:bg-white/5 hover:text-white border border-transparent'}
+                  : 'text-dim hover:bg-bg-secondary hover:text-main border border-transparent'}
               `}
             >
               <item.icon className="w-5 h-5" />
@@ -290,7 +290,7 @@ export default function SettingsPage() {
             {activeTab === 'profile' && (
               <div className="space-y-8">
                 {/* Avatar Section */}
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-8 border-b border-white/5 pb-8">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-8 border-b border-glass-border pb-8">
                   <div className="relative group">
                     <Avatar 
                         src={profileData.avatar} 
@@ -316,18 +316,18 @@ export default function SettingsPage() {
                   
                   <div className="space-y-4 flex-1">
                     <div>
-                        <h3 className="text-lg font-bold text-white">Photo de profil</h3>
+                        <h3 className="text-lg font-bold text-main">Photo de profil</h3>
                         <p className="text-sm text-dim">Personnalisez votre apparence sur la plateforme.</p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
                          {/* Color Picker */}
-                         <div className="flex items-center gap-2 p-1 rounded-lg bg-white/5 border border-white/5">
+                         <div className="flex items-center gap-2 p-1 rounded-lg bg-bg-tertiary border border-glass-border">
                             {PRESET_COLORS.map((color) => (
                                 <button
                                     key={color}
                                     onClick={() => setProfileData({...profileData, profileColor: color})}
-                                    className={`w-6 h-6 rounded-full ${color} transition-transform hover:scale-110 ${profileData.profileColor === color ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'}`}
+                                    className={`w-6 h-6 rounded-full ${color} transition-transform hover:scale-110 ${profileData.profileColor === color ? 'ring-2 ring-indigo-500 scale-110' : 'opacity-70 hover:opacity-100'}`}
                                 />
                             ))}
                          </div>
@@ -359,7 +359,7 @@ export default function SettingsPage() {
                       type="text" 
                       value={profileData.firstName}
                       onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
-                      className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                      className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-2.5 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -368,7 +368,7 @@ export default function SettingsPage() {
                       type="text" 
                       value={profileData.lastName}
                       onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
-                      className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                      className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-2.5 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
@@ -379,7 +379,7 @@ export default function SettingsPage() {
                         type="email" 
                         value={profileData.email}
                         onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                        className="w-full pl-12 bg-white/5 border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                        className="w-full pl-12 bg-bg-secondary border border-glass-border rounded-xl px-4 py-2.5 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -389,7 +389,7 @@ export default function SettingsPage() {
                       rows={4} 
                       value={profileData.bio}
                       onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                      className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                      className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-3 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                       placeholder="Dites-en un peu plus sur vous..."
                     />
                   </div>
@@ -409,7 +409,7 @@ export default function SettingsPage() {
                       <label className="text-xs font-bold uppercase tracking-wider text-muted">Mot de passe actuel</label>
                       <input 
                         type="password" 
-                        className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                        className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-3 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                         value={passwordData.currentPassword}
                         onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
                       />
@@ -418,7 +418,7 @@ export default function SettingsPage() {
                       <label className="text-xs font-bold uppercase tracking-wider text-muted">Nouveau mot de passe</label>
                       <input 
                         type="password" 
-                        className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                        className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-3 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
                       />
@@ -427,7 +427,7 @@ export default function SettingsPage() {
                       <label className="text-xs font-bold uppercase tracking-wider text-muted">Confirmer nouveau mot de passe</label>
                       <input 
                         type="password" 
-                        className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                        className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-3 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                         value={passwordData.confirmPassword}
                         onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
                       />
@@ -438,7 +438,7 @@ export default function SettingsPage() {
                 <div className="p-6 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <h4 className="text-white font-bold">Authentification à deux facteurs</h4>
+                      <h4 className="text-main font-bold">Authentification à deux facteurs</h4>
                       <p className="text-sm text-dim">Ajoutez une couche de sécurité supplémentaire à votre compte.</p>
                     </div>
                     <button className="btn-primary scale-90">Activer</button>
@@ -464,13 +464,13 @@ export default function SettingsPage() {
             )}
 
             {/* Footer Actions */}
-            <div className="pt-8 border-t border-white/5 flex items-center justify-between mt-8">
+            <div className="pt-8 border-t border-glass-border flex items-center justify-between mt-8">
                 <button className="text-sm font-bold text-red-500 hover:text-red-400 flex items-center gap-2 transition-colors">
                     <Trash2 className="w-4 h-4" />
                     Supprimer le compte
                 </button>
                 <div className="flex gap-4">
-                    <button className="px-6 py-2.5 rounded-xl border border-white/10 text-white text-sm font-bold hover:bg-white/5 transition-all">
+                    <button className="px-6 py-2.5 rounded-xl border border-glass-border text-main text-sm font-bold hover:bg-glass-hover transition-all">
                         Annuler
                     </button>
                     <button 

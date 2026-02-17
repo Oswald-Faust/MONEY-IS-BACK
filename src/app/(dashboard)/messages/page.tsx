@@ -422,7 +422,7 @@ export default function MessagesPage() {
                 </button>
                 <button
                   onClick={() => setShowNewGroupModal(true)}
-                  className="px-6 py-3.5 bg-white/5 text-white font-bold rounded-full hover:bg-white/10 transition-all border border-white/10 active:scale-95 flex items-center gap-2"
+                  className="px-6 py-3.5 bg-bg-tertiary text-text-main font-bold rounded-full hover:bg-glass-hover transition-all border border-glass-border active:scale-95 flex items-center gap-2"
                 >
                   <Users className="w-4 h-4" />
                   Nouveau groupe

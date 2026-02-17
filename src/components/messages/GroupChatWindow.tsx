@@ -136,7 +136,7 @@ export default function GroupChatWindow({
     const parts = content.split(new RegExp(`(${searchQuery})`, 'gi'));
     return parts.map((part, i) =>
       part.toLowerCase() === searchQuery.toLowerCase() ? (
-        <span key={i} className="bg-yellow-500/50 text-white font-bold px-0.5 rounded">
+        <span key={i} className="bg-yellow-500/30 text-amber-900 dark:text-amber-200 font-bold px-0.5 rounded border border-amber-500/20">
           {part}
         </span>
       ) : (
@@ -163,9 +163,9 @@ export default function GroupChatWindow({
   const memberCount = conversation.members.length;
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0f1115] relative overflow-hidden h-full">
+    <div className="flex-1 flex flex-col bg-bg-primary relative overflow-hidden h-full">
       {/* Header */}
-      <div className="h-20 px-4 md:px-6 flex items-center justify-between bg-[#0f1115]/50 backdrop-blur-md z-10 border-b border-white/5">
+      <div className="h-20 px-4 md:px-6 flex items-center justify-between bg-bg-secondary/50 backdrop-blur-md z-10 border-b border-glass-border">
         {isSearchOpen ? (
           <div className="flex-1 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="relative flex-1">
@@ -175,7 +175,7 @@ export default function GroupChatWindow({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher dans la discussion..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-bg-tertiary border border-glass-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 transition-all"
                 autoFocus
               />
               {matches.length > 0 && (
@@ -189,14 +189,14 @@ export default function GroupChatWindow({
               <button
                 onClick={handlePrevMatch}
                 disabled={matches.length === 0}
-                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50"
+                className="p-2 rounded-lg text-text-muted hover:text-text-main hover:bg-glass-hover disabled:opacity-50"
               >
                 <ChevronLeft className="w-5 h-5 rotate-90" />
               </button>
               <button
                 onClick={handleNextMatch}
                 disabled={matches.length === 0}
-                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50"
+                className="p-2 rounded-lg text-text-muted hover:text-text-main hover:bg-glass-hover disabled:opacity-50"
               >
                 <ChevronLeft className="w-5 h-5 -rotate-90" />
               </button>
@@ -204,7 +204,7 @@ export default function GroupChatWindow({
 
             <button
               onClick={closeSearch}
-              className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-xl text-text-muted hover:text-text-main hover:bg-glass-hover transition-colors"
             >
               <span className="text-sm font-medium">Annuler</span>
             </button>
@@ -214,7 +214,7 @@ export default function GroupChatWindow({
             <div className="flex items-center gap-3 md:gap-4">
               <button
                 onClick={onBack}
-                className="md:hidden p-2 -ml-2 text-gray-400 hover:text-white transition-colors"
+                className="md:hidden p-2 -ml-2 text-text-muted hover:text-text-main transition-colors"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
@@ -225,12 +225,12 @@ export default function GroupChatWindow({
                 </div>
               </div>
               <div>
-                <h3 className="font-bold text-white text-lg tracking-tight">
+                <h3 className="font-bold text-text-main text-lg tracking-tight">
                   {conversation.name}
                 </h3>
                 <button
                   onClick={() => setShowMembersPanel(!showMembersPanel)}
-                  className="text-indigo-400 text-xs font-medium hover:text-indigo-300 transition-colors"
+                  className="text-accent-primary text-xs font-medium hover:underline transition-colors"
                 >
                   {memberCount} membre{memberCount > 1 ? 's' : ''}
                 </button>
@@ -240,14 +240,14 @@ export default function GroupChatWindow({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                className="p-2.5 rounded-xl text-text-muted hover:text-text-main hover:bg-glass-hover transition-colors"
                 title="Rechercher"
               >
                 <Search className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setShowMembersPanel(!showMembersPanel)}
-                className="p-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                className="p-2.5 rounded-xl text-text-muted hover:text-text-main hover:bg-glass-hover transition-colors"
                 title="Membres"
               >
                 <Users className="w-5 h-5" />
@@ -266,12 +266,12 @@ export default function GroupChatWindow({
             </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in zoom-in duration-500">
-              <div className="w-24 h-24 rounded-3xl bg-indigo-500/10 flex items-center justify-center mb-2 ring-1 ring-indigo-500/20">
-                <Users className="w-10 h-10 text-indigo-400" />
+              <div className="w-24 h-24 rounded-3xl bg-accent-primary/10 flex items-center justify-center mb-2 ring-1 ring-accent-primary/20">
+                <Users className="w-10 h-10 text-accent-primary" />
               </div>
               <div>
-                <h4 className="text-white font-bold text-xl mb-2">Groupe créé !</h4>
-                <p className="text-gray-500 max-w-xs mx-auto">
+                <h4 className="text-text-main font-bold text-xl mb-2">Groupe créé !</h4>
+                <p className="text-text-muted max-w-xs mx-auto">
                   Envoyez un message pour démarrer la conversation de groupe.
                 </p>
               </div>
@@ -297,7 +297,7 @@ export default function GroupChatWindow({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                   key={msg._id || index}
-                  className={`flex w-full group/msg ${isOwn ? 'justify-end' : 'justify-start'} ${isHighlighted ? 'bg-indigo-500/10 -mx-4 px-4 py-2 rounded-lg transition-colors duration-500' : ''}`}
+                  className={`flex w-full group/msg ${isOwn ? 'justify-end' : 'justify-start'} ${isHighlighted ? 'bg-accent-primary/10 -mx-4 px-4 py-2 rounded-lg transition-colors duration-500' : ''}`}
                 >
                   <div className={`flex gap-2 max-w-[70%] ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
                     {/* Avatar for other users */}
@@ -315,7 +315,7 @@ export default function GroupChatWindow({
                     <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
                       {/* Sender name */}
                       {showSenderName && (
-                        <span className="text-xs text-indigo-400 font-medium mb-1 px-1">
+                        <span className="text-xs text-accent-primary font-medium mb-1 px-1">
                           {senderInfo.firstName} {senderInfo.lastName}
                         </span>
                       )}
@@ -323,8 +323,8 @@ export default function GroupChatWindow({
                       <div
                         className={`relative px-5 py-3.5 shadow-sm space-y-1 group ${
                           isOwn
-                            ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm shadow-[0_4px_15px_rgba(79,70,229,0.3)]'
-                            : 'bg-[#1c1c1e] border border-white/10 text-gray-100 rounded-2xl rounded-tl-sm'
+                            ? 'bg-accent-primary text-white rounded-2xl rounded-tr-sm shadow-md'
+                            : 'bg-bg-secondary border border-glass-border text-text-main rounded-2xl rounded-tl-sm'
                         }`}
                       >
                         {!msg.deletedForEveryone && (
@@ -372,7 +372,7 @@ export default function GroupChatWindow({
                                     }`}
                                   >
                                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                      isOwn ? 'bg-white/20' : 'bg-indigo-500/20 text-indigo-400'
+                                      isOwn ? 'bg-white/20' : 'bg-accent-primary/10 text-accent-primary'
                                     }`}>
                                       {att.type === 'task' && <LayoutDashboard className="w-4 h-4" />}
                                       {att.type === 'objective' && <Target className="w-4 h-4" />}
@@ -391,7 +391,7 @@ export default function GroupChatWindow({
                           </>
                         )}
 
-                        <div className={`flex items-center justify-end gap-1.5 pt-1 ${isOwn ? 'text-indigo-200' : 'text-gray-500'}`}>
+                        <div className={`flex items-center justify-end gap-1.5 pt-1 ${isOwn ? 'text-white/70' : 'text-text-muted'}`}>
                           <span className="text-[10px] font-medium">
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
@@ -413,14 +413,14 @@ export default function GroupChatWindow({
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: 280, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
-              className="border-l border-white/5 bg-[#0f1115] overflow-hidden flex-shrink-0"
+              className="border-l border-glass-border bg-bg-secondary overflow-hidden flex-shrink-0"
             >
               <div className="w-[280px] h-full flex flex-col">
-                <div className="p-4 border-b border-white/5 flex items-center justify-between">
-                  <h3 className="font-bold text-white text-sm">Membres ({memberCount})</h3>
+                <div className="p-4 border-b border-glass-border flex items-center justify-between">
+                  <h3 className="font-bold text-text-main text-sm">Membres ({memberCount})</h3>
                   <button
                     onClick={() => setShowMembersPanel(false)}
-                    className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-1 rounded-lg text-text-muted hover:text-text-main hover:bg-glass-hover transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -433,7 +433,7 @@ export default function GroupChatWindow({
                     return (
                       <div
                         key={memberUser._id}
-                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors"
+                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-glass-hover transition-colors"
                       >
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs overflow-hidden flex-shrink-0">
                           {memberUser.avatar ? (
@@ -443,13 +443,13 @@ export default function GroupChatWindow({
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white font-medium truncate">
+                          <p className="text-sm text-text-main font-medium truncate">
                             {memberUser.firstName} {memberUser.lastName}
                             {memberUser._id === currentUserId && (
-                              <span className="text-indigo-400 text-xs ml-1">(vous)</span>
+                              <span className="text-accent-primary text-xs ml-1">(vous)</span>
                             )}
                           </p>
-                          <p className="text-[10px] text-gray-500 uppercase font-medium">{member.role}</p>
+                          <p className="text-[10px] text-text-muted uppercase font-medium">{member.role}</p>
                         </div>
                       </div>
                     );
@@ -458,7 +458,7 @@ export default function GroupChatWindow({
 
                 {/* Leave group button */}
                 {conversation.creator !== currentUserId && onLeaveGroup && (
-                  <div className="p-3 border-t border-white/5">
+                  <div className="p-3 border-t border-glass-border">
                     <button
                       onClick={onLeaveGroup}
                       className="w-full py-2 px-3 rounded-xl text-red-400 hover:bg-red-500/10 text-sm font-medium transition-colors flex items-center justify-center gap-2"
@@ -475,7 +475,7 @@ export default function GroupChatWindow({
       </div>
 
       {/* Input Area */}
-      <div className="p-5 bg-[#0f1115]/80 backdrop-blur-xl">
+      <div className="p-5 bg-bg-secondary/80 backdrop-blur-xl border-t border-glass-border">
         <AnimatePresence>
           {attachments.length > 0 && (
             <motion.div
@@ -487,7 +487,7 @@ export default function GroupChatWindow({
               {attachments.map((att) => (
                 <div
                   key={att.id}
-                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 bg-indigo-500/10 text-indigo-300 rounded-lg text-xs border border-indigo-500/20"
+                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 bg-accent-primary/10 text-accent-primary rounded-lg text-xs border border-accent-primary/20"
                 >
                   <span className="font-medium">{att.name}</span>
                   <button
@@ -507,13 +507,13 @@ export default function GroupChatWindow({
             <button
               type="button"
               onClick={onOpenResourcePicker}
-              className="p-3.5 rounded-2xl bg-indigo-600/10 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-600/20 transition-all active:scale-95"
+              className="p-3.5 rounded-2xl bg-accent-primary/10 text-accent-primary hover:text-accent-primary hover:bg-accent-primary/20 transition-all active:scale-95"
             >
               <Plus className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="flex-1 bg-white/5 rounded-2xl p-1 focus-within:ring-2 focus-within:ring-indigo-500/30 transition-all border border-white/5 hover:border-white/10">
+          <div className="flex-1 bg-bg-tertiary rounded-2xl p-1 focus-within:ring-2 focus-within:ring-accent-primary/30 transition-all border border-glass-border">
             <textarea
               value={newMessage}
               onChange={(e) => onNewMessageChange(e.target.value)}
@@ -524,7 +524,7 @@ export default function GroupChatWindow({
                 }
               }}
               placeholder="Écrivez votre message..."
-              className="w-full bg-transparent text-white placeholder-gray-500 px-4 py-2.5 min-h-[46px] max-h-32 focus:outline-none resize-none custom-scrollbar"
+              className="w-full bg-transparent text-text-main placeholder-text-muted px-4 py-2.5 min-h-[46px] max-h-32 focus:outline-none resize-none custom-scrollbar"
               rows={1}
             />
           </div>
@@ -532,7 +532,7 @@ export default function GroupChatWindow({
           <button
             type="submit"
             disabled={(!newMessage.trim() && attachments.length === 0) || isSending}
-            className="p-3.5 rounded-2xl bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-50 disabled:grayscale transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex-shrink-0"
+            className="p-3.5 rounded-2xl bg-accent-primary text-white hover:opacity-90 disabled:opacity-50 disabled:grayscale transition-all shadow-lg shadow-accent-primary/20 active:scale-95 flex-shrink-0"
           >
             <Send className={`w-5 h-5 ${isSending ? 'animate-pulse' : ''}`} />
           </button>
@@ -547,15 +547,15 @@ export default function GroupChatWindow({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-sm bg-[#1c1c1e] rounded-2xl p-6 border border-white/10 shadow-xl"
+              className="w-full max-w-sm bg-bg-secondary rounded-2xl p-6 border border-glass-border shadow-xl"
             >
-              <h3 className="text-lg font-bold text-white mb-2">Supprimer le message ?</h3>
-              <p className="text-gray-400 text-sm mb-6">Cette action est irréversible.</p>
+              <h3 className="text-lg font-bold text-text-main mb-2">Supprimer le message ?</h3>
+              <p className="text-text-muted text-sm mb-6">Cette action est irréversible.</p>
 
               <div className="space-y-3">
                 <button
                   onClick={() => handleDeleteMessage(false)}
-                  className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors"
+                  className="w-full py-3 rounded-xl bg-bg-tertiary hover:bg-glass-hover text-text-main font-medium transition-colors"
                 >
                   Supprimer pour moi
                 </button>
@@ -564,14 +564,14 @@ export default function GroupChatWindow({
                   : messageToDelete.sender === currentUserId) && (
                   <button
                     onClick={() => handleDeleteMessage(true)}
-                    className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-medium transition-colors"
+                    className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-medium transition-colors"
                   >
                     Supprimer pour tout le monde
                   </button>
                 )}
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="w-full py-2 text-gray-500 hover:text-white text-sm transition-colors"
+                  className="w-full py-2 text-text-muted hover:text-text-main text-sm transition-colors"
                 >
                   Annuler
                 </button>

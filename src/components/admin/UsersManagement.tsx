@@ -126,7 +126,7 @@ export default function UsersManagement() {
             <Users className="w-6 h-6 text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Gestion des utilisateurs</h3>
+            <h3 className="text-lg font-bold text-main">Gestion des utilisateurs</h3>
             <p className="text-sm text-dim">{users.length} utilisateur{users.length > 1 ? 's' : ''} au total</p>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function UsersManagement() {
           placeholder="Rechercher par nom ou email..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-dim focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+          className="w-full pl-12 pr-4 py-3 bg-bg-secondary border border-glass-border rounded-xl text-main placeholder:text-dim focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 transition-all"
         />
       </div>
 
@@ -165,7 +165,7 @@ export default function UsersManagement() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-indigo-500/30 transition-all group"
+              className="p-5 rounded-xl bg-bg-secondary border border-glass-border hover:bg-bg-tertiary hover:border-indigo-500/30 transition-all group"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 flex-1">
@@ -181,7 +181,7 @@ export default function UsersManagement() {
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-bold text-white truncate">
+                      <h4 className="font-bold text-main truncate">
                         {userData.firstName} {userData.lastName}
                       </h4>
                       {userData.role === 'admin' && (
@@ -228,7 +228,7 @@ export default function UsersManagement() {
                         p-2 rounded-lg transition-all duration-200
                         ${confirmDeleteId === userData._id
                           ? 'bg-red-500/20 border-2 border-red-500 text-red-400 animate-pulse'
-                          : 'bg-white/5 border border-white/10 text-dim hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400'}
+                          : 'bg-bg-tertiary border border-glass-border text-dim hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400'}
                         ${deletingUserId === userData._id ? 'opacity-50 cursor-not-allowed' : ''}
                       `}
                       title={confirmDeleteId === userData._id ? 'Cliquer à nouveau pour confirmer' : 'Supprimer cet utilisateur'}
@@ -250,14 +250,14 @@ export default function UsersManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-white/5">
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-glass-border">
+        <div className="p-4 rounded-xl bg-bg-secondary border border-glass-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
               <Users className="w-5 h-5 text-indigo-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{users.length}</p>
+              <p className="text-2xl font-bold text-main">{users.length}</p>
               <p className="text-xs text-dim">Total utilisateurs</p>
             </div>
           </div>
@@ -269,7 +269,7 @@ export default function UsersManagement() {
               <Crown className="w-5 h-5 text-yellow-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{users.filter(u => u.role === 'admin').length}</p>
+              <p className="text-2xl font-bold text-main">{users.filter(u => u.role === 'admin').length}</p>
               <p className="text-xs text-dim">Administrateurs</p>
             </div>
           </div>
@@ -281,7 +281,7 @@ export default function UsersManagement() {
               <UserCheck className="w-5 h-5 text-indigo-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{users.filter(u => u.role === 'user').length}</p>
+              <p className="text-2xl font-bold text-main">{users.filter(u => u.role === 'user').length}</p>
               <p className="text-xs text-dim">Utilisateurs</p>
             </div>
           </div>

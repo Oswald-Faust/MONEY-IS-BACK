@@ -129,7 +129,7 @@ export default function AdminUsersPage() {
             placeholder="Rechercher par nom, email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-main placeholder-dim focus:border-blue-500/40 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-bg-secondary border border-glass-border rounded-2xl text-main placeholder-dim focus:border-blue-500/40 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
           />
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function AdminUsersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02]">
+              <tr className="border-b border-glass-border bg-bg-tertiary/50">
                 <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Utilisateur</th>
                 <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Rôle</th>
                 <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Workspaces</th>
@@ -146,7 +146,7 @@ export default function AdminUsersPage() {
                 <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-glass-border">
               <AnimatePresence mode="popLayout">
                 {isLoading ? (
                   <tr>
@@ -173,12 +173,12 @@ export default function AdminUsersPage() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="hover:bg-white/[0.02] transition-colors group"
+                      className="hover:bg-glass-hover transition-colors group"
                     >
                       <td className="px-6 py-4">
                         <Link href={`/admin/users/${u._id}`}>
                           <div className="flex items-center gap-3 cursor-pointer group/user">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden ring-2 ring-white/5 group-hover/user:ring-indigo-500/50 transition-all">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden ring-2 border border-glass-border group-hover/user:ring-indigo-500/50 transition-all">
                               {u.avatar ? (
                                 <Image src={u.avatar} alt="" width={40} height={40} className="object-cover" />
                               ) : (
@@ -199,7 +199,7 @@ export default function AdminUsersPage() {
                             u.role === 'admin' ? 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20' :
                             u.role === 'moderator' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20' :
                             u.role === 'support' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20' :
-                            'bg-white/5 text-dim border-white/10 hover:text-main hover:bg-white/10'
+                            'bg-bg-tertiary text-dim border-glass-border hover:text-main hover:bg-bg-secondary'
                           }`}
                         >
                           <div className="flex items-center gap-1.5">
@@ -229,7 +229,7 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link href={`/admin/users/${u._id}`}>
-                            <button className="p-2 rounded-xl hover:bg-white/5 text-dim hover:text-main transition-all">
+                            <button className="p-2 rounded-xl hover:bg-glass-hover text-dim hover:text-main transition-all">
                               <Eye className="w-4 h-4" />
                             </button>
                           </Link>
@@ -239,7 +239,7 @@ export default function AdminUsersPage() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-                          <button className="p-2 rounded-xl hover:bg-white/5 text-dim hover:text-main transition-all">
+                          <button className="p-2 rounded-xl hover:bg-glass-hover text-dim hover:text-main transition-all">
                             <MoreVertical className="w-4 h-4" />
                           </button>
                         </div>
@@ -253,7 +253,7 @@ export default function AdminUsersPage() {
         </div>
 
         {pagination && pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-white/5 flex items-center justify-between">
+          <div className="px-6 py-4 border-t border-glass-border flex items-center justify-between">
             <p className="text-xs text-dim">
               Affichage de <span className="font-bold text-main">{users.length}</span> sur <span className="font-bold text-main">{pagination.total}</span> membres
             </p>
@@ -261,7 +261,7 @@ export default function AdminUsersPage() {
               <button
                 disabled={page === 1}
                 onClick={() => setPage(page - 1)}
-                className="p-2 rounded-xl bg-white/5 border border-white/10 text-dim disabled:opacity-30 hover:text-main hover:bg-white/10 transition-all"
+                className="p-2 rounded-xl bg-bg-secondary border border-glass-border text-dim disabled:opacity-30 hover:text-main hover:bg-bg-tertiary transition-all"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -271,7 +271,7 @@ export default function AdminUsersPage() {
                     key={i}
                     onClick={() => setPage(i + 1)}
                     className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
-                      page === i + 1 ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-dim hover:text-main hover:bg-white/5'
+                      page === i + 1 ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-dim hover:text-main hover:bg-glass-bg'
                     }`}
                   >
                     {i + 1}
@@ -281,7 +281,7 @@ export default function AdminUsersPage() {
               <button
                 disabled={page === pagination.totalPages}
                 onClick={() => setPage(page + 1)}
-                className="p-2 rounded-xl bg-white/5 border border-white/10 text-dim disabled:opacity-30 hover:text-main hover:bg-white/10 transition-all"
+                className="p-2 rounded-xl bg-bg-secondary border border-glass-border text-dim disabled:opacity-30 hover:text-main hover:bg-bg-tertiary transition-all"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

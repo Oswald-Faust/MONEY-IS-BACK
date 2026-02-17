@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore, useAuthStore } from '@/store';
+import { useTranslation } from '@/lib/i18n';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -32,24 +33,6 @@ import {
   Rocket,
   Command,
 } from 'lucide-react';
-
-const mainNavItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', view: 'dashboard' as const },
-  { icon: FolderKanban, label: 'Projets', href: '/projects', view: 'projects' as const },
-  { icon: CheckSquare, label: 'To Do Global', href: '/tasks', view: 'tasks' as const },
-  { icon: Calendar, label: 'Calendrier', href: '/calendar', view: 'calendar' as const },
-  { icon: RotateCcw, label: 'Routines', href: '/routines', view: 'routines' as const },
-  { icon: MessageCircle, label: 'Messagerie', href: '/messages', view: 'messages' as const },
-];
-
-const secondaryNavItems = [
-  { icon: Target, label: 'Objectifs', href: '/objectives', view: 'objectives' as const },
-  { icon: Lightbulb, label: 'Idées', href: '/ideas', view: 'ideas' as const },
-  { icon: Key, label: 'IDs Sécurisés', href: '/secure-ids', view: 'ids' as const },
-  { icon: HardDrive, label: 'Drive', href: '/drive', view: 'drive' as const },
-  { icon: UserPlus, label: 'Inviter', href: '/invite', view: 'invite' as const },
-  { icon: Sparkles, label: 'Mettre à niveau', href: '/upgrade', view: 'upgrade' as const },
-];
 
 import Image from 'next/image';
 
@@ -85,6 +68,7 @@ const PlanBadge = ({ plan }: { plan?: string }) => {
 
 
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -102,9 +86,28 @@ export default function Sidebar() {
     workspaces
   } = useAppStore();
   const { user, logout } = useAuthStore();
+  const { t } = useTranslation();
   const [mounted, setMounted] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
   const [projectsExpanded, setProjectsExpanded] = React.useState(true);
+
+  const mainNavItems = [
+    { icon: LayoutDashboard, label: t.sidebar.dashboard, href: '/dashboard', view: 'dashboard' as const },
+    { icon: FolderKanban, label: t.sidebar.projects, href: '/projects', view: 'projects' as const },
+    { icon: CheckSquare, label: t.sidebar.globalTodo, href: '/tasks', view: 'tasks' as const },
+    { icon: Calendar, label: t.sidebar.calendar, href: '/calendar', view: 'calendar' as const },
+    { icon: RotateCcw, label: t.sidebar.routines, href: '/routines', view: 'routines' as const },
+    { icon: MessageCircle, label: t.sidebar.messaging, href: '/messages', view: 'messages' as const },
+  ];
+
+  const secondaryNavItems = [
+    { icon: Target, label: t.sidebar.objectives, href: '/objectives', view: 'objectives' as const },
+    { icon: Lightbulb, label: t.sidebar.ideas, href: '/ideas', view: 'ideas' as const },
+    { icon: Key, label: t.sidebar.secureIds, href: '/secure-ids', view: 'ids' as const },
+    { icon: HardDrive, label: t.sidebar.drive, href: '/drive', view: 'drive' as const },
+    { icon: UserPlus, label: t.sidebar.invite, href: '/invite', view: 'invite' as const },
+    { icon: Sparkles, label: t.sidebar.upgrade, href: '/upgrade', view: 'upgrade' as const },
+  ];
 
   React.useEffect(() => {
     setMounted(true);
@@ -179,7 +182,7 @@ export default function Sidebar() {
                         {currentWorkspace?.name || 'MONEY IS BACK'}
                       </h1>
                       <div className="flex items-center gap-1">
-                        <p className="text-[10px] text-text-dim font-bold uppercase tracking-wider">Workspace</p>
+                        <p className="text-[10px] text-text-dim font-bold uppercase tracking-wider">{t.common.workspace}</p>
                         <ChevronRight className="w-3 h-3 text-text-dim group-hover/ws:rotate-90 transition-transform" />
                       </div>
                     </div>
@@ -188,7 +191,7 @@ export default function Sidebar() {
                   {/* Workspace Dropdown */}
                   <div id="ws-dropdown" className="hidden absolute top-full left-0 w-64 mt-2 py-2 bg-bg-card border border-glass-border rounded-2xl shadow-2xl z-[100] backdrop-blur-xl">
                     <div className="px-4 py-2 border-b border-glass-border/50 mb-2">
-                      <p className="text-[10px] font-black text-text-dim uppercase tracking-widest">Vos Espaces de Travail</p>
+                      <p className="text-[10px] font-black text-text-dim uppercase tracking-widest">{t.common.yourWorkspaces}</p>
                     </div>
                     <div className="max-h-[300px] overflow-y-auto px-2 space-y-1 custom-scrollbar">
                       {workspaces.map((ws) => (
@@ -245,7 +248,7 @@ export default function Sidebar() {
                           <div className="w-8 h-8 rounded-lg border border-dashed border-glass-border flex items-center justify-center group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all">
                             <Plus className="w-4 h-4 group-hover:text-indigo-400" />
                           </div>
-                          <span className="text-sm font-medium">Créer un workspace</span>
+                          <span className="text-sm font-medium">{t.common.createWorkspace}</span>
                         </button>
                       ) : (
                         <Link
@@ -258,7 +261,7 @@ export default function Sidebar() {
                           </div>
                           <div className="flex flex-col text-left">
                             <span className="text-sm font-medium">Créer un workspace</span>
-                            <span className="text-[10px] text-indigo-400/70 font-bold">REQUIS : PLAN TEAM</span>
+                            <span className="text-[10px] text-indigo-400/70 font-bold">{t.common.requiredTeamPlan}</span>
                           </div>
                         </Link>
                       )}
@@ -270,6 +273,7 @@ export default function Sidebar() {
           </AnimatePresence>
           
           <div className="flex items-center gap-1">
+            {(!sidebarCollapsed || isMobile) && <LanguageSwitcher />}
             {(!sidebarCollapsed || isMobile) && <ThemeToggle />}
             <button
               onClick={isMobile ? () => setMobileMenuOpen(false) : toggleSidebar}
@@ -290,7 +294,7 @@ export default function Sidebar() {
           <div className="flex items-center justify-between px-1">
             <span className="text-[10px] font-bold text-dim uppercase tracking-widest flex items-center gap-2">
               <Search className="w-3 h-3" />
-              Quick search
+              {t.common.quickSearch}
             </span>
             <PlanBadge plan={currentWorkspace?.subscriptionPlan} />
           </div>
@@ -300,7 +304,7 @@ export default function Sidebar() {
           >
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-hover:text-indigo-400 transition-colors duration-200" />
             <div className="w-full pl-11 pr-4 py-2.5 text-sm bg-glass-bg border border-glass-border rounded-xl text-text-dim text-left group-hover:bg-glass-hover group-hover:border-indigo-500/40 transition-all duration-300 shadow-inner flex items-center justify-between">
-              <span>Rechercher...</span>
+              <span>{t.common.search}</span>
               <div className="flex items-center gap-1 px-1.5 py-0.5 bg-glass-bg border border-glass-border rounded text-[10px] font-mono text-gray-500">
                 <Command className="w-2.5 h-2.5" />
                 <span>K</span>
@@ -364,7 +368,7 @@ export default function Sidebar() {
                       exit={{ opacity: 0, width: 0 }}
                       className="text-sm font-bold whitespace-nowrap uppercase tracking-wider"
                     >
-                      Mode Créateur
+                      {t.sidebar.creatorMode}
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -388,7 +392,7 @@ export default function Sidebar() {
                   <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${projectsExpanded ? 'rotate-90' : ''}`} />
                 </div>
                 <span className="text-xs font-medium text-gray-500 uppercase tracking-wider group-hover/header:text-main transition-colors">
-                  Projets
+                  {t.sidebar.projects}
                 </span>
               </button>
               <button
@@ -436,13 +440,13 @@ export default function Sidebar() {
             {(!sidebarCollapsed || isMobile) && (
               <div className="px-3 mb-2">
                 <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Outils
+                  {t.sidebar.tools}
                 </span>
               </div>
             )}
             <div className="space-y-1">
               {secondaryNavItems.filter(item => {
-                if (item.label === 'Mettre à niveau' && user?.role === 'admin') return false;
+                if (item.href === '/upgrade' && user?.role === 'admin') return false;
                 return true;
               }).map((item) => {
                 const isActive = pathname === item.href;

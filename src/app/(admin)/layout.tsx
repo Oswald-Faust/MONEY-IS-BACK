@@ -36,14 +36,14 @@ export default function AdminLayout({
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#0a0a0c]" />
+      <div className="min-h-screen bg-bg-primary" />
     );
   }
 
   // Double check admin role
   if (user && user.role !== 'admin') {
     return (
-      <div className="min-h-screen bg-[#0a0a0c] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center p-4">
         <div className="w-20 h-20 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
           <ShieldAlert className="w-10 h-10" />
         </div>
@@ -62,15 +62,15 @@ export default function AdminLayout({
 
   return (
     <AuthGuard requireAuth={true}>
-      <div className="min-h-screen bg-[#0a0a0c] transition-colors duration-300">
+      <div className="min-h-screen bg-bg-primary transition-colors duration-300">
         <Toaster
           position="top-right"
           toastOptions={{
             duration: 3000,
             style: {
-              background: '#1a1a24',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-main)',
+              border: '1px solid var(--glass-border)',
               borderRadius: '12px',
             },
           }}
@@ -80,7 +80,7 @@ export default function AdminLayout({
         
         {/* Mobile Header */}
         {isMobile && !isMobileMenuOpen && (
-          <div className="fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-4 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-white/5 z-40">
+          <div className="fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-4 bg-bg-primary/80 backdrop-blur-md border-b border-glass-border z-40">
             <div className="flex items-center">
               <button
                 onClick={() => setMobileMenuOpen(true)}

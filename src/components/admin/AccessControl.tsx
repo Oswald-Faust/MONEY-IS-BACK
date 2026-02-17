@@ -288,7 +288,7 @@ export default function AccessControl() {
   };
 
   const VerificationItem = ({ title, description, status, date }: VerificationItemProps) => (
-    <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+    <div className="flex items-center justify-between p-4 rounded-xl bg-bg-secondary border border-glass-border hover:bg-bg-tertiary transition-colors">
       <div className="flex items-center gap-4">
         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
           status === 'pending' || status === 'warning' ? 'bg-yellow-500/10 text-yellow-400' : 
@@ -302,7 +302,7 @@ export default function AccessControl() {
            <Info className="w-5 h-5" />}
         </div>
         <div>
-          <h4 className="font-bold text-white text-sm">{title}</h4>
+          <h4 className="font-bold text-main text-sm">{title}</h4>
           <p className="text-xs text-dim">{description}</p>
         </div>
       </div>
@@ -338,13 +338,13 @@ export default function AccessControl() {
           <Shield className="w-6 h-6 text-indigo-400" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white">Accès & Vérifications</h3>
+          <h3 className="text-lg font-bold text-main">Accès & Vérifications</h3>
           <p className="text-sm text-dim">Gérez les permissions globales et les accès par projet.</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 rounded-xl bg-white/5 border border-white/10 w-fit">
+      <div className="flex gap-2 p-1 rounded-xl bg-bg-secondary border border-glass-border w-fit">
         {['permissions', 'projects', 'drive', 'verifications'].map((tab) => (
              <button
              key={tab}
@@ -352,7 +352,7 @@ export default function AccessControl() {
              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all capitalize ${
                activeSection === tab 
                  ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
-                 : 'text-dim hover:text-white hover:bg-white/5'
+                 : 'text-dim hover:text-main hover:bg-glass-hover'
              }`}
            >
              {tab === 'permissions' ? 'Permissions Globales' : 
@@ -371,13 +371,13 @@ export default function AccessControl() {
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {Object.entries(globalPermissions).map(([key, value]) => (
-              <div key={key} className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div key={key} className="p-4 rounded-xl bg-bg-secondary border border-glass-border flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${typeof value === 'boolean' && value ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white/5 text-dim'}`}>
                     {key === 'driveAccess' ? <HardDrive className="w-4 h-4" /> : <Settings className="w-4 h-4" />}
                   </div>
                   <div>
-                    <h4 className="font-bold text-white text-sm capitalize">
+                    <h4 className="font-bold text-main text-sm capitalize">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </h4>
                     <p className="text-xs text-dim">
@@ -403,13 +403,13 @@ export default function AccessControl() {
             ))}
             
             {/* File Types Manager */}
-            <div className="md:col-span-2 p-6 rounded-2xl bg-white/5 border border-white/10 mt-2">
+            <div className="md:col-span-2 p-6 rounded-2xl bg-bg-secondary border border-glass-border mt-2">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
                   <FileText className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white leading-none mb-1">Extensions de fichiers autorisées</h4>
+                  <h4 className="font-bold text-main leading-none mb-1">Extensions de fichiers autorisées</h4>
                   <p className="text-xs text-dim">Laissez vide pour tout autoriser</p>
                 </div>
               </div>
@@ -421,7 +421,7 @@ export default function AccessControl() {
                     value={newFileType}
                     onChange={e => setNewFileType(e.target.value)}
                     placeholder="ex: .pdf, .zip, .jpg"
-                    className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:border-indigo-500 outline-none transition-all"
+                    className="flex-1 px-4 py-2.5 bg-bg-tertiary border border-glass-border rounded-xl text-sm text-main focus:border-indigo-500 outline-none transition-all"
                   />
                   <button 
                     type="submit"
@@ -459,7 +459,7 @@ export default function AccessControl() {
             className="flex flex-col md:flex-row gap-6 h-[500px]"
           >
             {/* Users List */}
-            <div className="w-full md:w-1/3 border-r border-white/10 pr-6 overflow-y-auto">
+            <div className="w-full md:w-1/3 border-r border-glass-border pr-6 overflow-y-auto">
               <h4 className="text-xs font-bold uppercase tracking-wider text-muted mb-4">Utilisateurs</h4>
               <div className="space-y-2">
                 {users.map(user => (
@@ -468,8 +468,8 @@ export default function AccessControl() {
                     onClick={() => setSelectedUser(user._id)}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                       selectedUser === user._id 
-                        ? 'bg-indigo-500/10 border border-indigo-500/20 text-white' 
-                        : 'text-dim hover:bg-white/5 border border-transparent'
+                        ? 'bg-indigo-500/10 border border-indigo-500/20 text-main font-bold' 
+                        : 'text-dim hover:bg-glass-hover border border-transparent'
                     }`}
                   >
                     <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-400 overflow-hidden relative shrink-0">
@@ -499,14 +499,14 @@ export default function AccessControl() {
                {selectedUser ? (
                  <div className="space-y-3">
                    {projects.map(project => (
-                     <div key={project._id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                     <div key={project._id} className="flex items-center justify-between p-4 rounded-xl bg-bg-secondary border border-glass-border hover:bg-bg-tertiary transition-colors">
                        <div className="flex items-center gap-4">
-                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${project.hasAccess ? 'bg-purple-500/10 text-purple-400' : 'bg-white/5 text-dim'}`}>
+                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${project.hasAccess ? 'bg-purple-500/10 text-purple-400' : 'bg-bg-tertiary text-dim'}`}>
                            <Folder className="w-5 h-5" />
                          </div>
                          <div>
                            <div className="flex items-center gap-2">
-                               <h4 className="font-bold text-white text-sm">{project.name}</h4>
+                               <h4 className="font-bold text-main text-sm">{project.name}</h4>
                                {project.role === 'owner' && (
                                    <span className="text-[10px] bg-yellow-500/10 text-yellow-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Propriétaire</span>
                                )}
@@ -556,7 +556,7 @@ export default function AccessControl() {
             className="flex flex-col md:flex-row gap-6 h-[500px]"
           >
             {/* Users List */}
-            <div className="w-full md:w-1/3 border-r border-white/10 pr-6 overflow-y-auto">
+            <div className="w-full md:w-1/3 border-r border-glass-border pr-6 overflow-y-auto">
               <h4 className="text-xs font-bold uppercase tracking-wider text-muted mb-4">Utilisateurs</h4>
               <div className="space-y-2">
                 {users.map(user => (
@@ -565,8 +565,8 @@ export default function AccessControl() {
                     onClick={() => setSelectedUser(user._id)}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                       selectedUser === user._id 
-                        ? 'bg-indigo-500/10 border border-indigo-500/20 text-white' 
-                        : 'text-dim hover:bg-white/5 border border-transparent'
+                        ? 'bg-indigo-500/10 border border-indigo-500/20 text-main font-bold' 
+                        : 'text-dim hover:bg-glass-hover border border-transparent'
                     }`}
                   >
                     <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-400 overflow-hidden relative shrink-0">
@@ -590,7 +590,7 @@ export default function AccessControl() {
             <div className="flex-1 overflow-y-auto pl-2">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h4 className="text-base font-bold text-white mb-1">Restrictions d&apos;Accès Drive</h4>
+                        <h4 className="text-base font-bold text-main mb-1">Restrictions d&apos;Accès Drive</h4>
                         <p className="text-xs text-dim">Contrôlez la visibilité et l&apos;utilisation du Drive pour cet utilisateur.</p>
                     </div>
                 </div>
@@ -598,14 +598,14 @@ export default function AccessControl() {
                 {selectedUser ? (
                     <div className="space-y-6">
                         {/* Global Drive Toggle for User */}
-                        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/30 transition-all">
+                        <div className="p-6 rounded-2xl bg-bg-secondary border border-glass-border hover:border-indigo-500/30 transition-all">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${users.find(u => u._id === selectedUser)?.driveAccess !== false ? 'bg-indigo-500/20 text-indigo-400' : 'bg-red-500/10 text-red-400'}`}>
                                         <HardDrive className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-white">Accès au module Drive</h4>
+                                        <h4 className="font-bold text-main">Accès au module Drive</h4>
                                         <p className="text-xs text-dim">Permettre à l&apos;utilisateur de voir le Drive et d&apos;uploader des fichiers.</p>
                                     </div>
                                 </div>
@@ -626,7 +626,7 @@ export default function AccessControl() {
                             <div className="flex gap-3">
                                 <Info className="w-5 h-5 text-indigo-400 shrink-0" />
                                 <div className="space-y-2">
-                                    <h5 className="text-sm font-bold text-white">Visibilité des fichiers</h5>
+                                    <h5 className="text-sm font-bold text-main">Visibilité des fichiers</h5>
                                     <ul className="text-xs text-dim space-y-2 list-disc pl-4">
                                         <li>L&apos;utilisateur voit ses propres fichiers uploadés.</li>
                                         <li>Il voit les fichiers liés aux projets dont il est membre.</li>
@@ -669,15 +669,15 @@ export default function AccessControl() {
             )}
             
              <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 mt-6">
-              <h4 className="font-bold text-white text-sm mb-2">Statistiques Système</h4>
+              <h4 className="font-bold text-main text-sm mb-2">Statistiques Système</h4>
               <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/5 p-3 rounded-lg">
+                  <div className="bg-bg-tertiary p-3 rounded-lg">
                       <p className="text-xs text-dim">Total Actions</p>
-                      <p className="text-xl font-bold text-white">{logs.length}</p>
+                      <p className="text-xl font-bold text-main">{logs.length}</p>
                   </div>
-                  <div className="bg-white/5 p-3 rounded-lg">
+                  <div className="bg-bg-tertiary p-3 rounded-lg">
                       <p className="text-xs text-dim">Dernière activité</p>
-                      <p className="text-sm font-bold text-white">{logs.length > 0 ? new Date(logs[0].createdAt).toLocaleTimeString() : 'N/A'}</p>
+                      <p className="text-sm font-bold text-main">{logs.length > 0 ? new Date(logs[0].createdAt).toLocaleTimeString() : 'N/A'}</p>
                   </div>
               </div>
             </div>

@@ -12,11 +12,14 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useTranslation } from '@/lib/i18n';
 
 export const LandingNavbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { isAuthenticated, logout } = useAuthStore();
+    const { t } = useTranslation();
     
     const [isMobile, setIsMobile] = useState(false);
     
@@ -83,15 +86,16 @@ export const LandingNavbar = () => {
 
                     {/* Desktop Nav */}
                     <div className="hidden md:flex items-center gap-6 text-sm font-medium text-text-dim mx-4">
-                        <Link href="/#features" className="hover:text-text-main transition-colors">Produit</Link>
-                        <Link href="/about" className="hover:text-text-main transition-colors">À propos</Link>
-                        <Link href="/blog" className="hover:text-text-main transition-colors">Blog</Link>
-                        <Link href="/#pricing" className="hover:text-text-main transition-colors">Tarifs</Link>
-                        <Link href="/contact" className="hover:text-text-main transition-colors">Contact</Link>
+                        <Link href="/#features" className="hover:text-text-main transition-colors">{t.navbar.product}</Link>
+                        <Link href="/about" className="hover:text-text-main transition-colors">{t.navbar.about}</Link>
+                        <Link href="/blog" className="hover:text-text-main transition-colors">{t.navbar.blog}</Link>
+                        <Link href="/#pricing" className="hover:text-text-main transition-colors">{t.navbar.pricing}</Link>
+                        <Link href="/contact" className="hover:text-text-main transition-colors">{t.navbar.contact}</Link>
                     </div>
 
                     {/* Auth / Mobile Toggle */}
                     <div className="flex items-center gap-3 shrink-0">
+                        <LanguageSwitcher />
                         <ThemeToggle />
                         
                         {isAuthenticated ? (
@@ -110,7 +114,7 @@ export const LandingNavbar = () => {
                                                 transition={{ duration: 0.2 }}
                                                 className="overflow-hidden whitespace-nowrap"
                                             >
-                                                Dashboard
+                                                {t.common.dashboard}
                                             </motion.span>
                                         )}
                                     </AnimatePresence>
@@ -124,13 +128,13 @@ export const LandingNavbar = () => {
                                 className={`hidden md:flex items-center gap-3 ${!scrolled ? "pl-4 border-l border-glass-border" : ""}`}
                             >
                                 <Link href="/login" className="text-text-main text-sm font-medium hover:text-[#00FFB2] transition-colors">
-                                    Connexion
+                                    {t.common.login}
                                 </Link>
                                 <Link 
                                     href="/#pricing" 
                                     className="bg-accent-primary text-white px-5 py-2 rounded-full text-xs font-bold hover:opacity-90 transition-all hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
                                 >
-                                    Commencer
+                                    {t.common.getStarted}
                                 </Link>
                             </div>
                         )}
@@ -152,18 +156,18 @@ export const LandingNavbar = () => {
                         className="fixed inset-0 bg-bg-primary/95 backdrop-blur-xl z-40 flex flex-col pt-32 px-6 gap-8 md:hidden"
                     >
                         <div className="flex flex-col gap-6 items-center text-center">
-                            <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">Produit</Link>
-                            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">À propos</Link>
-                            <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">Blog</Link>
-                            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">Contact</Link>
-                            <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">Tarifs</Link>
+                            <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.product}</Link>
+                            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.about}</Link>
+                            <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.blog}</Link>
+                            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.contact}</Link>
+                            <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.pricing}</Link>
                             <hr className="w-20 border-glass-border" />
                             {isAuthenticated ? (
-                                <Link href="/dashboard" className="text-xl font-bold text-[#00FFB2]">Accéder au Dashboard</Link>
+                                <Link href="/dashboard" className="text-xl font-bold text-[#00FFB2]">{t.common.goToDashboard}</Link>
                             ) : (
                                 <>
-                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-xl text-text-dim">Connexion</Link>
-                                    <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-accent-primary">Commencer</Link>
+                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-xl text-text-dim">{t.common.login}</Link>
+                                    <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-accent-primary">{t.common.getStarted}</Link>
                                 </>
                             )}
                         </div>

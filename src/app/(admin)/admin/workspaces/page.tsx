@@ -61,7 +61,7 @@ function WorkspacesList() {
               {userId && (
                 <button 
                   onClick={() => router.back()}
-                  className="p-1 hover:bg-white/5 rounded-lg text-dim hover:text-main transition-colors mr-1"
+                  className="p-1 hover:bg-glass-hover rounded-lg text-dim hover:text-main transition-colors mr-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
@@ -81,7 +81,7 @@ function WorkspacesList() {
             placeholder="Rechercher un workspace..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-main placeholder-dim focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-bg-secondary border border-glass-border rounded-2xl text-main placeholder-dim focus:border-indigo-500/40 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
           />
         </div>
       </div>
@@ -108,7 +108,7 @@ function WorkspacesList() {
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center border border-white/5 group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center border border-glass-border group-hover:scale-110 transition-transform">
                     <Building2 className="w-6 h-6 text-indigo-400" />
                   </div>
                   <div>
@@ -119,21 +119,21 @@ function WorkspacesList() {
                 <div className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
                   ws.subscriptionPlan === 'pro' ? 'bg-blue-500/10 text-blue-400 border border-blue-400/20' :
                   ws.subscriptionPlan === 'business' ? 'bg-purple-500/10 text-purple-400 border border-purple-400/20' :
-                  'bg-white/5 text-dim border border-white/10'
+                  'bg-bg-tertiary text-dim border border-glass-border'
                 }`}>
                   {ws.subscriptionPlan}
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between text-sm py-2 border-b border-white/5">
+                <div className="flex items-center justify-between text-sm py-2 border-b border-glass-border">
                   <span className="text-dim flex items-center gap-2">
                     <UserIcon className="w-4 h-4" />
                     Propriétaire
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-main font-medium">{ws.owner?.firstName} {ws.owner?.lastName}</span>
-                    <div className="w-6 h-6 rounded-full bg-white/5 overflow-hidden">
+                    <div className="w-6 h-6 rounded-full bg-bg-deep overflow-hidden">
                       {ws.owner?.avatar ? (
                         <Image src={ws.owner.avatar} alt="" width={24} height={24} className="object-cover" />
                       ) : (
@@ -144,14 +144,14 @@ function WorkspacesList() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/[0.02] border border-white/5 p-3 rounded-xl">
+                  <div className="bg-bg-deep/50 border border-glass-border p-3 rounded-xl">
                     <p className="text-[10px] text-dim uppercase font-bold tracking-widest mb-1">Projets</p>
                     <div className="flex items-center gap-2">
                       <FolderKanban className="w-4 h-4 text-indigo-400" />
                       <span className="text-lg font-bold text-main">{ws.projectsCount || 0}</span>
                     </div>
                   </div>
-                  <div className="bg-white/[0.02] border border-white/5 p-3 rounded-xl">
+                  <div className="bg-bg-deep/50 border border-glass-border p-3 rounded-xl">
                     <p className="text-[10px] text-dim uppercase font-bold tracking-widest mb-1">Membres</p>
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-blue-400" />
@@ -169,7 +169,7 @@ function WorkspacesList() {
                     }`} />
                     {ws.subscriptionStatus === 'active' ? 'Abonnement Actif' : 'Pas d\'abonnement'}
                   </div>
-                  <button className="p-2 rounded-lg hover:bg-white/5 text-dim hover:text-main transition-all group/btn">
+                  <button className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-all group/btn">
                     <ExternalLink className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
                   </button>
                 </div>

@@ -151,10 +151,10 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
           >
             <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto hover:!bg-[var(--bg-card)]">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-white">Nouvelle routine</h2>
+                <h2 className="text-xl font-semibold text-text-main">Nouvelle routine</h2>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+                  className="p-2 rounded-lg hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -162,28 +162,28 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Titre *</label>
+                  <label className="block text-sm font-medium text-text-muted mb-2">Titre *</label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-xl text-text-main focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
                     placeholder="Ex: Séance de sport, Lecture..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
                     <FolderKanban className="w-4 h-4" /> Projet associé *
                   </label>
                   <select
                     value={formData.project}
                     onChange={(e) => setFormData({ ...formData, project: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 appearance-none bg-[#1a1a24]"
+                    className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-xl text-text-main focus:outline-none focus:ring-2 focus:ring-accent-primary/20 appearance-none"
                   >
-                    <option value="" className="bg-[#1a1a24] text-gray-400">Sélectionner un projet</option>
+                    <option value="" className="bg-bg-secondary text-text-muted">Sélectionner un projet</option>
                     {projectList.map((p) => (
-                      <option key={p._id} value={p._id} className="bg-[#1a1a24] text-white">
+                      <option key={p._id} value={p._id} className="bg-bg-secondary text-text-main">
                         {p.name}
                       </option>
                     ))}
@@ -199,19 +199,19 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
                     <Clock className="w-4 h-4" /> Heure (optionnel)
                   </label>
                   <input
                     type="time"
                     value={formData.time}
                     onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-xl text-text-main focus:outline-none focus:ring-2 focus:ring-accent-primary/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-4">Récurrence</label>
+                  <label className="block text-sm font-medium text-text-muted mb-4">Récurrence</label>
                   <div className="flex justify-between gap-1">
                     {dayOptions.map((day) => (
                       <button
@@ -221,8 +221,8 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
                         className={`
                           flex-1 py-3 rounded-xl border text-xs font-bold transition-all
                           ${formData.days[day.key]
-                            ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
-                            : 'bg-white/5 border-white/10 text-dim hover:bg-white/10'}
+                            ? 'bg-accent-primary/20 border-accent-primary text-accent-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]'
+                            : 'bg-bg-tertiary border-glass-border text-text-muted hover:bg-glass-hover'}
                         `}
                       >
                         {day.label}
@@ -231,18 +231,18 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-4 border-t border-white/5">
+                <div className="flex gap-3 pt-4 border-t border-glass-border">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 py-4 rounded-xl bg-white/5 text-gray-300 font-bold hover:bg-white/10 transition-all"
+                    className="flex-1 py-4 rounded-xl bg-bg-tertiary text-text-muted font-bold hover:bg-glass-hover transition-all"
                   >
                     ANNULER
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 py-4 rounded-xl bg-indigo-500 text-white font-bold hover:bg-indigo-400 transition-all disabled:opacity-50 flex items-center justify-center"
+                    className="flex-1 py-4 rounded-xl bg-accent-primary text-white font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center"
                   >
                     {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'CRÉER'}
                   </button>

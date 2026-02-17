@@ -80,7 +80,7 @@ export default function CustomCalendar({
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={prevMonth}
-          className="p-2 rounded-lg hover:bg-[rgba(255,255,255,0.05)] text-gray-400 hover:text-white transition-colors"
+          className="p-2 rounded-lg hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -89,14 +89,14 @@ export default function CustomCalendar({
           key={currentMonth.toString()}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-lg font-semibold text-white capitalize"
+          className="text-lg font-semibold text-text-main capitalize"
         >
           {format(currentMonth, 'MMMM yyyy', { locale: fr })}
         </motion.h2>
         
         <button
           onClick={nextMonth}
-          className="p-2 rounded-lg hover:bg-[rgba(255,255,255,0.05)] text-gray-400 hover:text-white transition-colors"
+          className="p-2 rounded-lg hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -107,7 +107,7 @@ export default function CustomCalendar({
         {orderedDays.map((dayName) => (
           <div
             key={dayName}
-            className="py-2 text-center text-xs font-medium text-gray-500 uppercase"
+            className="py-2 text-center text-[10px] font-bold text-text-muted uppercase tracking-wider"
           >
             {dayName}
           </div>
@@ -133,15 +133,15 @@ export default function CustomCalendar({
                 className={`
                   relative aspect-square p-1 rounded-xl flex flex-col items-center justify-center
                   transition-all duration-200 group
-                  ${!isCurrentMonth ? 'opacity-30' : ''}
-                  ${isSelected ? 'bg-indigo-500 text-white' : ''}
-                  ${isToday(dayDate) && !isSelected ? 'bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/50' : ''}
-                  ${!isSelected && isCurrentMonth ? 'hover:bg-[rgba(255,255,255,0.05)]' : ''}
+                  ${!isCurrentMonth ? 'opacity-20' : ''}
+                  ${isSelected ? 'bg-accent-primary text-white shadow-lg shadow-accent-primary/20' : ''}
+                  ${isToday(dayDate) && !isSelected ? 'bg-accent-primary/10 text-accent-primary ring-1 ring-accent-primary/50' : ''}
+                  ${!isSelected && isCurrentMonth ? 'hover:bg-glass-hover' : ''}
                 `}
               >
                 <span className={`
-                  text-sm font-medium
-                  ${!isCurrentMonth ? 'text-gray-600' : isSelected ? 'text-white' : isToday(dayDate) ? 'text-indigo-400' : 'text-gray-300'}
+                  text-sm font-bold
+                  ${!isCurrentMonth ? 'text-text-muted' : isSelected ? 'text-white' : isToday(dayDate) ? 'text-accent-primary' : 'text-text-main'}
                 `}>
                   {format(dayDate, 'd')}
                 </span>
@@ -168,17 +168,17 @@ export default function CustomCalendar({
       </div>
 
       {/* Legend */}
-      <div className="mt-4 pt-4 border-t border-[rgba(255,255,255,0.06)] flex items-center gap-4 text-xs text-gray-500">
+      <div className="mt-4 pt-4 border-t border-glass-border flex items-center gap-4 text-[10px] font-bold text-text-muted uppercase tracking-wider">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-indigo-500" />
+          <div className="w-2 h-2 rounded-full bg-accent-primary" />
           <span>Aujourd&apos;hui</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
           <span>Tâches</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full border border-red-500" />
+          <div className="w-1.5 h-1.5 rounded-full border border-red-500" />
           <span>Objectifs</span>
         </div>
       </div>

@@ -105,7 +105,7 @@ export default function UserDetailPage() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.back()}
-            className="p-2 hover:bg-white/5 rounded-xl text-dim hover:text-main transition-colors border border-white/5"
+            className="p-2 hover:bg-glass-hover rounded-xl text-dim hover:text-main transition-colors border border-glass-border"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -115,7 +115,7 @@ export default function UserDetailPage() {
           </div>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-dim hover:text-main hover:bg-white/10 transition-all">
+          <button className="px-4 py-2 bg-bg-secondary border border-glass-border rounded-xl text-sm font-bold text-dim hover:text-main hover:bg-bg-tertiary transition-all">
             Désactiver
           </button>
           <button className="px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20">
@@ -133,7 +133,7 @@ export default function UserDetailPage() {
             className="glass-card flex flex-col items-center text-center"
           >
             <div className="relative mb-6">
-              <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-white/5">
+              <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-glass-border">
                 {user.avatar ? (
                   <Image src={user.avatar} alt="" fill className="object-cover" />
                 ) : (
@@ -142,7 +142,7 @@ export default function UserDetailPage() {
                   </div>
                 )}
               </div>
-              <div className={`absolute bottom-0 right-0 p-2 rounded-full border-2 border-[#0a0a0c] ${getRoleStyle(user.role)}`}>
+              <div className={`absolute bottom-0 right-0 p-2 rounded-full border-2 border-bg-primary ${getRoleStyle(user.role)}`}>
                 {getRoleIcon(user.role)}
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function UserDetailPage() {
               {user.role}
             </div>
 
-            <div className="w-full grid grid-cols-2 gap-4 border-t border-white/5 pt-8">
+            <div className="w-full grid grid-cols-2 gap-4 border-t border-glass-border pt-8">
               <div className="space-y-1">
                 <p className="text-[10px] text-dim font-black uppercase tracking-widest">Inscrit le</p>
                 <div className="flex items-center justify-center gap-2 text-main font-medium">
@@ -165,7 +165,7 @@ export default function UserDetailPage() {
                   {new Date(user.createdAt).toLocaleDateString('fr-FR')}
                 </div>
               </div>
-              <div className="space-y-1 border-l border-white/5 text-center">
+              <div className="space-y-1 border-l border-glass-border text-center">
                 <p className="text-[10px] text-dim font-black uppercase tracking-widest">Productivité</p>
                 <div className="flex items-center justify-center gap-2 text-main font-medium">
                   <Activity className="w-4 h-4 text-green-400" />
@@ -192,7 +192,7 @@ export default function UserDetailPage() {
                 { label: 'Tâches Totales', value: stats.totalTasks, icon: Clock, color: 'text-purple-400' },
                 { label: 'Tâches Terminées', value: stats.completedTasks, icon: CheckCircle2, color: 'text-green-400' },
               ].map((stat, i) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.04] transition-colors">
+                <div key={i} className="flex items-center justify-between p-3 bg-bg-deep/50 border border-glass-border rounded-xl hover:bg-bg-deep transition-colors">
                   <div className="flex items-center gap-3">
                     <stat.icon className={`w-4 h-4 ${stat.color}`} />
                     <span className="text-sm text-dim">{stat.label}</span>
@@ -223,7 +223,7 @@ export default function UserDetailPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {workspaces.map((ws: any) => (
-                <div key={ws._id} className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:border-indigo-500/30 transition-all group">
+                <div key={ws._id} className="p-4 bg-bg-deep/30 border border-glass-border rounded-2xl hover:border-indigo-500/30 transition-all group">
                   <div className="flex items-center justify-between mb-3">
                     <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                       <Building2 className="w-5 h-5" />
@@ -231,7 +231,7 @@ export default function UserDetailPage() {
                     <div className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${
                       ws.subscriptionPlan === 'pro' ? 'bg-blue-500/10 text-blue-400 border border-blue-400/20' :
                       ws.subscriptionPlan === 'business' ? 'bg-purple-500/10 text-purple-400 border border-purple-400/20' :
-                      'bg-white/5 text-dim border border-white/10'
+                      'bg-bg-tertiary text-dim border border-glass-border'
                     }`}>
                       {ws.subscriptionPlan}
                     </div>
@@ -263,7 +263,7 @@ export default function UserDetailPage() {
                 <p className="text-dim text-center py-8">Aucune activité enregistrée</p>
               ) : (
                 recentLogs.map((log: any) => (
-                  <div key={log._id} className="flex items-center gap-4 p-4 hover:bg-white/[0.02] rounded-xl transition-colors border-b border-white/5 last:border-0">
+                  <div key={log._id} className="flex items-center gap-4 p-4 hover:bg-glass-hover rounded-xl transition-colors border-b border-glass-border last:border-0">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                       log.status === 'error' ? 'bg-red-500/10 text-red-500' :
                       log.status === 'warning' ? 'bg-orange-500/10 text-orange-500' :

@@ -1,0 +1,252 @@
+const fr = {
+  // --- Global / Common ---
+  common: {
+    getStarted: 'Commencer',
+    getStartedFree: 'COMMENCER GRATUITEMENT',
+    login: 'Connexion',
+    logout: 'Déconnexion',
+    dashboard: 'Dashboard',
+    goToDashboard: 'Accéder au Dashboard',
+    viewDemo: 'Voir la démo',
+    search: 'Rechercher...',
+    quickSearch: 'Quick search',
+    settings: 'Paramètres',
+    upgrade: 'Mettre à niveau',
+    workspace: 'Workspace',
+    yourWorkspaces: 'Vos Espaces de Travail',
+    createWorkspace: 'Créer un workspace',
+    requiredTeamPlan: 'REQUIS : PLAN TEAM',
+    projects: 'Projets',
+    tools: 'Outils',
+    creatorMode: 'Mode Créateur',
+    exploreFeature: 'Explore Feature',
+    madeWithLove: 'Fait avec ❤️ à Paris',
+    allRightsReserved: '© 2026 MONEY IS BACK Inc. Tous droits réservés.',
+    monthly: 'Mensuel',
+    yearly: 'Annuel (-25%)',
+    perMonth: '/mois',
+    perUserMonth: '/user/mois',
+    free: 'Gratuit',
+    onQuote: 'Sur devis',
+    contactSupport: 'Contacter le Support',
+    services: 'Services',
+  },
+
+  // --- Landing Navbar ---
+  navbar: {
+    product: 'Produit',
+    about: 'À propos',
+    blog: 'Blog',
+    pricing: 'Tarifs',
+    contact: 'Contact',
+  },
+
+  // --- Hero Section ---
+  hero: {
+    badgeText: 'V2.0 Mainnet Live',
+    title: 'Une seule app',
+    animatedWords: ['remplacer.', 'contrôler.', 'créer.'],
+    animatedPrefix: 'pour tout',
+    subtitle: "Retrouvez vos Tâches, Docs, Chat, Objectifs, et bien plus encore sur une seule plateforme unifiée. L'OS de votre réussite.",
+  },
+
+  // --- Replace All Section ---
+  replaceAll: {
+    title: 'Remplacez-les tous',
+    subtitle: 'Ne perdez plus de contexte entre vos outils.',
+  },
+
+  // --- Bento Grid / Features ---
+  features: {
+    sectionTitle: 'Tout ce dont vous avez besoin.',
+    sectionSubtitle: 'Nous avons déconstruit le chaos du travail moderne pour en faire un système fluide et intégré.',
+    driveLabel: 'DRIVE',
+    driveTitle: 'Stockage & Partage Sécurisé',
+    driveDesc: "Un espace centralisé pour tous vos fichiers. Partagez des documents avec des liens sécurisés et gérez les permissions d'accès.",
+    dashboardTitle: 'Tableaux de Bord Dynamiques',
+    dashboardDesc: "Visualisez l'avancement de vos projets, suivez vos budgets et analysez la performance de vos équipes en un coup d'œil.",
+    collaborationTitle: 'Collaboration en Temps Réel',
+    collaborationDesc: 'Travaillez ensemble sur les mêmes documents et tâches sans conflit.',
+    messagingTitle: 'Messagerie Intégrée',
+    messagingDesc: 'Discutez avec votre équipe directement dans le contexte de vos projets.',
+    taskTitle: 'Gestion de Tâches Avancée',
+    taskDesc: 'Organisez votre travail avec des listes, des tableaux kanban et des calendriers.',
+    securityTitle: "Contrôle d'Accès Sécurisé",
+    securityDesc: 'Définissez précisément qui peut voir et modifier quoi. Protégez vos informations sensibles avec des rôles et des permissions granulaires.',
+  },
+
+  // --- Services / Tab Content ---
+  tabContent: {
+    documents: {
+      title: 'Documents',
+      desc: 'Créez des documents magnifiques, des wikis et des bases de connaissances connectés à vos tâches.',
+    },
+    dashboards: {
+      title: 'Tableaux de bord',
+      desc: "Obtenez une vue d\u2019ensemble complète avec des graphiques en temps réel et des rapports personnalisables.",
+    },
+    chat: {
+      title: 'Discussion',
+      desc: 'Communiquez en temps réel avec votre équipe, partagez des fichiers et restez connectés.',
+    },
+    goals: {
+      title: 'Objectifs',
+      desc: "Définissez des objectifs stratégiques, suivez la progression et alignez votre équipe.",
+    },
+    routines: {
+      title: 'Routines',
+      desc: 'Automatisez vos processus récurrents et maintenez la cohérence de vos opérations.',
+    },
+  },
+
+  // --- Pricing ---
+  pricing: {
+    title: 'Tarifs Simples',
+    plans: {
+      free: {
+        name: 'Gratuit',
+        features: [
+          '1 Utilisateur maximum',
+          '1 Projet maximum',
+          '1 Go de stockage Drive',
+          '7 Tâches max par projet',
+          'Routines limitées',
+        ],
+      },
+      pro: {
+        name: 'Pro',
+        features: [
+          '3 Utilisateurs inclus',
+          '€6.99/user supplémentaire',
+          '3 Projets inclus',
+          '€4.99/projet supplémentaire',
+          '10 Go de stockage Drive',
+          'Tâches & Routines illimitées',
+        ],
+      },
+      team: {
+        name: 'Team',
+        features: [
+          '10 Utilisateurs inclus',
+          '€4.99/user supplémentaire',
+          '5 Projets inclus',
+          '€4.99/projet supplémentaire',
+          'Stockage illimité',
+          'Dashboard personnalisés',
+          'Mindmaps & Timelines',
+        ],
+      },
+      enterprise: {
+        name: 'Enterprise',
+        features: [
+          'Utilisateurs illimités',
+          'White Label complet',
+          "Logs d'Audit & Sécurité",
+          'SAML SSO / Okta',
+          'API illimitée',
+          'Success Manager dédié',
+        ],
+      },
+    },
+  },
+
+  // --- FAQ ---
+  faq: {
+    title: 'Questions Fréquentes',
+    subtitle: 'Tout ce que vous devez savoir sur la plateforme pour booster votre productivité.',
+    items: [
+      {
+        question: "Qu'est-ce que MONEY IS BACK ?",
+        answer: "MONEY IS BACK est une plateforme de gestion de projet révolutionnaire qui centralise vos tâches, vos documents, votre stockage drive, vos objectifs et votre communication d'équipe dans une interface unique et ultra-rapide.",
+      },
+      {
+        question: 'Mes données sont-elles en sécurité ?',
+        answer: "Absolument. Nous utilisons un chiffrement de bout en bout de niveau bancaire (AES-256) pour tous vos fichiers et bases de données. Vos documents sensibles sont protégés par des protocoles d'accès granulaires et une infrastructure sécurisée.",
+      },
+      {
+        question: 'Puis-je inviter mon équipe ?',
+        answer: "Oui, la plateforme est conçue pour la collaboration. Selon votre plan, vous pouvez inviter un nombre variable de collaborateurs avec des rôles et des permissions spécifiques (Admin, Membre, Invité).",
+      },
+      {
+        question: 'Le stockage Drive est-il illimité ?',
+        answer: "Le stockage dépend de votre abonnement. Le plan Gratuit inclut 1 Go, le plan Pro 10 Go, et le plan Team offre un stockage illimité pour accompagner la croissance de votre entreprise sans contraintes.",
+      },
+      {
+        question: 'Comment fonctionne la transition vers MONEY IS BACK ?',
+        answer: "Nous proposons des outils d'importation fluides pour Trello, Asana et Notion. Vous pouvez migrer vos tâches et votre historique en quelques clics pour ne rien perdre de votre progression.",
+      },
+      {
+        question: 'Puis-je annuler mon abonnement à tout moment ?',
+        answer: "Oui, nos abonnements sont sans engagement de durée pour les formats mensuels. Vous pouvez passer d'un plan à un autre ou résilier directement depuis vos paramètres sans frais cachés.",
+      },
+    ],
+    noAnswer: "Vous n'avez pas trouvé votre réponse ?",
+    teamAvailable: 'Notre équipe est disponible 24/7 pour vous aider.',
+  },
+
+  // --- Footer ---
+  footer: {
+    description: 'La plateforme tout-en-un pour gérer vos projets, vos équipes et votre croissance. Construit pour les bâtisseurs.',
+    productTitle: 'Produit',
+    features: 'Fonctionnalités',
+    security: 'Sécurité',
+    changelog: 'Changelog',
+    integrations: 'Intégrations',
+    companyTitle: 'Entreprise',
+    about: 'À propos',
+    careers: 'Carrières',
+    blog: 'Blog',
+    contact: 'Contact',
+    partners: 'Partenaires',
+    resourcesTitle: 'Ressources',
+    documentation: 'Documentation',
+    community: 'Communauté',
+    helpCenter: 'Help Center',
+    status: 'Status',
+    api: 'API',
+    legalTitle: 'Légal',
+    privacy: 'Confidentialité',
+    terms: 'CGU',
+    cookies: 'Cookies',
+    licenses: 'Licences',
+  },
+
+  // --- Sidebar ---
+  sidebar: {
+    dashboard: 'Dashboard',
+    projects: 'Projets',
+    globalTodo: 'To Do Global',
+    calendar: 'Calendrier',
+    routines: 'Routines',
+    messaging: 'Messagerie',
+    objectives: 'Objectifs',
+    ideas: 'Idées',
+    secureIds: 'IDs Sécurisés',
+    drive: 'Drive',
+    invite: 'Inviter',
+    upgrade: 'Mettre à niveau',
+    tools: 'Outils',
+    creatorMode: 'Mode Créateur',
+  },
+
+  // --- Dashboard Mockup ---
+  mockup: {
+    taskCompleted: 'Tâche terminée',
+    timeAgo: 'Il y a 2 min',
+  },
+} as const;
+
+export default fr;
+
+// Deep type that converts readonly literal string tuples/values to mutable string versions
+type DeepStringify<T> = T extends readonly string[]
+  ? string[]
+  : T extends readonly (infer U)[]
+    ? DeepStringify<U>[]
+    : T extends object
+      ? { [K in keyof T]: DeepStringify<T[K]> }
+      : T extends string
+        ? string
+        : T;
+
+export type TranslationType = DeepStringify<typeof fr>;

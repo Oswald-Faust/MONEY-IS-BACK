@@ -177,12 +177,12 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
             <div className="glass-card p-6 m-4 hover:!bg-[var(--bg-card)]">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-white">
+                <h2 className="text-xl font-semibold text-text-main">
                   {isEditing ? 'Modifier le projet' : 'Nouveau projet'}
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
+                  className="p-2 rounded-lg hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -192,7 +192,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2">
                     Nom du projet *
                   </label>
                   <input
@@ -212,7 +212,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2">
                     Description
                   </label>
                   <textarea
@@ -232,7 +232,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
 
                 {/* Color Picker */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-text-muted mb-3 flex items-center gap-2">
                     <Palette className="w-4 h-4" />
                     Couleur du projet
                   </label>
@@ -245,7 +245,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                         className={`
                           w-8 h-8 rounded-lg transition-all duration-200
                           ${formData.color === color.value 
-                            ? 'ring-2 ring-white ring-offset-2 ring-offset-[#12121a] scale-110' 
+                            ? 'ring-2 ring-accent-primary ring-offset-2 ring-offset-bg-secondary scale-110' 
                             : 'hover:scale-105'}
                         `}
                         style={{ backgroundColor: color.value }}

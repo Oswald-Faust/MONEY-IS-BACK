@@ -135,10 +135,10 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
             <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto hover:!bg-[var(--bg-card)]">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-white">Nouvelle tâche</h2>
+                <h2 className="text-xl font-semibold text-text-main">Nouvelle tâche</h2>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
+                  className="p-2 rounded-lg hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -148,7 +148,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2">
                     Titre de la tâche *
                   </label>
                   <input
@@ -168,7 +168,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2">
                     Description
                   </label>
                   <textarea
@@ -189,7 +189,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                 {/* Project Selection - Hidden if defaultProjectId is provided */}
                 {!defaultProjectId && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
                       <FolderKanban className="w-4 h-4" />
                       Projet *
                     </label>
@@ -219,7 +219,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
 
                 {/* Priority */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
                     <Flag className="w-4 h-4" />
                     Priorité
                   </label>
@@ -245,7 +245,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                           className="w-2 h-2 rounded-full"
                           style={{ backgroundColor: option.color }}
                         />
-                        <span className="text-xs text-white">{option.label}</span>
+                        <span className={`text-xs ${formData.priority === option.value ? 'text-text-main font-bold' : 'text-text-muted'}`}>{option.label}</span>
                       </button>
                     ))}
                   </div>
@@ -263,7 +263,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
 
                 {/* Due Date */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     Date d&apos;échéance
                   </label>
@@ -277,14 +277,13 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                       rounded-xl text-main
                       focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                       transition-all duration-200
-                      [color-scheme:dark]
                     "
                   />
                 </div>
 
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-muted mb-2">
                     Tags (séparés par des virgules)
                   </label>
                   <input
@@ -294,8 +293,8 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                     placeholder="Ex: urgent, design, frontend"
                     className="
                       w-full px-4 py-3 text-sm
-                      bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                      rounded-xl text-white placeholder-gray-500
+                      bg-bg-tertiary border border-glass-border
+                      rounded-xl text-text-main placeholder-text-muted
                       focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                       transition-all duration-200
                     "

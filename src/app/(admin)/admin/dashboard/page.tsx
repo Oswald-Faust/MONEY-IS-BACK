@@ -141,11 +141,11 @@ export default function AdminDashboardPage() {
             transition={{ delay: index * 0.1 }}
             className="glass-card relative overflow-hidden group hover:border-red-500/30 transition-all duration-500"
           >
-            <div className={`absolute top-0 right-0 w-32 h-32 ${stat.bg} blur-[60px] -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity`} />
+            <div className={`absolute top-0 right-0 w-32 h-32 ${stat.bg} blur-[60px] -mr-16 -mt-16 opacity-30 group-hover:opacity-60 transition-opacity`} />
             
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center ${stat.color} border border-white/5`}>
+                <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center ${stat.color} border border-glass-border`}>
                   <stat.icon className="w-6 h-6" />
                 </div>
                 <div className={`flex items-center gap-1 text-xs font-bold ${stat.trendUp ? 'text-green-400' : 'text-red-400'}`}>
@@ -172,7 +172,7 @@ export default function AdminDashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-white/5 bg-white/[0.02]">
+                  <tr className="border-b border-glass-border bg-bg-tertiary/50">
                     <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Workspace</th>
                     <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Propriétaire</th>
                     <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Plan</th>
@@ -180,9 +180,9 @@ export default function AdminDashboardPage() {
                     <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-glass-border">
                   {stats?.recentWorkspaces.map((ws) => (
-                    <tr key={ws._id} className="hover:bg-white/[0.02] transition-colors group">
+                    <tr key={ws._id} className="hover:bg-glass-hover transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
@@ -197,7 +197,7 @@ export default function AdminDashboardPage() {
                       <td className="px-6 py-4">
                         <Link href={`/admin/users/${ws.owner?._id}`}>
                           <div className="flex items-center gap-2 group/owner cursor-pointer">
-                            <div className="w-6 h-6 rounded-full bg-glass-bg flex items-center justify-center overflow-hidden ring-1 ring-white/5 group-hover/owner:ring-red-500/50 transition-all">
+                            <div className="w-6 h-6 rounded-full bg-bg-deep flex items-center justify-center overflow-hidden ring-1 border border-glass-border group-hover/owner:ring-red-500/50 transition-all">
                               {ws.owner?.avatar ? (
                                 <Image src={ws.owner.avatar} alt="" width={24} height={24} className="object-cover" />
                               ) : (
@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
                           ws.subscriptionPlan === 'pro' ? 'bg-indigo-500/20 text-indigo-400' :
                           ws.subscriptionPlan === 'business' ? 'bg-purple-500/20 text-purple-400' :
-                          'bg-white/5 text-dim'
+                          'bg-bg-tertiary text-dim'
                         }`}>
                           {ws.subscriptionPlan}
                         </span>
@@ -228,7 +228,7 @@ export default function AdminDashboardPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button className="p-2 rounded-lg hover:bg-white/5 text-dim hover:text-main transition-all">
+                        <button className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-all">
                           <ExternalLink className="w-4 h-4" />
                         </button>
                       </td>
@@ -250,7 +250,7 @@ export default function AdminDashboardPage() {
                  <div key={item._id} className="glass-card flex flex-col items-center text-center p-4 hover:border-red-500/20 transition-all group">
                     <span className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1 group-hover:text-red-500 transition-colors">{item._id || 'Autre'}</span>
                     <span className="text-2xl font-bold text-main">{item.count}</span>
-                    <div className="w-full h-1 bg-white/5 rounded-full mt-3 overflow-hidden">
+                    <div className="w-full h-1 bg-bg-deep rounded-full mt-3 overflow-hidden">
                        <div 
                          className="h-full bg-red-500" 
                          style={{ width: `${(item.count / (stats.counts.workspaces || 1)) * 100}%` }} 
@@ -271,9 +271,9 @@ export default function AdminDashboardPage() {
           <div className="glass-card space-y-4">
             {stats?.recentUsers.map((u) => (
               <Link key={u._id} href={`/admin/users/${u._id}`}>
-                <div className="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.02] transition-colors border border-transparent hover:border-white/5 group/u cursor-pointer">
+                <div className="flex items-center justify-between p-3 rounded-xl hover:bg-glass-hover transition-colors border border-transparent hover:border-glass-border group/u cursor-pointer">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden ring-2 ring-white/5 group-hover/u:ring-red-500/50 transition-all">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden ring-2 border border-glass-border group-hover/u:ring-red-500/50 transition-all">
                       {u.avatar ? (
                         <Image src={u.avatar} alt="" width={40} height={40} className="object-cover" />
                       ) : (

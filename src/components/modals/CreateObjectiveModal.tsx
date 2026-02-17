@@ -181,19 +181,19 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-2xl bg-[#12121a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden hover:!bg-[#12121a]"
+          className="relative w-full max-w-2xl bg-bg-secondary border border-glass-border rounded-3xl shadow-2xl overflow-hidden hover:!bg-bg-secondary"
         >
           {/* Header */}
-          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <div className="p-6 border-b border-glass-border flex items-center justify-between bg-bg-secondary/20">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+              <div className="p-2 rounded-xl bg-accent-primary/10 text-accent-primary">
                 <Target className="w-6 h-6" />
               </div>
-              <h2 className="text-xl font-bold text-white">{initialData ? 'Modifier l\'Objectif' : 'Nouvel Objectif'}</h2>
+              <h2 className="text-xl font-bold text-text-main">{initialData ? 'Modifier l\'Objectif' : 'Nouvel Objectif'}</h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+              className="p-2 rounded-xl hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
@@ -203,22 +203,22 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
             {/* Title & Project */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Titre de l&apos;objectif</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Titre de l&apos;objectif</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Ex: Lancement Beta v1.0"
-                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-white placeholder-gray-600 focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
+                  className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main placeholder-text-muted/50 focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 outline-none transition-all"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Projet associé</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Projet associé</label>
                 <select
                   value={formData.project}
                   onChange={e => setFormData({ ...formData, project: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#1a1a24] border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500/50 transition-all appearance-none"
+                  className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main outline-none focus:border-accent-primary/50 transition-all appearance-none"
                 >
                   <option value="">Objectif Global</option>
                   {projects.map(p => (
@@ -230,13 +230,13 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400 ml-1">Description (optionnel)</label>
+              <label className="text-sm font-medium text-text-muted ml-1">Description (optionnel)</label>
               <textarea
                 value={formData.description}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Détails de l'objectif..."
                 rows={3}
-                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-white placeholder-gray-600 focus:border-indigo-500/50 outline-none transition-all resize-none"
+                className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main placeholder-text-muted/50 focus:border-accent-primary/50 outline-none transition-all resize-none"
               />
             </div>
 
@@ -252,7 +252,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
             {/* Priority & Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Priorité</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Priorité</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['low', 'medium', 'high'] as const).map((p) => (
                     <button
@@ -262,8 +262,8 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
                       className={`
                         py-2 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all
                         ${formData.priority === p 
-                          ? 'bg-indigo-500/10 border-indigo-500 text-indigo-400' 
-                          : 'bg-white/[0.02] border-white/5 text-gray-500 hover:border-white/10'}
+                          ? 'bg-accent-primary/10 border-accent-primary text-accent-primary' 
+                          : 'bg-bg-tertiary border-glass-border text-text-muted hover:border-text-dim'}
                       `}
                     >
                       {p === 'low' ? 'Basse' : p === 'medium' ? 'Moyenne' : 'Haute'}
@@ -272,12 +272,12 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400 ml-1">Date limite</label>
+                <label className="text-sm font-medium text-text-muted ml-1">Date limite</label>
                 <input
                   type="date"
                   value={formData.targetDate}
                   onChange={e => setFormData({ ...formData, targetDate: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main outline-none focus:border-accent-primary/50 transition-all font-medium"
                 />
               </div>
             </div>
@@ -285,11 +285,11 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
             {/* Checkpoints */}
             <div className="space-y-4">
               <div className="flex items-center justify-between ml-1">
-                <label className="text-sm font-medium text-gray-400">Checkpoints / Sous-objectifs</label>
+                <label className="text-sm font-medium text-text-muted">Checkpoints / Sous-objectifs</label>
                 <button
                   type="button"
                   onClick={addCheckpoint}
-                  className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
+                  className="text-xs font-bold text-accent-primary hover:underline flex items-center gap-1 transition-colors"
                 >
                   <Plus className="w-3 h-3" /> Ajouter
                 </button>
@@ -297,7 +297,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
               <div className="space-y-3">
                 {formData.checkpoints.map((cp, index) => (
                   <div key={cp.id} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-xs font-bold text-gray-500">
+                    <div className="w-8 h-8 rounded-lg bg-bg-tertiary border border-glass-border flex items-center justify-center text-xs font-bold text-text-muted">
                       {index + 1}
                     </div>
                     <input
@@ -305,12 +305,12 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
                       value={cp.title}
                       onChange={e => updateCheckpoint(cp.id, e.target.value)}
                       placeholder="Titre du checkpoint..."
-                      className="flex-1 px-4 py-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-white placeholder-gray-700 focus:border-indigo-500/30 outline-none transition-all"
+                      className="flex-1 px-4 py-2.5 bg-bg-tertiary border border-glass-border rounded-xl text-text-main placeholder-text-muted/40 focus:border-accent-primary/30 outline-none transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => removeCheckpoint(cp.id)}
-                      className="p-2 rounded-lg hover:bg-red-500/10 text-gray-600 hover:text-red-400 transition-colors"
+                      className="p-2 rounded-lg hover:bg-red-500/10 text-text-muted hover:text-red-500 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -321,18 +321,18 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
           </form>
 
           {/* Footer */}
-          <div className="p-6 border-t border-white/5 bg-white/[0.01] flex items-center justify-end gap-3">
+          <div className="p-6 border-t border-glass-border bg-bg-secondary/50 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+              className="px-6 py-2.5 rounded-xl text-sm font-medium text-text-muted hover:text-text-main hover:bg-glass-hover transition-all"
             >
               Annuler
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-8 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-bold hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-lg shadow-indigo-500/20"
+              className="px-8 py-2.5 rounded-xl bg-accent-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-lg shadow-accent-primary/20"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (initialData ? 'Enregistrer' : 'Créer l\'objectif')}
             </button>

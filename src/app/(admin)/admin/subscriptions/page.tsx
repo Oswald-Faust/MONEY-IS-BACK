@@ -53,7 +53,7 @@ export default function AdminSubscriptionsPage() {
   }, [planFilter, statusFilter, token]);
 
   const planColors: any = {
-    starter: 'bg-white/5 text-dim border-white/10',
+    starter: 'bg-bg-tertiary text-dim border-glass-border',
     pro: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     business: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
     enterprise: 'bg-red-500/10 text-red-400 border-red-500/20'
@@ -108,7 +108,7 @@ export default function AdminSubscriptionsPage() {
               </div>
               <p className="text-sm font-bold text-dim uppercase tracking-widest group-hover:text-main transition-colors">{p}</p>
               <div className="mt-2 flex items-center gap-2">
-                <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className="flex-1 h-1 bg-bg-deep rounded-full overflow-hidden">
                   <div 
                     className={`h-full ${planColors[p].split(' ')[1].replace('text-', 'bg-')}`} 
                     style={{ width: `${(planStat?.count / (data?.workspaces.length || 1)) * 100}%` }}
@@ -130,7 +130,7 @@ export default function AdminSubscriptionsPage() {
           </h2>
           
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5">
+            <div className="flex items-center gap-2 bg-bg-secondary border border-glass-border rounded-xl px-3 py-1.5">
               <Filter className="w-3.5 h-3.5 text-dim" />
               <select 
                 value={planFilter} 
@@ -145,7 +145,7 @@ export default function AdminSubscriptionsPage() {
               </select>
             </div>
 
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5">
+            <div className="flex items-center gap-2 bg-bg-secondary border border-glass-border rounded-xl px-3 py-1.5">
               <Activity className="w-3.5 h-3.5 text-dim" />
               <select 
                 value={statusFilter} 
@@ -165,7 +165,7 @@ export default function AdminSubscriptionsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-white/5 bg-white/[0.02]">
+                <tr className="border-b border-glass-border bg-bg-tertiary/50">
                   <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Workspace</th>
                   <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Propriétaire</th>
                   <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Plan</th>
@@ -174,7 +174,7 @@ export default function AdminSubscriptionsPage() {
                   <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-glass-border">
                 {isLoading ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-dim">
@@ -190,10 +190,10 @@ export default function AdminSubscriptionsPage() {
                   </tr>
                 ) : (
                   data?.workspaces.map((ws: any) => (
-                    <tr key={ws._id} className="hover:bg-white/[0.02] transition-colors group">
+                    <tr key={ws._id} className="hover:bg-glass-hover transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-indigo-400 border border-white/5`}>
+                          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-indigo-400 border border-glass-border`}>
                              <Building2 className="w-5 h-5" />
                           </div>
                           <div>
@@ -204,7 +204,7 @@ export default function AdminSubscriptionsPage() {
                       </td>
                       <td className="px-6 py-4">
                          <div className="flex items-center gap-2">
-                           <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold text-main border border-white/10">
+                           <div className="w-8 h-8 rounded-full bg-bg-deep flex items-center justify-center text-xs font-bold text-main border border-glass-border">
                               {ws.owner?.avatar ? <Image src={ws.owner.avatar} alt="" width={32} height={32} className="rounded-full" /> : ws.owner?.firstName?.[0]}
                            </div>
                            <div>
@@ -222,7 +222,7 @@ export default function AdminSubscriptionsPage() {
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                           ws.subscriptionStatus === 'active' ? 'bg-green-500/10 text-green-400' :
                           ws.subscriptionStatus === 'canceled' ? 'bg-red-500/10 text-red-400' :
-                          'bg-white/5 text-dim shadow-inner'
+                          'bg-bg-tertiary text-dim shadow-inner border border-glass-border'
                         }`}>
                           <div className={`w-1.5 h-1.5 rounded-full ${
                              ws.subscriptionStatus === 'active' ? 'bg-green-400 animate-pulse' :
@@ -235,7 +235,7 @@ export default function AdminSubscriptionsPage() {
                         {ws.subscriptionEnd ? new Date(ws.subscriptionEnd).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button className="p-2 rounded-lg hover:bg-white/5 text-dim hover:text-main transition-all">
+                        <button className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-all">
                           <ExternalLink className="w-4 h-4" />
                         </button>
                       </td>
