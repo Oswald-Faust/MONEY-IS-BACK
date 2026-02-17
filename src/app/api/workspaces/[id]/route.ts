@@ -5,11 +5,11 @@ import jwt from 'jsonwebtoken';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await params;
 
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth-token')?.value;
@@ -71,11 +71,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await params;
 
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth-token')?.value;
