@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import type { Task } from '@/types';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 import { CheckCircle, Clock, MoreHorizontal, Calendar, MessageSquare, Send } from 'lucide-react';
 
 interface TaskCardProps {
@@ -13,32 +14,34 @@ interface TaskCardProps {
   onClick?: (task: Task) => void;
 }
 
-const priorityConfig = {
-  important: {
-    label: 'Important',
-    bgColor: 'rgba(239, 68, 68, 0.1)',
-    color: '#ef4444',
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-    dotColor: '#ef4444',
-  },
-  less_important: {
-    label: 'Moins important',
-    bgColor: 'rgba(59, 130, 246, 0.1)',
-    color: '#3b82f6',
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-    dotColor: '#3b82f6',
-  },
-  waiting: {
-    label: 'En attente',
-    bgColor: 'rgba(148, 163, 184, 0.1)',
-    color: '#94a3b8',
-    borderColor: 'rgba(148, 163, 184, 0.3)',
-    dotColor: '#94a3b8',
-  },
-};
-
 export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCardProps) {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const priorityConfig = {
+    important: {
+      label: t.common.priority.important,
+      bgColor: 'rgba(239, 68, 68, 0.1)',
+      color: '#ef4444',
+      borderColor: 'rgba(239, 68, 68, 0.3)',
+      dotColor: '#ef4444',
+    },
+    less_important: {
+      label: t.common.priority.lessImportant,
+      bgColor: 'rgba(59, 130, 246, 0.1)',
+      color: '#3b82f6',
+      borderColor: 'rgba(59, 130, 246, 0.3)',
+      dotColor: '#3b82f6',
+    },
+    waiting: {
+      label: t.common.priority.waiting,
+      bgColor: 'rgba(148, 163, 184, 0.1)',
+      color: '#94a3b8',
+      borderColor: 'rgba(148, 163, 184, 0.3)',
+      dotColor: '#94a3b8',
+    },
+  };
+
   const priority = priorityConfig[task.priority];
   const completedSubtasks = task.subtasks?.filter((s) => s.completed).length || 0;
   const totalSubtasks = task.subtasks?.length || 0;
@@ -195,7 +198,7 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
                 p-2 rounded-xl hover:bg-glass-hover text-indigo-400
                 transition-all duration-200
               "
-              title="Partager en messagerie"
+              title={t.common.shareTask}
             >
               <Send className="w-4 h-4" />
             </button>

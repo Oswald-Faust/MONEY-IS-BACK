@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import frTranslations from './translations/fr';
 import enTranslations from './translations/en';
 import type { TranslationType } from './translations/fr';
@@ -40,8 +40,16 @@ function getStoredLocale(): Locale {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Initialize with stored locale (avoids extra effect + setState cascade)
-  const [locale, setLocaleState] = useState<Locale>(getStoredLocale);
+  // Always initialize with 'fr' (server default) to avoid hydration mismatch
+  const [locale, setLocaleState] = useState<Locale>('fr');
+
+  useEffect(() => {
+    // Read from localStorage only after hydration
+    const stored = getStoredLocale();
+    if (stored !== 'fr') {
+      setLocaleState(stored);
+    }
+  }, []);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);

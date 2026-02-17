@@ -30,6 +30,19 @@ const fr = {
     onQuote: 'Sur devis',
     contactSupport: 'Contacter le Support',
     services: 'Services',
+    edit: 'Modifier',
+    delete: 'Supprimer',
+    save: 'Enregistrer',
+    cancel: 'Annuler',
+    tasks: 'Tâches',
+    team: 'Équipe',
+    progress: 'Progression',
+    shareTask: 'Partager en messagerie',
+    priority: {
+      important: 'Important',
+      lessImportant: 'Moins important',
+      waiting: 'En attente',
+    },
   },
 
   // --- Landing Navbar ---
@@ -233,6 +246,40 @@ const fr = {
   mockup: {
     taskCompleted: 'Tâche terminée',
     timeAgo: 'Il y a 2 min',
+  },
+
+  // --- Dashboard Page ---
+  dashboard: {
+    welcome: 'Bonjour,',
+    ready: 'Tout est prêt pour une journée productive.',
+    manageEdwin: 'Gérez la plateforme Edwin',
+    openPanel: 'Ouvrir le Panel',
+    newTask: 'Nouvelle tâche',
+    newProject: 'Nouveau projet',
+    stats: {
+      activeProjects: 'Projets Actifs',
+      tasksInProgress: 'Tâches en cours',
+      completedTasks: 'Tâches terminées',
+      productivity: 'Productivité',
+    },
+    myBusiness: 'Mes Business',
+    manageAll: 'Gérer tout',
+    priorityTasks: 'Tâches Prioritaires',
+    crucial: 'Crucial',
+    upcoming: 'Prochainement',
+    noCrucialTasks: 'Aucune tâche cruciale',
+    noUpcomingTasks: 'Aucune tâche à venir',
+    addTask: 'Ajouter une tâche',
+    dailyRoutine: 'Routine du jour',
+    weeklyFollowup: 'Suivi Hebdomadaire',
+    noProjects: 'Aucun projet pour le moment',
+    createFirstProject: 'Créez votre premier projet pour commencer',
+    createProject: 'Créer un projet',
+    team: {
+      title: 'Mon équipe',
+      invite: 'Inviter',
+      empty: 'Personne dans votre équipe pour le moment.',
+    },
   },
 } as const;
 

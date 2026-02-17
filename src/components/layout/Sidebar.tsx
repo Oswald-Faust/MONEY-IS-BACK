@@ -260,7 +260,7 @@ export default function Sidebar() {
                             <Star className="w-4 h-4 group-hover:text-indigo-400" />
                           </div>
                           <div className="flex flex-col text-left">
-                            <span className="text-sm font-medium">Créer un workspace</span>
+                            <span className="text-sm font-medium">{t.common.createWorkspace}</span>
                             <span className="text-[10px] text-indigo-400/70 font-bold">{t.common.requiredTeamPlan}</span>
                           </div>
                         </Link>

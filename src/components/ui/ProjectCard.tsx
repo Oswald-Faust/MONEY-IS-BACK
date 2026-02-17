@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Project } from '@/types';
 import { MoreHorizontal, Users, CheckCircle, Edit3, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n';
 
 interface ProjectCardProps {
   project: Project;
@@ -13,6 +14,7 @@ interface ProjectCardProps {
 export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const progress = project.tasksCount > 0 
     ? Math.round((project.completedTasksCount / project.tasksCount) * 100) 
@@ -130,7 +132,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                           className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-200 hover:text-white hover:bg-glass-hover rounded-xl transition-all group/item"
                         >
                           <Edit3 className="w-4 h-4 text-dim group-hover/item:text-indigo-400 transition-colors" />
-                          Modifier
+                          {t.common.edit}
                         </button>
                         <div className="h-px bg-glass-bg mx-2" />
                         <button
@@ -143,7 +145,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                           className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all group/item"
                         >
                           <Trash2 className="w-4 h-4 text-red-500/50 group-hover/item:text-red-400 transition-colors" />
-                          Supprimer
+                          {t.common.delete}
                         </button>
                       </div>
                     </motion.div>
@@ -160,7 +162,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                     <CheckCircle className="w-4 h-4 text-indigo-400" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">Tâches</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">{t.common.tasks}</span>
                     <span className="font-semibold text-main leading-tight">
                       {project.completedTasksCount} <span className="text-dim">/ {project.tasksCount}</span>
                     </span>
@@ -173,7 +175,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                       <Users className="w-4 h-4 text-purple-400" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-wider text-muted font-bold">Équipe</span>
+                      <span className="text-[10px] uppercase tracking-wider text-muted font-bold">{t.common.team}</span>
                       <span className="font-semibold text-main leading-tight">{project.members.length}</span>
                     </div>
                   </div>
@@ -183,7 +185,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
               {/* Progress Bar Container */}
               <div className="relative pt-2">
                 <div className="flex items-center justify-between text-xs mb-3">
-                  <span className="text-muted font-bold uppercase tracking-widest">Progression</span>
+                  <span className="text-muted font-bold uppercase tracking-widest">{t.common.progress}</span>
                   <span className="font-black text-main px-2 py-0.5 rounded-md bg-glass-bg" style={{ color: project.color }}>
                     {progress}%
                   </span>

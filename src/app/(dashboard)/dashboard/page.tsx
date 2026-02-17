@@ -21,7 +21,7 @@ import TaskCard from '@/components/ui/TaskCard';
 import RoutineCalendar from '@/components/ui/RoutineCalendar';
 import TeamSection from '@/components/dashboard/TeamSection';
 import { useAppStore, useAuthStore } from '@/store';
-// import type { Project, Task, Routine } from '@/types'; // Types non utilisés pour l'instant
+import { useTranslation } from '@/lib/i18n';
 
 export default function DashboardPage() {
   const { user, token } = useAuthStore();
@@ -39,6 +39,7 @@ export default function DashboardPage() {
     updateTask,
     currentWorkspace // Added
   } = useAppStore();
+  const { t } = useTranslation();
   
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,7 +62,7 @@ export default function DashboardPage() {
       const data = await response.json();
       if (data.success) {
         updateTask(taskId, { status: newStatus });
-        toast.success(newStatus === 'done' ? 'Tâche terminée !' : 'Tâche rétablie');
+        toast.success(newStatus === 'done' ? t.mockup.taskCompleted : 'Tâche rétablie');
       }
     } catch {
       toast.error('Erreur lors de la mise à jour');
@@ -117,10 +118,10 @@ export default function DashboardPage() {
   }, [token, currentWorkspace, setProjects, setTasks, setRoutines]);
 
   const stats = [
-    { label: 'Projets Actifs', value: projects.length, icon: FolderKanban, color: '#6366f1' },
-    { label: 'Tâches en cours', value: tasks.filter(t => t.status !== 'done').length, icon: Clock, color: '#f97316' },
-    { label: 'Tâches terminées', value: tasks.filter(t => t.status === 'done').length, icon: CheckCircle, color: '#22c55e' },
-    { label: 'Productivité', value: '78%', icon: TrendingUp, color: '#8b5cf6' },
+    { label: t.dashboard.stats.activeProjects, value: projects.length, icon: FolderKanban, color: '#6366f1' },
+    { label: t.dashboard.stats.tasksInProgress, value: tasks.filter(t => t.status !== 'done').length, icon: Clock, color: '#f97316' },
+    { label: t.dashboard.stats.completedTasks, value: tasks.filter(t => t.status === 'done').length, icon: CheckCircle, color: '#22c55e' },
+    { label: t.dashboard.stats.productivity, value: '78%', icon: TrendingUp, color: '#8b5cf6' },
   ];
 
   const importantTasks = tasks.filter(t => t.priority === 'important');
@@ -136,11 +137,11 @@ export default function DashboardPage() {
               <Sparkles className="w-6 h-6" />
             </div>
             <h1 className="text-3xl font-bold text-text-main tracking-tight">
-              Bonjour, {user?.firstName || 'Mathias'}
+              {t.dashboard.welcome} {user?.firstName || 'Mathias'}
             </h1>
           </div>
           <p className="text-text-dim text-lg">
-            Tout est prêt pour une journée productive.
+            {t.dashboard.ready}
           </p>
         </div>
 
@@ -155,13 +156,13 @@ export default function DashboardPage() {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-black text-red-500 uppercase tracking-widest">Creator Mode</p>
-                <p className="text-sm text-text-main font-medium">Gérez la plateforme Edwin</p>
+                <p className="text-xs font-black text-red-500 uppercase tracking-widest">{t.sidebar.creatorMode}</p>
+                <p className="text-sm text-text-main font-medium">{t.dashboard.manageEdwin}</p>
               </div>
             </div>
             <Link href="/admin/dashboard">
               <button className="px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20">
-                Ouvrir le Panel
+                {t.dashboard.openPanel}
               </button>
             </Link>
           </motion.div>
@@ -173,7 +174,7 @@ export default function DashboardPage() {
             className="px-6 py-3 rounded-2xl bg-glass-bg border border-glass-border text-text-main font-semibold hover:bg-glass-hover transition-all flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Nouvelle tâche
+            {t.dashboard.newTask}
           </button>
           
           <button
@@ -184,7 +185,7 @@ export default function DashboardPage() {
             className="btn-primary flex items-center justify-center gap-2 px-6 rounded-2xl"
           >
             <Plus className="w-4 h-4" />
-            Nouveau projet
+            {t.dashboard.newProject}
           </button>
         </div>
       </div>
@@ -228,11 +229,11 @@ export default function DashboardPage() {
               <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
                 <LayoutGrid className="w-4 h-4" />
               </div>
-              Mes Business
+              {t.dashboard.myBusiness}
             </h2>
           </div>
           <Link href="/projects" className="px-4 py-2 rounded-2xl text-sm font-semibold text-accent-primary hover:text-text-main hover:bg-accent-primary/10 flex items-center gap-2 transition-all group/link">
-            Gérer tout 
+            {t.dashboard.manageAll} 
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -244,13 +245,13 @@ export default function DashboardPage() {
         ) : projects.length === 0 ? (
           <div className="text-center py-12 text-text-dim bg-glass-bg rounded-xl border border-glass-border">
             <FolderKanban className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p className="text-lg font-medium text-text-main mb-1">Aucun projet pour le moment</p>
-            <p className="text-sm text-text-dim">Créez votre premier projet pour commencer</p>
+            <p className="text-lg font-medium text-text-main mb-1">{t.dashboard.noProjects}</p>
+            <p className="text-sm text-text-dim">{t.dashboard.createFirstProject}</p>
             <button 
               onClick={() => setProjectModalOpen(true)}
               className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-2xl text-sm hover:bg-indigo-600 transition-colors"
             >
-              Créer un projet
+              {t.dashboard.createProject}
             </button>
           </div>
         ) : (
@@ -299,7 +300,7 @@ export default function DashboardPage() {
           <section>
             <h2 className="section-title flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-indigo-400" />
-              Tâches Prioritaires
+              {t.dashboard.priorityTasks}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Important Column */}
@@ -307,7 +308,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-red-500 font-bold text-sm uppercase tracking-wider">
                     <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                    Crucial
+                    {t.dashboard.crucial}
                   </span>
                   <span className="text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full border border-glass-border">{importantTasks.length} tâches</span>
                 </div>
@@ -319,7 +320,7 @@ export default function DashboardPage() {
                   </AnimatePresence>
                   {importantTasks.length === 0 && (
                     <div className="text-center py-8 text-text-muted text-sm italic">
-                      Aucune tâche cruciale
+                      {t.dashboard.noCrucialTasks}
                     </div>
                   )}
                 </div>
@@ -330,7 +331,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-accent-primary font-bold text-sm uppercase tracking-wider">
                     <span className="w-2 h-2 rounded-full bg-accent-primary" />
-                    Prochainement
+                    {t.dashboard.upcoming}
                   </span>
                   <span className="text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full border border-glass-border">{otherTasks.length} tâches</span>
                 </div>
@@ -342,7 +343,7 @@ export default function DashboardPage() {
                   </AnimatePresence>
                   {otherTasks.length === 0 && (
                     <div className="text-center py-8 text-text-muted text-sm italic">
-                      Aucune tâche à venir
+                      {t.dashboard.noUpcomingTasks}
                     </div>
                   )}
                   <button 
@@ -350,7 +351,7 @@ export default function DashboardPage() {
                     className="w-full p-4 rounded-2xl bg-glass-bg border border-glass-border border-dashed flex items-center justify-center gap-2 text-text-dim hover:text-text-main hover:bg-glass-hover hover:border-accent-primary/30 transition-all group"
                   >
                     <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-medium">Ajouter une tâche</span>
+                    <span className="text-xs font-medium">{t.dashboard.addTask}</span>
                   </button>
                 </div>
               </div>
@@ -366,7 +367,7 @@ export default function DashboardPage() {
           <section className="glass-card">
             <h2 className="section-title !m-0 !mb-4 flex items-center gap-2 text-sm">
               <RotateCcw className="w-4 h-4 text-indigo-400" />
-              Routine du jour
+              {t.dashboard.dailyRoutine}
             </h2>
             <div className="space-y-3">
               {routines.map(routine => (
@@ -389,7 +390,7 @@ export default function DashboardPage() {
       <section className="pt-8">
         <h2 className="section-title flex items-center gap-2">
           <Clock className="w-5 h-5 text-indigo-400" />
-          Suivi Hebdomadaire
+          {t.dashboard.weeklyFollowup}
         </h2>
         <div className="glass-card">
           <RoutineCalendar routines={routines} />

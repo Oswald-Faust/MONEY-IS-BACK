@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Users, UserPlus } from 'lucide-react';
 import { useAuthStore } from '@/store';
+import { useTranslation } from '@/lib/i18n';
 import Avatar from '@/components/ui/Avatar';
 import Link from 'next/link';
 
@@ -12,6 +13,7 @@ interface TeamSectionProps {
 
 export default function TeamSection({ workspaceId }: TeamSectionProps) {
   const { token, user } = useAuthStore();
+  const { t } = useTranslation();
   const [members, setMembers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -63,18 +65,18 @@ export default function TeamSection({ workspaceId }: TeamSectionProps) {
             <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
             <Users className="w-4 h-4" />
             </div>
-            Mon équipe
+            {t.dashboard.team.title}
         </h2>
         <Link href="/invite" className="px-4 py-2 rounded-2xl text-sm font-semibold text-indigo-400 hover:text-main hover:bg-indigo-500/10 flex items-center gap-2 transition-all">
             <UserPlus className="w-4 h-4" />
-            Inviter
+            {t.dashboard.team.invite}
         </Link>
       </div>
 
       <div className="glass-card p-6">
         {members.length === 0 ? (
            <div className="text-center py-4 text-dim">
-               Personne dans votre équipe pour le moment.
+               {t.dashboard.team.empty}
            </div>
         ) : (
             <div className="flex items-center gap-4 flex-wrap">

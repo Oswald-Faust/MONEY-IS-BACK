@@ -32,6 +32,19 @@ const en: TranslationType = {
     onQuote: 'Custom pricing',
     contactSupport: 'Contact Support',
     services: 'Services',
+    edit: 'Edit',
+    delete: 'Delete',
+    save: 'Save',
+    cancel: 'Cancel',
+    tasks: 'Tasks',
+    team: 'Team',
+    progress: 'Progress',
+    shareTask: 'Share in messaging',
+    priority: {
+      important: 'Important',
+      lessImportant: 'Less important',
+      waiting: 'Waiting',
+    },
   },
 
   // --- Landing Navbar ---
@@ -235,6 +248,40 @@ const en: TranslationType = {
   mockup: {
     taskCompleted: 'Task completed',
     timeAgo: '2 min ago',
+  },
+
+  // --- Dashboard Page ---
+  dashboard: {
+    welcome: 'Welcome,',
+    ready: 'Everything is ready for a productive day.',
+    manageEdwin: 'Manage the Edwin platform',
+    openPanel: 'Open Panel',
+    newTask: 'New Task',
+    newProject: 'New Project',
+    stats: {
+      activeProjects: 'Active Projects',
+      tasksInProgress: 'Tasks in progress',
+      completedTasks: 'Completed Tasks',
+      productivity: 'Productivity',
+    },
+    myBusiness: 'My Businesses',
+    manageAll: 'Manage all',
+    priorityTasks: 'Priority Tasks',
+    crucial: 'Crucial',
+    upcoming: 'Upcoming',
+    noCrucialTasks: 'No crucial tasks',
+    noUpcomingTasks: 'No upcoming tasks',
+    addTask: 'Add a task',
+    dailyRoutine: 'Daily Routine',
+    weeklyFollowup: 'Weekly Follow-up',
+    noProjects: 'No projects yet',
+    createFirstProject: 'Create your first project to get started',
+    createProject: 'Create a project',
+    team: {
+      title: 'My Team',
+      invite: 'Invite',
+      empty: 'Nobody in your team for now.',
+    },
   },
 } as const;
 
