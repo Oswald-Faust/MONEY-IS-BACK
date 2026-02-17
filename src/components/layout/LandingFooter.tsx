@@ -43,43 +43,43 @@ export const LandingFooter = () => (
                 <div>
                     <h4 className="text-text-main font-bold mb-6">Produit</h4>
                     <ul className="space-y-4 text-sm text-text-muted">
-                        <li><Link href="/#features" className="hover:text-[#00FFB2] transition-colors">Fonctionnalités</Link></li>
-                        <li><Link href="/#pricing" className="hover:text-[#00FFB2] transition-colors">Tarifs</Link></li>
-                        <li><Link href="/security" className="hover:text-[#00FFB2] transition-colors">Sécurité</Link></li>
-                        <li><Link href="/changelog" className="hover:text-[#00FFB2] transition-colors">Changelog</Link></li>
-                        <li><Link href="/integrations" className="hover:text-[#00FFB2] transition-colors">Intégrations</Link></li>
+                        <li><Link href="/#features" className="hover:text-accent-primary transition-colors">Fonctionnalités</Link></li>
+                        <li><Link href="/#pricing" className="hover:text-accent-primary transition-colors">Tarifs</Link></li>
+                        <li><Link href="/security" className="hover:text-accent-primary transition-colors">Sécurité</Link></li>
+                        <li><Link href="/changelog" className="hover:text-accent-primary transition-colors">Changelog</Link></li>
+                        <li><Link href="/integrations" className="hover:text-accent-primary transition-colors">Intégrations</Link></li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 className="text-text-main font-bold mb-6">Entreprise</h4>
                     <ul className="space-y-4 text-sm text-text-muted">
-                        <li><Link href="/about" className="hover:text-[#00FFB2] transition-colors">À propos</Link></li>
-                        <li><Link href="/careers" className="hover:text-[#00FFB2] transition-colors">Carrières</Link></li>
-                        <li><Link href="/blog" className="hover:text-[#00FFB2] transition-colors">Blog</Link></li>
-                        <li><Link href="/contact" className="hover:text-[#00FFB2] transition-colors">Contact</Link></li>
-                        <li><Link href="/partners" className="hover:text-[#00FFB2] transition-colors">Partenaires</Link></li>
+                        <li><Link href="/about" className="hover:text-accent-primary transition-colors">À propos</Link></li>
+                        <li><Link href="/careers" className="hover:text-accent-primary transition-colors">Carrières</Link></li>
+                        <li><Link href="/blog" className="hover:text-accent-primary transition-colors">Blog</Link></li>
+                        <li><Link href="/contact" className="hover:text-accent-primary transition-colors">Contact</Link></li>
+                        <li><Link href="/partners" className="hover:text-accent-primary transition-colors">Partenaires</Link></li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 className="text-text-main font-bold mb-6">Ressources</h4>
                     <ul className="space-y-4 text-sm text-text-muted">
-                        <li><Link href="/docs" className="hover:text-[#00FFB2] transition-colors">Documentation</Link></li>
-                        <li><Link href="/community" className="hover:text-[#00FFB2] transition-colors">Communauté</Link></li>
-                        <li><Link href="/help" className="hover:text-[#00FFB2] transition-colors">Help Center</Link></li>
-                        <li><Link href="/status" className="hover:text-[#00FFB2] transition-colors">Status</Link></li>
-                        <li><Link href="/api-docs" className="hover:text-[#00FFB2] transition-colors">API</Link></li>
+                        <li><Link href="/docs" className="hover:text-accent-primary transition-colors">Documentation</Link></li>
+                        <li><Link href="/community" className="hover:text-accent-primary transition-colors">Communauté</Link></li>
+                        <li><Link href="/help" className="hover:text-accent-primary transition-colors">Help Center</Link></li>
+                        <li><Link href="/status" className="hover:text-accent-primary transition-colors">Status</Link></li>
+                        <li><Link href="/api-docs" className="hover:text-accent-primary transition-colors">API</Link></li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 className="text-text-main font-bold mb-6">Légal</h4>
                     <ul className="space-y-4 text-sm text-text-muted">
-                        <li><Link href="/privacy" className="hover:text-[#00FFB2] transition-colors">Confidentialité</Link></li>
-                        <li><Link href="/terms" className="hover:text-[#00FFB2] transition-colors">CGU</Link></li>
-                        <li><Link href="/cookies" className="hover:text-[#00FFB2] transition-colors">Cookies</Link></li>
-                        <li><Link href="/licenses" className="hover:text-[#00FFB2] transition-colors">Licences</Link></li>
+                        <li><Link href="/privacy" className="hover:text-accent-primary transition-colors">Confidentialité</Link></li>
+                        <li><Link href="/terms" className="hover:text-accent-primary transition-colors">CGU</Link></li>
+                        <li><Link href="/cookies" className="hover:text-accent-primary transition-colors">Cookies</Link></li>
+                        <li><Link href="/licenses" className="hover:text-accent-primary transition-colors">Licences</Link></li>
                     </ul>
                 </div>
             </div>

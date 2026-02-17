@@ -145,25 +145,25 @@ export const LandingNavbar = () => {
              {/* Mobile Menu Overlay */}
             <AnimatePresence>
                 {mobileMenuOpen && (
-                    <motion.div 
+                     <motion.div 
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-40 flex flex-col pt-32 px-6 gap-8 md:hidden"
+                        className="fixed inset-0 bg-bg-primary/95 backdrop-blur-xl z-40 flex flex-col pt-32 px-6 gap-8 md:hidden"
                     >
                         <div className="flex flex-col gap-6 items-center text-center">
-                            <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Produit</Link>
-                            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">À propos</Link>
-                            <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Blog</Link>
-                            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Contact</Link>
-                            <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white">Tarifs</Link>
-                            <hr className="w-20 border-white/10" />
+                            <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">Produit</Link>
+                            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">À propos</Link>
+                            <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">Blog</Link>
+                            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">Contact</Link>
+                            <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">Tarifs</Link>
+                            <hr className="w-20 border-glass-border" />
                             {isAuthenticated ? (
                                 <Link href="/dashboard" className="text-xl font-bold text-[#00FFB2]">Accéder au Dashboard</Link>
                             ) : (
                                 <>
-                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-xl text-zinc-400">Connexion</Link>
-                                    <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-[#00FFB2]">Commencer</Link>
+                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-xl text-text-dim">Connexion</Link>
+                                    <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-accent-primary">Commencer</Link>
                                 </>
                             )}
                         </div>

@@ -210,9 +210,9 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#0a0a0c] shadow-2xl rounded-tl-3xl border-t border-l border-white/5 relative">
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-bg-primary shadow-2xl rounded-tl-3xl border-t border-l border-glass-border relative">
       <ContactList 
-        className={`w-full md:w-80 shrink-0 ${selectedContact ? 'hidden md:flex' : 'flex'}`}
+        className={`w-full md:w-80 shrink-0 border-r border-glass-border ${selectedContact ? 'hidden md:flex' : 'flex'}`}
         contacts={filteredContacts} 
         selectedContact={selectedContact} 
         onSelectContact={setSelectedContact} 
@@ -240,21 +240,21 @@ export default function MessagesPage() {
             onDeleteMessage={() => fetchMessages(selectedContact._id)}
           />
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-gray-500 bg-[#0f1115] relative overflow-hidden">
+          <div className="flex-1 flex flex-col items-center justify-center text-text-muted bg-bg-secondary relative overflow-hidden">
              {/* Background Effects */}
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent-primary/5 blur-[100px] rounded-full pointer-events-none" />
              
-             <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(79,70,229,0.1)] relative z-10">
-                <MessageCircle className="w-12 h-12 text-indigo-400" />
+             <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-accent-primary/20 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(79,70,229,0.1)] relative z-10">
+                <MessageCircle className="w-12 h-12 text-accent-primary" />
               </div>
             <div className="text-center px-6 relative z-10">
-              <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Messagerie Interne</h2>
-              <p className="max-w-sm text-gray-400 leading-relaxed font-light mx-auto">
+              <h2 className="text-3xl font-bold text-text-main mb-3 tracking-tight">Messagerie Interne</h2>
+              <p className="max-w-sm text-text-dim leading-relaxed font-light mx-auto">
                 Sélectionnez une conversation ou démarrez-en une nouvelle pour collaborer.
               </p>
               <button 
                 onClick={() => setShowNewChatModal(true)}
-                className="mt-8 px-8 py-3.5 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all shadow-lg shadow-white/10 active:scale-95 flex items-center gap-2 mx-auto"
+                className="mt-8 px-8 py-3.5 bg-accent-primary text-white font-bold rounded-full hover:opacity-90 transition-all shadow-lg shadow-accent-primary/20 active:scale-95 flex items-center gap-2 mx-auto"
               >
                 <Send className="w-4 h-4" />
                 Nouvelle discussion

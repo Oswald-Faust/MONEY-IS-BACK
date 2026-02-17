@@ -132,14 +132,14 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+            <div className="w-10 h-10 rounded-xl bg-accent-primary/10 flex items-center justify-center text-accent-primary">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h1 className="text-3xl font-bold text-main tracking-tight">
+            <h1 className="text-3xl font-bold text-text-main tracking-tight">
               Bonjour, {user?.firstName || 'Mathias'}
             </h1>
           </div>
-          <p className="text-dim text-lg">
+          <p className="text-text-dim text-lg">
             Tout est prêt pour une journée productive.
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-xs font-black text-red-500 uppercase tracking-widest">Creator Mode</p>
-                <p className="text-sm text-main font-medium">Gérez la plateforme Edwin</p>
+                <p className="text-sm text-text-main font-medium">Gérez la plateforme Edwin</p>
               </div>
             </div>
             <Link href="/admin/dashboard">
@@ -170,7 +170,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button
             onClick={() => setTaskModalOpen(true)}
-            className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-main font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+            className="px-6 py-3 rounded-2xl bg-glass-bg border border-glass-border text-text-main font-semibold hover:bg-glass-hover transition-all flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Nouvelle tâche
@@ -200,10 +200,10 @@ export default function DashboardPage() {
             className="glass-card flex items-center justify-between group"
           >
             <div>
-              <p className="text-sm font-medium text-dim mb-1 group-hover:text-main transition-colors">
+              <p className="text-sm font-medium text-text-dim mb-1 group-hover:text-text-main transition-colors">
                 {stat.label}
               </p>
-              <p className="text-3xl font-bold text-main">{stat.value}</p>
+              <p className="text-3xl font-bold text-text-main">{stat.value}</p>
             </div>
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-glass-bg group-hover:scale-110 transition-transform">
               <stat.icon className="w-6 h-6" style={{ color: stat.color }} />
@@ -231,7 +231,7 @@ export default function DashboardPage() {
               Mes Business
             </h2>
           </div>
-          <Link href="/projects" className="px-4 py-2 rounded-2xl text-sm font-semibold text-indigo-400 hover:text-main hover:bg-indigo-500/10 flex items-center gap-2 transition-all group/link">
+          <Link href="/projects" className="px-4 py-2 rounded-2xl text-sm font-semibold text-accent-primary hover:text-text-main hover:bg-accent-primary/10 flex items-center gap-2 transition-all group/link">
             Gérer tout 
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
@@ -242,10 +242,10 @@ export default function DashboardPage() {
             <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-12 text-dim bg-glass-bg rounded-xl">
-            <FolderKanban className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="text-lg font-medium text-main mb-1">Aucun projet pour le moment</p>
-            <p className="text-sm text-dim">Créez votre premier projet pour commencer</p>
+          <div className="text-center py-12 text-text-dim bg-glass-bg rounded-xl border border-glass-border">
+            <FolderKanban className="w-12 h-12 mx-auto mb-3 opacity-20" />
+            <p className="text-lg font-medium text-text-main mb-1">Aucun projet pour le moment</p>
+            <p className="text-sm text-text-dim">Créez votre premier projet pour commencer</p>
             <button 
               onClick={() => setProjectModalOpen(true)}
               className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-2xl text-sm hover:bg-indigo-600 transition-colors"
@@ -309,7 +309,7 @@ export default function DashboardPage() {
                     <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
                     Crucial
                   </span>
-                  <span className="text-xs text-dim bg-glass-bg px-2 py-0.5 rounded-full border border-glass-border">{importantTasks.length} tâches</span>
+                  <span className="text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full border border-glass-border">{importantTasks.length} tâches</span>
                 </div>
                 <div className="space-y-4">
                   <AnimatePresence mode="popLayout">
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                     ))}
                   </AnimatePresence>
                   {importantTasks.length === 0 && (
-                    <div className="text-center py-8 text-dim text-sm italic">
+                    <div className="text-center py-8 text-text-muted text-sm italic">
                       Aucune tâche cruciale
                     </div>
                   )}
@@ -328,11 +328,11 @@ export default function DashboardPage() {
               {/* Waiting/Less Important Column - Merged for clarity */}
               <div className="glass-card p-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-indigo-400 font-bold text-sm uppercase tracking-wider">
-                    <span className="w-2 h-2 rounded-full bg-indigo-400" />
+                  <span className="flex items-center gap-2 text-accent-primary font-bold text-sm uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-accent-primary" />
                     Prochainement
                   </span>
-                  <span className="text-xs text-dim bg-glass-bg px-2 py-0.5 rounded-full border border-glass-border">{otherTasks.length} tâches</span>
+                  <span className="text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full border border-glass-border">{otherTasks.length} tâches</span>
                 </div>
                 <div className="space-y-4">
                   <AnimatePresence mode="popLayout">
@@ -341,13 +341,13 @@ export default function DashboardPage() {
                     ))}
                   </AnimatePresence>
                   {otherTasks.length === 0 && (
-                    <div className="text-center py-8 text-dim text-sm italic">
+                    <div className="text-center py-8 text-text-muted text-sm italic">
                       Aucune tâche à venir
                     </div>
                   )}
                   <button 
                     onClick={() => setTaskModalOpen(true)}
-                    className="w-full p-4 rounded-2xl bg-glass-bg border border-glass-border border-dashed flex items-center justify-center gap-2 text-dim hover:text-main hover:bg-glass-hover hover:border-indigo-500/30 transition-all group"
+                    className="w-full p-4 rounded-2xl bg-glass-bg border border-glass-border border-dashed flex items-center justify-center gap-2 text-text-dim hover:text-text-main hover:bg-glass-hover hover:border-accent-primary/30 transition-all group"
                   >
                     <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-medium">Ajouter une tâche</span>
@@ -373,9 +373,9 @@ export default function DashboardPage() {
                 <div key={routine._id} className="flex items-center justify-between p-3 bg-glass-bg rounded-xl group hover:bg-glass-hover transition-all">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: routine.color }} />
-                    <span className="text-sm font-medium text-main">{routine.title}</span>
+                    <span className="text-sm font-medium text-text-main">{routine.title}</span>
                   </div>
-                  <button className="p-1.5 rounded-lg text-dim group-hover:text-main transition-colors">
+                  <button className="p-1.5 rounded-lg text-text-dim group-hover:text-text-main transition-colors">
                     <CheckCircle className="w-4 h-4" />
                   </button>
                 </div>

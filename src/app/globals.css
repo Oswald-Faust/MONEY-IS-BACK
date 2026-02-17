@@ -13,8 +13,8 @@
   --color-text-dim: var(--text-dim);
   --color-text-muted: var(--text-muted);
   
-  --color-input-bg: var(--input-bg);
-  --color-input-border: var(--input-border);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
   --color-bg-deep: var(--bg-deep);
 }
 /* ========================================

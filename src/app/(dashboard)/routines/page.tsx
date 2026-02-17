@@ -136,11 +136,11 @@ export default function RoutinesPage() {
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
             <RotateCcw className="w-8 h-8 text-indigo-400" />
             Routines
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-text-dim mt-1">
             {activeRoutines.length} routines actives
           </p>
         </div>
@@ -177,7 +177,7 @@ export default function RoutinesPage() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <h2 className="text-lg font-semibold text-white mb-4">Toutes les routines</h2>
+        <h2 className="text-lg font-semibold text-text-main mb-4">Toutes les routines</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {routines.map((routine, index) => (
@@ -192,7 +192,7 @@ export default function RoutinesPage() {
               <div className="flex items-start gap-3">
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-white font-medium mb-1">{routine.title}</h3>
+                    <h3 className="text-text-main font-medium mb-1">{routine.title}</h3>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                        <button
                         onClick={() => handleToggleStatus(routine._id, routine.isActive)}
@@ -212,7 +212,7 @@ export default function RoutinesPage() {
                   </div>
                   
                   {routine.description && (
-                    <p className="text-gray-500 text-sm mb-3 line-clamp-2">{routine.description}</p>
+                    <p className="text-text-dim text-sm mb-3 line-clamp-2">{routine.description}</p>
                   )}
                   
                   {/* Days */}
@@ -228,7 +228,7 @@ export default function RoutinesPage() {
                             w-7 h-7 rounded-lg flex items-center justify-center text-xs font-medium border
                             ${isActive 
                               ? 'text-white border-transparent' 
-                              : 'bg-transparent border-white/5 text-gray-700'}
+                              : 'bg-transparent border-glass-border text-text-muted'}
                           `}
                           style={isActive ? { backgroundColor: `${routine.color}40`, color: routine.color } : {}}
                         >
@@ -239,9 +239,9 @@ export default function RoutinesPage() {
                   </div>
 
                   {/* Time & Status */}
-                  <div className="flex items-center justify-between mt-4 border-t border-white/5 pt-3">
+                  <div className="flex items-center justify-between mt-4 border-t border-glass-border pt-3">
                     {routine.time && (
-                      <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-md">
+                      <span className="text-xs text-text-dim bg-glass-bg px-2 py-1 rounded-md">
                         🕐 {routine.time}
                       </span>
                     )}
@@ -261,19 +261,19 @@ export default function RoutinesPage() {
         </div>
 
         {!isLoading && routines.length === 0 && (
-          <div className="glass-card p-12 text-center mt-8 border-dashed border-2 border-white/5">
-            <RotateCcw className="w-12 h-12 text-gray-600 mx-auto mb-4 opacity-50" />
-            <h3 className="text-white font-medium mb-2">Aucune routine</h3>
-            <p className="text-gray-500 text-sm mb-4">
+          <div className="glass-card p-12 text-center mt-8 border-dashed border-2 border-glass-border">
+            <RotateCcw className="w-12 h-12 text-text-muted mx-auto mb-4 opacity-20" />
+            <h3 className="text-text-main font-medium mb-2">Aucune routine</h3>
+            <p className="text-text-dim text-sm mb-4">
               Créez des routines récurrentes pour automatiser vos tâches
             </p>
             <button
               onClick={() => setIsModalOpen(true)}
               className="
                 px-4 py-2 rounded-xl
-                bg-white/5 border border-white/10
-                text-white font-medium text-sm
-                hover:bg-white/10
+                bg-glass-bg border border-glass-border
+                text-text-main font-medium text-sm
+                hover:opacity-80
                 transition-all
               "
             >

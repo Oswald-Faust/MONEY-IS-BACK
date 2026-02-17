@@ -89,7 +89,7 @@ const AnimatedText = () => {
     }, [words.length]);
 
     return (
-        <span className="block h-[1.2em] overflow-hidden text-zinc-500">
+        <span className="block h-[1.2em] overflow-hidden text-text-muted">
              <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span 
                     key={index}
@@ -152,7 +152,7 @@ const Hero = () => {
                 >
                     <Link 
                         href="#pricing" 
-                        className="px-10 py-4 rounded-full bg-[#00FFB2] text-black font-bold text-sm tracking-wide hover:shadow-[0_0_40px_rgba(0,255,178,0.4)] transition-all hover:scale-105"
+                        className="px-10 py-4 rounded-full bg-accent-primary text-white font-bold text-sm tracking-wide hover:shadow-[0_0_40px_rgba(99,102,241,0.4)] transition-all hover:scale-105"
                     >
                         COMMENCER GRATUITEMENT
                     </Link>
@@ -296,27 +296,27 @@ const BentoGrid = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Large Card */}
                     <div className="md:col-span-2 relative h-[400px] rounded-3xl bg-glass-bg border border-glass-border overflow-hidden group">
-                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10" />
+                         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-bg-secondary to-transparent z-10" />
                          <Image src="/secure-drive.png" fill className="object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Drive Storage" />
                          <div className="absolute bottom-0 left-0 p-10 z-20 max-w-lg">
-                             <div className="text-[#00FFB2] font-mono text-xs mb-2">DRIVE</div>
-                             <h3 className="text-3xl font-medium text-white mb-2">Stockage & Partage Sécurisé</h3>
-                             <p className="text-zinc-300 font-light">Un espace centralisé pour tous vos fichiers. Partagez des documents avec des liens sécurisés et gérez les permissions d&apos;accès.</p>
+                             <div className="text-accent-primary font-mono text-xs mb-2">DRIVE</div>
+                             <h3 className="text-3xl font-medium text-text-main mb-2">Stockage & Partage Sécurisé</h3>
+                             <p className="text-text-dim font-light">Un espace centralisé pour tous vos fichiers. Partagez des documents avec des liens sécurisés et gérez les permissions d&apos;accès.</p>
                          </div>
                     </div>
 
                     {/* Tall Card */}
-                    <div className="md:row-span-2 rounded-3xl bg-glass-bg border border-glass-border p-8 flex flex-col items-center text-center group hover:border-[#00FFB2]/20 transition-colors relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/90 z-10" />
+                    <div className="md:row-span-2 rounded-3xl bg-glass-bg border border-glass-border p-8 flex flex-col items-center text-center group hover:border-accent-primary/20 transition-colors relative overflow-hidden">
+                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-bg-secondary to-transparent z-10" />
                         <Image src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop" fill className="object-cover opacity-10 grayscale group-hover:opacity-20 group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110" alt="Dashboards" />
                         
                         <div className="relative z-20 flex flex-col items-center">
-                            <div className="w-full h-48 bg-gradient-to-tr from-[#00FFB2]/20 to-blue-500/20 rounded-2xl mb-8 flex items-center justify-center relative overflow-hidden">
+                            <div className="w-full h-48 bg-gradient-to-tr from-accent-primary/20 to-blue-500/20 rounded-2xl mb-8 flex items-center justify-center relative overflow-hidden">
                                  <div className="absolute inset-0 bg-grid-white/[0.05]" />
-                                 <BarChart3 className="w-16 h-16 text-white relative z-10" />
+                                 <BarChart3 className="w-16 h-16 text-accent-primary relative z-10" />
                             </div>
-                            <h3 className="text-2xl font-medium text-white mb-4">Tableaux de Bord Dynamiques</h3>
-                            <p className="text-zinc-300 font-light text-sm">Visualisez l&apos;avancement de vos projets, suivez vos budgets et analysez la performance de vos équipes en un coup d&apos;œil.</p>
+                            <h3 className="text-2xl font-medium text-text-main mb-4">Tableaux de Bord Dynamiques</h3>
+                            <p className="text-text-dim font-light text-sm">Visualisez l&apos;avancement de vos projets, suivez vos budgets et analysez la performance de vos équipes en un coup d&apos;œil.</p>
                         </div>
                     </div>
 
@@ -345,18 +345,18 @@ const BentoGrid = () => {
                         image="https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=2670&auto=format&fit=crop"
                     />
                     
-                     <div className="md:col-span-2 relative h-[320px] rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden group p-10 flex flex-col justify-between hover:border-[#00FFB2]/20 transition-colors">
-                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/90 z-10" />
+                     <div className="md:col-span-2 relative h-[320px] rounded-3xl bg-glass-bg border border-glass-border overflow-hidden group p-10 flex flex-col justify-between hover:border-accent-primary/20 transition-colors">
+                         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-bg-secondary to-transparent z-10" />
                          <Image src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2670&auto=format&fit=crop" fill className="object-cover opacity-10 grayscale group-hover:opacity-20 group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" alt="Security" />
                          <div className="absolute top-0 right-0 p-16 opacity-10 group-hover:opacity-20 transition-opacity z-20">
-                             <Shield className="w-64 h-64 text-[#00FFB2]" />
+                             <Shield className="w-64 h-64 text-accent-primary" />
                          </div>
                          <div className="relative z-20">
-                             <div className="w-12 h-12 rounded-xl bg-[#00FFB2]/20 flex items-center justify-center mb-6">
-                                 <Shield className="w-6 h-6 text-[#00FFB2]" />
+                             <div className="w-12 h-12 rounded-xl bg-accent-primary/20 flex items-center justify-center mb-6">
+                                 <Shield className="w-6 h-6 text-accent-primary" />
                              </div>
-                             <h3 className="text-2xl font-medium text-white mb-3">Contrôle d&apos;Accès Sécurisé</h3>
-                             <p className="text-zinc-400 font-light max-w-md">Définissez précisément qui peut voir et modifier quoi. Protégez vos informations sensibles avec des rôles et des permissions granulaires.</p>
+                             <h3 className="text-2xl font-medium text-text-main mb-3">Contrôle d&apos;Accès Sécurisé</h3>
+                             <p className="text-text-dim font-light max-w-md">Définissez précisément qui peut voir et modifier quoi. Protégez vos informations sensibles avec des rôles et des permissions granulaires.</p>
                          </div>
                     </div>
                 </div>
@@ -464,7 +464,7 @@ const Services = () => {
                                     <Zap className="w-8 h-8 text-white" />
                                 </div>
                                 <h3 className="text-4xl text-white font-medium mb-4">{TAB_CONTENT[activeTab].title}</h3>
-                                <p className="text-zinc-300 text-lg max-w-md mb-8">{TAB_CONTENT[activeTab].desc}</p>
+                                <p className="text-zinc-100 text-lg max-w-md mb-8">{TAB_CONTENT[activeTab].desc}</p>
                                 <Link 
                                     href={isAuthenticated ? "/dashboard" : "/login"}
                                     className="px-8 py-3 bg-white text-black rounded-full font-bold hover:bg-[#D7FE03] transition-colors inline-block"
@@ -542,10 +542,10 @@ const PricingCard = ({ plan, price, highlight = false, billingCycle, originalPri
 
         <Link href={`/register?plan=${plan.toLowerCase()}&billing=${billingCycle}`} className="block w-full">
             <button className={`
-                w-full py-4 rounded-[20px] font-bold text-lg transition-all
+                w-full py-4 rounded-[20px] font-bold text-lg transition-all shadow-lg
                 ${highlight 
-                    ? 'bg-[#D7FE03] text-black hover:bg-[#c2e503]' 
-                    : 'bg-glass-bg text-text-main border border-glass-border hover:bg-text-main hover:text-bg-primary'
+                    ? 'bg-accent-primary text-white hover:opacity-90 shadow-accent-primary/20' 
+                    : 'bg-glass-bg text-text-main border border-glass-border hover:bg-accent-primary hover:text-white hover:border-accent-primary'
                 }
             `}>
                 Commencer
@@ -711,11 +711,11 @@ const FAQSection = () => {
                                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
                                 className="w-full text-left p-6 md:p-8 flex items-center justify-between gap-4"
                             >
-                                <span className={`text-lg md:text-xl font-medium transition-colors ${openIndex === i ? 'text-[#00FFB2]' : 'text-text-dim'}`}>
+                                <span className={`text-lg md:text-xl font-medium transition-colors ${openIndex === i ? 'text-accent-primary' : 'text-text-dim'}`}>
                                     {faq.question}
                                 </span>
-                                <div className={`shrink-0 w-8 h-8 rounded-full border border-glass-border flex items-center justify-center transition-transform duration-300 ${openIndex === i ? 'rotate-180 bg-[#00FFB2]/10 border-[#00FFB2]/20' : ''}`}>
-                                    <ArrowRight className={`w-4 h-4 transition-colors ${openIndex === i ? 'text-[#00FFB2] rotate-90' : 'text-text-muted'}`} />
+                                <div className={`shrink-0 w-8 h-8 rounded-full border border-glass-border flex items-center justify-center transition-transform duration-300 ${openIndex === i ? 'rotate-180 bg-accent-primary/10 border-accent-primary/20' : ''}`}>
+                                    <ArrowRight className={`w-4 h-4 transition-colors ${openIndex === i ? 'text-accent-primary rotate-90' : 'text-text-muted'}`} />
                                 </div>
                             </button>
                             

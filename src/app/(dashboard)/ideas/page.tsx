@@ -120,11 +120,11 @@ export default function IdeasPage() {
             </button>
           )}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
               <Lightbulb className="w-8 h-8 text-amber-500" />
               {selectedProject ? `Idées - ${selectedProject.name}` : 'Boîte à Idées'}
             </h1>
-            <p className="text-gray-500 mt-1 uppercase text-[10px] font-bold tracking-widest">
+            <p className="text-text-dim mt-1 uppercase text-[10px] font-bold tracking-widest">
               {filteredIdeas.length} {filteredIdeas.length > 1 ? 'idées partagées' : 'idée partagée'}
             </p>
           </div>
@@ -145,13 +145,13 @@ export default function IdeasPage() {
       <div className="flex flex-col gap-4">
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher une idée, un concept..."
-            className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/40 transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-glass-bg border border-glass-border rounded-2xl text-text-main placeholder-text-muted focus:outline-none focus:border-amber-500/40 transition-all"
           />
         </div>
 
@@ -165,7 +165,7 @@ export default function IdeasPage() {
                 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all
                 ${activeTab === tab.id 
                   ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' 
-                  : 'bg-white/[0.03] text-gray-400 hover:bg-white/[0.08] hover:text-white'}
+                  : 'bg-glass-bg text-text-muted border border-glass-border hover:bg-glass-hover hover:text-text-main'}
               `}
             >
               {tab.label}
@@ -186,9 +186,9 @@ export default function IdeasPage() {
       </div>
 
       {!isLoading && filteredIdeas.length === 0 && (
-        <div className="text-center py-32 bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
-          <Lightbulb className="w-16 h-16 text-gray-600 mx-auto mb-6 opacity-20" />
-          <p className="text-gray-500 font-medium tracking-wide">Aucune idée trouvée pour ce filtre</p>
+        <div className="text-center py-32 bg-glass-bg rounded-3xl border border-dashed border-glass-border">
+          <Lightbulb className="w-16 h-16 text-text-muted mx-auto mb-6 opacity-20" />
+          <p className="text-text-dim font-medium tracking-wide">Aucune idée trouvée pour ce filtre</p>
           <button 
             onClick={() => setIdeaModalOpen(true)}
             className="mt-4 text-amber-500 hover:text-amber-400 text-sm font-bold uppercase tracking-widest transition-colors"

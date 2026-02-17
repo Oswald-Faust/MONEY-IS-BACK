@@ -106,11 +106,11 @@ export default function ObjectivesPage() {
             </button>
           )}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
               {!projectId && <Target className="w-8 h-8 text-indigo-400" />}
               {selectedProject ? `Objectifs - ${selectedProject.name}` : 'Objectifs Globaux'}
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-text-dim mt-1">
               {filteredObjectives.length} objectifs {selectedProject ? 'pour ce projet' : 'au total'}
             </p>
           </div>
@@ -141,22 +141,22 @@ export default function ObjectivesPage() {
         className="flex flex-col md:flex-row gap-4"
       >
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher un objectif..."
-            className="w-full pl-12 pr-4 py-3 text-sm bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+            className="w-full pl-12 pr-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-xl text-text-main placeholder-text-muted focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 transition-all duration-200"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-gray-500" />
+          <Filter className="w-5 h-5 text-text-muted" />
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value as 'all' | 'high' | 'medium' | 'low')}
-            className="px-4 py-3 text-sm bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-all duration-200"
+            className="px-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-xl text-text-main focus:border-accent-primary focus:outline-none transition-all duration-200"
           >
             <option value="all">Toutes les priorités</option>
             <option value="high">Haute</option>
@@ -188,9 +188,9 @@ export default function ObjectivesPage() {
           <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
         </div>
       ) : filteredObjectives.length === 0 ? (
-        <div className="text-center py-20 bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
-          <Target className="w-12 h-12 text-gray-600 mx-auto mb-4 opacity-20" />
-          <p className="text-gray-500">Aucun objectif trouvé</p>
+        <div className="text-center py-20 bg-glass-bg rounded-3xl border border-dashed border-glass-border">
+          <Target className="w-12 h-12 text-text-muted mx-auto mb-4 opacity-20" />
+          <p className="text-text-dim">Aucun objectif trouvé</p>
         </div>
       ) : null}
 

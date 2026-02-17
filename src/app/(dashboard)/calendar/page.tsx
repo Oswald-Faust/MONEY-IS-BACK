@@ -120,24 +120,24 @@ export default function CalendarPage() {
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
             <CalendarIcon className="w-8 h-8 text-indigo-400" />
             Calendrier Global
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-text-dim mt-1">
             Vue d&apos;ensemble de vos tâches et objectifs
           </p>
         </div>
         
         {/* Legend */}
-        <div className="flex items-center gap-4 text-sm bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+        <div className="flex items-center gap-4 text-sm bg-glass-bg px-4 py-2 rounded-xl border border-glass-border">
             <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-gray-300">Tâches</span>
+                <span className="text-text-dim">Tâches</span>
             </div>
             <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full border border-red-500" />
-                <span className="text-gray-300">Objectifs</span>
+                <span className="text-text-dim">Objectifs</span>
             </div>
         </div>
       </motion.div>
@@ -182,7 +182,7 @@ export default function CalendarPage() {
               {daysOfWeek.map((dayName) => (
                 <div
                   key={dayName}
-                  className="py-3 text-center text-sm font-medium text-gray-500"
+                  className="py-3 text-center text-sm font-medium text-text-muted"
                 >
                   {dayName}
                 </div>
@@ -213,7 +213,7 @@ export default function CalendarPage() {
                   >
                     <span className={`
                       text-sm font-medium mb-2
-                      ${!isCurrentMonth ? 'text-gray-600' : isSelected ? 'text-indigo-400' : isToday(dayDate) ? 'text-indigo-400' : 'text-gray-300'}
+                      ${!isCurrentMonth ? 'text-text-muted opacity-50' : isSelected ? 'text-accent-primary' : isToday(dayDate) ? 'text-accent-primary' : 'text-text-dim'}
                     `}>
                       {format(dayDate, 'd')}
                     </span>
@@ -258,7 +258,7 @@ export default function CalendarPage() {
           className="lg:col-span-1"
         >
           <div className="glass-card p-5 sticky top-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+            <h3 className="text-lg font-semibold text-text-main mb-4">
               {selectedDate
                 ? format(selectedDate, 'EEEE d MMMM', { locale: fr })
                 : "Sélectionnez une date"}
@@ -309,8 +309,8 @@ export default function CalendarPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <CalendarIcon className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">
+                    <CalendarIcon className="w-10 h-10 text-text-muted mx-auto mb-3 opacity-20" />
+                    <p className="text-text-dim text-sm">
                       Aucun événement prévu
                     </p>
                   </div>
@@ -320,7 +320,7 @@ export default function CalendarPage() {
 
             {!selectedDate && (
               <div className="text-center py-8">
-                <p className="text-gray-500 text-sm">
+                <p className="text-text-dim text-sm">
                   Cliquez sur une date pour voir les détails
                 </p>
               </div>

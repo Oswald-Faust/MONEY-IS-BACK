@@ -120,11 +120,11 @@ export default function TasksPage() {
             </button>
           )}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
               {!projectId && <CheckCircle className="w-8 h-8 text-indigo-400" />}
               {selectedProject ? `To Do - ${selectedProject.name}` : 'To Do Global'}
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-text-dim mt-1">
               {filteredTasks.length} tâches {selectedProject ? 'pour ce projet' : 'au total'}
             </p>
           </div>
@@ -150,23 +150,23 @@ export default function TasksPage() {
       >
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher une tâche..."
-            className="w-full pl-12 pr-4 py-3 text-sm bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+            className="w-full pl-12 pr-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-xl text-text-main placeholder-text-muted focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 transition-all duration-200"
           />
         </div>
 
         {/* Priority Filter */}
         <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-gray-500" />
+          <Filter className="w-5 h-5 text-text-muted" />
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value as TaskPriority | 'all')}
-            className="px-4 py-3 text-sm bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white focus:border-indigo-500 focus:outline-none transition-all duration-200"
+            className="px-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-xl text-text-main focus:border-accent-primary focus:outline-none transition-all duration-200"
           >
             <option value="all">Toutes les priorités</option>
             <option value="important">Important</option>
@@ -176,12 +176,12 @@ export default function TasksPage() {
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 p-1 bg-[rgba(255,255,255,0.03)] rounded-xl border border-[rgba(255,255,255,0.08)]">
+        <div className="flex items-center gap-1 p-1 bg-glass-bg rounded-xl border border-glass-border">
           <button
             onClick={() => setViewMode('kanban')}
             className={`
               p-2 rounded-lg transition-all duration-200
-              ${viewMode === 'kanban' ? 'bg-indigo-500/20 text-indigo-400' : 'text-gray-500 hover:text-white'}
+              ${viewMode === 'kanban' ? 'bg-accent-primary/20 text-accent-primary' : 'text-text-muted hover:text-text-main'}
             `}
           >
             <Grid3X3 className="w-5 h-5" />
@@ -190,7 +190,7 @@ export default function TasksPage() {
             onClick={() => setViewMode('list')}
             className={`
               p-2 rounded-lg transition-all duration-200
-              ${viewMode === 'list' ? 'bg-indigo-500/20 text-indigo-400' : 'text-gray-500 hover:text-white'}
+              ${viewMode === 'list' ? 'bg-accent-primary/20 text-accent-primary' : 'text-text-muted hover:text-text-main'}
             `}
           >
             <List className="w-5 h-5" />
@@ -208,10 +208,10 @@ export default function TasksPage() {
         >
           {/* Important Column */}
           <div className="glass-card p-4">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[rgba(255,255,255,0.06)]">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-glass-border">
               <div className="w-3 h-3 rounded-full bg-red-500" />
-              <h3 className="text-sm font-semibold text-white">Important</h3>
-              <span className="ml-auto text-xs text-gray-500 bg-[rgba(255,255,255,0.05)] px-2 py-0.5 rounded-full">
+              <h3 className="text-sm font-semibold text-text-main">Important</h3>
+              <span className="ml-auto text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full">
                 {importantTasks.length}
               </span>
             </div>
@@ -222,17 +222,17 @@ export default function TasksPage() {
                 ))}
               </AnimatePresence>
               {importantTasks.length === 0 && (
-                <p className="text-center text-gray-500 text-sm py-8">Aucune tâche importante</p>
+                <p className="text-center text-text-muted text-sm py-8">Aucune tâche importante</p>
               )}
             </div>
           </div>
 
           {/* Less Important Column */}
           <div className="glass-card p-4">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[rgba(255,255,255,0.06)]">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-glass-border">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <h3 className="text-sm font-semibold text-white">Moins important</h3>
-              <span className="ml-auto text-xs text-gray-500 bg-[rgba(255,255,255,0.05)] px-2 py-0.5 rounded-full">
+              <h3 className="text-sm font-semibold text-text-main">Moins important</h3>
+              <span className="ml-auto text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full">
                 {lessImportantTasks.length}
               </span>
             </div>
@@ -243,17 +243,17 @@ export default function TasksPage() {
                 ))}
               </AnimatePresence>
               {lessImportantTasks.length === 0 && (
-                <p className="text-center text-gray-500 text-sm py-8">Aucune tâche</p>
+                <p className="text-center text-text-muted text-sm py-8">Aucune tâche</p>
               )}
             </div>
           </div>
 
           {/* Waiting Column */}
           <div className="glass-card p-4">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[rgba(255,255,255,0.06)]">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-glass-border">
               <div className="w-3 h-3 rounded-full bg-gray-400" />
-              <h3 className="text-sm font-semibold text-white">En attente</h3>
-              <span className="ml-auto text-xs text-gray-500 bg-[rgba(255,255,255,0.05)] px-2 py-0.5 rounded-full">
+              <h3 className="text-sm font-semibold text-text-main">En attente</h3>
+              <span className="ml-auto text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full">
                 {waitingTasks.length}
               </span>
             </div>
@@ -264,7 +264,7 @@ export default function TasksPage() {
                 ))}
               </AnimatePresence>
               {waitingTasks.length === 0 && (
-                <p className="text-center text-gray-500 text-sm py-8">Aucune tâche en attente</p>
+                <p className="text-center text-text-muted text-sm py-8">Aucune tâche en attente</p>
               )}
             </div>
           </div>
