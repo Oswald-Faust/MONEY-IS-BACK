@@ -11,6 +11,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 
+import { ThemeToggle } from '@/components/ThemeToggle';
+
 export const LandingNavbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -58,11 +60,11 @@ export const LandingNavbar = () => {
                         stiffness: 300, 
                         damping: 30,
                     }}
-                    className="bg-[#0A0A0F]/80 backdrop-blur-xl border border-white/10 flex items-center justify-between shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
+                    className="bg-bg-secondary/80 backdrop-blur-xl border border-glass-border flex items-center justify-between shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
                 >
                     <Link href="/" className="flex items-center gap-2 group shrink-0">
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 group-hover:border-[#00FFB2]/50 transition-colors">
-                            <span className="text-white font-bold text-xs">M</span>
+                        <div className="w-8 h-8 rounded-full bg-accent-primary/10 flex items-center justify-center border border-glass-border group-hover:border-[#00FFB2]/50 transition-colors">
+                            <span className="text-text-main font-bold text-xs font-mono">M</span>
                         </div>
                         <AnimatePresence initial={false}>
                             {!scrolled && (
@@ -71,7 +73,7 @@ export const LandingNavbar = () => {
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -10 }}
                                     transition={{ duration: 0.2 }}
-                                    className="text-lg font-bold text-white tracking-tight hidden sm:block whitespace-nowrap overflow-hidden"
+                                    className="text-lg font-bold text-text-main tracking-tight hidden sm:block whitespace-nowrap overflow-hidden"
                                 >
                                     MONEY IS BACK
                                 </motion.span>
@@ -80,21 +82,23 @@ export const LandingNavbar = () => {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-400 mx-4">
-                        <Link href="/#features" className="hover:text-white transition-colors">Produit</Link>
-                        <Link href="/about" className="hover:text-white transition-colors">À propos</Link>
-                        <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-                        <Link href="/#pricing" className="hover:text-white transition-colors">Tarifs</Link>
-                        <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+                    <div className="hidden md:flex items-center gap-6 text-sm font-medium text-text-dim mx-4">
+                        <Link href="/#features" className="hover:text-text-main transition-colors">Produit</Link>
+                        <Link href="/about" className="hover:text-text-main transition-colors">À propos</Link>
+                        <Link href="/blog" className="hover:text-text-main transition-colors">Blog</Link>
+                        <Link href="/#pricing" className="hover:text-text-main transition-colors">Tarifs</Link>
+                        <Link href="/contact" className="hover:text-text-main transition-colors">Contact</Link>
                     </div>
 
                     {/* Auth / Mobile Toggle */}
                     <div className="flex items-center gap-3 shrink-0">
+                        <ThemeToggle />
+                        
                         {isAuthenticated ? (
                              <>
                                 <Link 
                                     href="/dashboard"
-                                    className="hidden md:flex px-4 py-2 rounded-full bg-white/5 text-white text-xs font-bold hover:bg-white/10 border border-white/10 transition-all items-center gap-2"
+                                    className="hidden md:flex px-4 py-2 rounded-full bg-glass-bg text-text-main text-xs font-bold hover:bg-glass-hover border border-glass-border transition-all items-center gap-2"
                                 >   
                                     <Layout className="w-3 h-3" />
                                     <AnimatePresence initial={false}>
@@ -117,21 +121,21 @@ export const LandingNavbar = () => {
                              </>
                         ) : (
                             <div 
-                                className={`hidden md:flex items-center gap-3 ${!scrolled ? "pl-4 border-l border-white/10" : ""}`}
+                                className={`hidden md:flex items-center gap-3 ${!scrolled ? "pl-4 border-l border-glass-border" : ""}`}
                             >
-                                <Link href="/login" className="text-white text-sm font-medium hover:text-[#00FFB2] transition-colors">
+                                <Link href="/login" className="text-text-main text-sm font-medium hover:text-[#00FFB2] transition-colors">
                                     Connexion
                                 </Link>
                                 <Link 
                                     href="/#pricing" 
-                                    className="bg-[#00FFB2] text-black px-5 py-2 rounded-full text-xs font-bold hover:bg-[#00e6a0] transition-colors hover:shadow-[0_0_20px_rgba(0,255,178,0.3)]"
+                                    className="bg-accent-primary text-white px-5 py-2 rounded-full text-xs font-bold hover:opacity-90 transition-all hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
                                 >
                                     Commencer
                                 </Link>
                             </div>
                         )}
 
-                        <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                        <button className="md:hidden text-text-main" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                         </button>
                     </div>

@@ -15,20 +15,59 @@
   
   --color-input-bg: var(--input-bg);
   --color-input-border: var(--input-border);
+  --color-bg-deep: var(--bg-deep);
 }
 /* ========================================
    PROJECT HUB - Clean Premium Dark Theme
    ======================================== */
 :root {
+  /* --- LIGHT MODE --- */
+  /* Core Colors */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-deep: #f1f5f9;
+  
+  /* Glass Effects - Light */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-hover: rgba(0, 0, 0, 0.02);
+  
+  /* Text Colors */
+  --text-main: #0f172a;
+  --text-dim: #475569;
+  --text-muted: #94a3b8;
+  
+  /* Component Specific */
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --scrollbar-thumb: #cbd5e1;
+
+  /* Shared (don't change between modes) */
+  --sidebar-w: 280px;
+  --sidebar-coll: 80px;
+  --radius-xl: 16px;
+  --radius-lg: 12px;
+  --accent-primary: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --color-neon-cyan: #00FFB2;
+}
+
+.dark {
+  /* --- DARK MODE (Current design) --- */
   /* Core Colors */
   --bg-primary: #0a0a0f;
   --bg-secondary: #0f0f15;
   --bg-tertiary: #14141d;
   --bg-card: #14141d;
+  
   /* Glass Effects */
   --glass-bg: rgba(255, 255, 255, 0.01);
   --glass-border: rgba(255, 255, 255, 0.015);
   --glass-hover: rgba(255, 255, 255, 0.02);
+  
   /* Text Colors */
   --text-main: #ffffff;
   --text-dim: #94a3b8;
@@ -38,19 +77,11 @@
   --input-bg: #0d0d14;
   --input-border: rgba(255, 255, 255, 0.02);
   --scrollbar-thumb: #1a1a24;
-  /* Spacing & Radii (Shared) */
-  --sidebar-w: 280px;
-  --sidebar-coll: 80px;
-  --radius-xl: 16px;
-  --radius-lg: 12px;
-  /* Accent Colors (Shared) */
-  --accent-primary: #6366f1;
-  --accent-secondary: #8b5cf6;
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  
   /* Cryptix Theme Colors */
-  --color-neon-cyan: #00FFB2;
-  --bg-deep: #050505; /* Deep black/purple for hero */
+  --bg-deep: #050505;
 }
+
 /* ========================================
    Base Styles
    ======================================== */

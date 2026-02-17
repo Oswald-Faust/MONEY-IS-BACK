@@ -33,6 +33,8 @@ const adminNavItems = [
   { icon: Settings, label: 'Configuration', href: '/admin/settings' },
 ];
 
+import { ThemeToggle } from '@/components/ThemeToggle';
+
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { sidebarCollapsed, toggleSidebar, isMobileMenuOpen, setMobileMenuOpen } = useAppStore();
@@ -72,8 +74,8 @@ export default function AdminSidebar() {
           : { x: 0, width: sidebarCollapsed ? 80 : 280 }
         }
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className={`fixed left-0 top-0 h-screen bg-[#0f0f13] flex flex-col z-[70] ${
-          isMobile ? 'shadow-2xl' : 'border-r border-red-500/20'
+        className={`fixed left-0 top-0 h-screen bg-bg-secondary flex flex-col z-[70] ${
+          isMobile ? 'shadow-2xl' : 'border-r border-glass-border'
         }`}
       >
         {/* Header */}
@@ -90,7 +92,7 @@ export default function AdminSidebar() {
                   <ShieldCheck className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-main text-sm tracking-tight">
+                  <h1 className="font-bold text-text-main text-sm tracking-tight">
                     ADMIN PANEL
                   </h1>
                   <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest">Creator Mode</p>
@@ -100,9 +102,10 @@ export default function AdminSidebar() {
           </AnimatePresence>
           
           <div className="flex items-center gap-1">
+            {(!sidebarCollapsed || isMobile) && <ThemeToggle />}
             <button
               onClick={isMobile ? () => setMobileMenuOpen(false) : toggleSidebar}
-              className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
+              className="p-2 rounded-lg hover:bg-glass-hover text-text-dim hover:text-text-main transition-colors"
             >
               {isMobile ? (
                 <X className="w-4 h-4" />
@@ -121,7 +124,7 @@ export default function AdminSidebar() {
               <input
                 type="text"
                 placeholder="Rechercher..."
-                className="w-full pl-11 pr-4 py-3 text-sm bg-white/5 border border-white/10 rounded-2xl text-main placeholder-dim focus:bg-glass-hover focus:border-red-500/40 focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
+                className="w-full pl-11 pr-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-2xl text-text-main placeholder-text-dim focus:bg-glass-hover focus:border-red-500/40 focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
               />
             </div>
           </div>
@@ -142,7 +145,7 @@ export default function AdminSidebar() {
                       transition-all duration-200 cursor-pointer
                       ${isActive 
                         ? 'bg-red-500/10 text-red-400 border border-red-500/20 shadow-sm' 
-                        : 'text-dim hover:bg-glass-hover hover:text-main'}
+                        : 'text-text-dim hover:bg-glass-hover hover:text-text-main'}
                     `}
                   >
                     <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-red-400' : ''}`} />
@@ -171,21 +174,21 @@ export default function AdminSidebar() {
                 Performance Directe
               </span>
               <div className="space-y-4">
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="p-3 rounded-2xl bg-glass-bg border border-glass-border">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-dim">Revenus</span>
+                    <span className="text-xs text-text-dim">Revenus</span>
                     <span className="text-xs text-green-400 font-bold">+12%</span>
                   </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-glass-bg rounded-full overflow-hidden">
                     <div className="h-full bg-red-500 w-[65%]" />
                   </div>
                 </div>
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="p-3 rounded-2xl bg-glass-bg border border-glass-border">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-dim">Serveur</span>
+                    <span className="text-xs text-text-dim">Serveur</span>
                     <span className="text-xs text-blue-400 font-bold">Stable</span>
                   </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-glass-bg rounded-full overflow-hidden">
                     <div className="h-full bg-blue-500 w-[92%]" />
                   </div>
                 </div>
@@ -210,7 +213,7 @@ export default function AdminSidebar() {
         </div>
 
         {/* Footer - Admin */}
-        <div className="p-3 border-t border-white/5">
+        <div className="p-3 border-t border-glass-border/50">
           <div className={`
             flex items-center gap-3 px-3 py-2 rounded-xl
             hover:bg-glass-hover transition-all duration-200 group
@@ -236,7 +239,7 @@ export default function AdminSidebar() {
                   exit={{ opacity: 0 }}
                   className="flex-1 min-w-0"
                 >
-                  <p className="text-sm font-medium text-main truncate group-hover:text-red-400 transition-colors">
+                  <p className="text-sm font-medium text-text-main truncate group-hover:text-red-400 transition-colors">
                     {user ? `${user.firstName} ${user.lastName}` : 'Admin'}
                   </p>
                   <p className="text-[10px] text-red-500 font-bold uppercase">Super Admin</p>
@@ -247,7 +250,7 @@ export default function AdminSidebar() {
             {(!sidebarCollapsed || isMobile) && (
               <button
                 onClick={logout}
-                className="p-1.5 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-red-500/10 text-text-dim hover:text-red-400 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
               </button>

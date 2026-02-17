@@ -86,11 +86,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-bg-primary">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-[#0a0a0f]">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px]" />
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px]" />
       </div>
 
       <motion.div
@@ -104,12 +104,12 @@ export default function RegisterPage() {
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4 shadow-lg shadow-indigo-500/20"
           >
             <span className="text-2xl font-bold text-white">MB</span>
           </motion.div>
-          <h1 className="text-2xl font-bold text-white mb-2">Créer un compte</h1>
-          <p className="text-gray-400">Rejoignez MONEY IS BACK</p>
+          <h1 className="text-2xl font-bold text-text-main mb-2">Créer un compte</h1>
+          <p className="text-text-dim">Rejoignez MONEY IS BACK</p>
         </div>
 
         {/* Register Form */}
@@ -123,11 +123,11 @@ export default function RegisterPage() {
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-text-dim mb-2">
                   Prénom
                 </label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                   <input
                     type="text"
                     name="firstName"
@@ -137,8 +137,8 @@ export default function RegisterPage() {
                     required
                     className="
                       w-full pl-12 pr-4 py-3 text-sm
-                      bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                      rounded-xl text-white placeholder-gray-500
+                      bg-glass-bg border border-glass-border
+                      rounded-xl text-text-main placeholder-text-muted
                       focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                       transition-all duration-200
                     "
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-text-dim mb-2">
                   Nom
                 </label>
                 <input
@@ -158,8 +158,8 @@ export default function RegisterPage() {
                   required
                   className="
                     w-full px-4 py-3 text-sm
-                    bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                    rounded-xl text-white placeholder-gray-500
+                    bg-glass-bg border border-glass-border
+                    rounded-xl text-text-main placeholder-text-muted
                     focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                     transition-all duration-200
                   "
@@ -170,11 +170,11 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-dim mb-2">
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type="email"
                   name="email"
@@ -184,8 +184,8 @@ export default function RegisterPage() {
                   required
                   className="
                     w-full pl-12 pr-4 py-3 text-sm
-                    bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                    rounded-xl text-white placeholder-gray-500
+                    bg-glass-bg border border-glass-border
+                    rounded-xl text-text-main placeholder-text-muted
                     focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                     transition-all duration-200
                   "
@@ -195,11 +195,11 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-dim mb-2">
                 Mot de passe
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -210,8 +210,8 @@ export default function RegisterPage() {
                   minLength={8}
                   className="
                     w-full pl-12 pr-12 py-3 text-sm
-                    bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                    rounded-xl text-white placeholder-gray-500
+                    bg-glass-bg border border-glass-border
+                    rounded-xl text-text-main placeholder-text-muted
                     focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                     transition-all duration-200
                   "
@@ -219,7 +219,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -228,11 +228,11 @@ export default function RegisterPage() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-dim mb-2">
                 Confirmer le mot de passe
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="confirmPassword"
@@ -242,8 +242,8 @@ export default function RegisterPage() {
                   required
                   className="
                     w-full pl-12 pr-4 py-3 text-sm
-                    bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
-                    rounded-xl text-white placeholder-gray-500
+                    bg-glass-bg border border-glass-border
+                    rounded-xl text-text-main placeholder-text-muted
                     focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
                     transition-all duration-200
                   "
@@ -282,15 +282,15 @@ export default function RegisterPage() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[rgba(255,255,255,0.08)]"></div>
+              <div className="w-full border-t border-glass-border"></div>
             </div>
             <div className="relative flex justify-center">
-              <span className="px-4 text-xs text-gray-500 bg-[#12121a]">ou</span>
+              <span className="px-4 text-xs text-text-muted bg-bg-secondary">ou</span>
             </div>
           </div>
 
           {/* Login Link */}
-          <p className="text-center text-sm text-gray-400">
+          <p className="text-center text-sm text-text-dim">
             Déjà un compte ?{' '}
             <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
               Se connecter
@@ -300,4 +300,5 @@ export default function RegisterPage() {
       </motion.div>
     </div>
   );
+
 }
