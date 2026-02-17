@@ -2,19 +2,20 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  X, 
-  FolderKanban, 
-  CheckSquare, 
-  Target, 
-  Lightbulb, 
-  Command, 
+import {
+  Search,
+  X,
+  FolderKanban,
+  CheckSquare,
+  Target,
+  Lightbulb,
+  Command,
   ChevronRight,
   Loader2
 } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 
 interface SearchResult {
   type: 'project' | 'task' | 'objective' | 'idea';
@@ -31,6 +32,7 @@ interface SearchResult {
 export default function GlobalSearch() {
   const { isSearchModalOpen, setSearchModalOpen, currentWorkspace } = useAppStore();
   const { token } = useAuthStore();
+  const { t } = useTranslation();
   const router = useRouter();
   
   const [query, setQuery] = useState('');
@@ -169,7 +171,7 @@ export default function GlobalSearch() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Rechercher des projets, tâches, objectifs..."
+                  placeholder={t.globalSearch.placeholder}
                   className="w-full bg-transparent border-none focus:outline-none text-xl text-white placeholder-gray-500"
                 />
                 <div className="flex items-center gap-2">
@@ -197,12 +199,12 @@ export default function GlobalSearch() {
                     <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <Search className="w-8 h-8 text-indigo-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-white mb-1">Recherche Globale</h3>
+                    <h3 className="text-lg font-medium text-white mb-1">{t.globalSearch.title}</h3>
                     <p className="text-gray-400 max-w-xs mx-auto">
-                      Tapez au moins 2 caractères pour rechercher dans tout votre espace de travail.
+                      {t.globalSearch.description}
                     </p>
                     <div className="mt-8 flex flex-wrap justify-center gap-2">
-                       {['Projets', 'Tâches', 'Objectifs', 'Idées'].map(tag => (
+                       {[t.globalSearch.tags.projects, t.globalSearch.tags.tasks, t.globalSearch.tags.objectives, t.globalSearch.tags.ideas].map(tag => (
                          <span key={tag} className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-xs text-gray-500">
                            {tag}
                          </span>
@@ -257,7 +259,7 @@ export default function GlobalSearch() {
                             animate={{ opacity: 1, x: 0 }}
                             className="text-indigo-400 flex items-center gap-1 text-xs font-medium"
                           >
-                            Ouvrir <ChevronRight className="w-4 h-4" />
+                            {t.globalSearch.open} <ChevronRight className="w-4 h-4" />
                           </motion.div>
                         )}
                       </motion.div>
@@ -268,9 +270,9 @@ export default function GlobalSearch() {
                     <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <Search className="w-8 h-8 text-red-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-white mb-1">Aucun résultat</h3>
+                    <h3 className="text-lg font-medium text-white mb-1">{t.globalSearch.noResults}</h3>
                     <p className="text-gray-400">
-                      Nous n&apos;avons rien trouvé pour &quot;{query}&quot;
+                      {t.globalSearch.noResultsFor} &quot;{query}&quot;
                     </p>
                   </div>
                 )}
@@ -281,15 +283,15 @@ export default function GlobalSearch() {
                 <div className="flex gap-4">
                   <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
                     <span className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-gray-400">↑↓</span>
-                    Naviguer
+                    {t.globalSearch.shortcuts.navigate}
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
                     <span className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-gray-400">⏎</span>
-                    Sélectionner
+                    {t.globalSearch.shortcuts.select}
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
                     <span className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-gray-400">ESC</span>
-                    Fermer
+                    {t.globalSearch.shortcuts.close}
                   </div>
                 </div>
                 <div className="text-[10px] text-indigo-400/50 font-bold uppercase tracking-[0.2em]">

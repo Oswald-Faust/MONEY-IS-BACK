@@ -283,6 +283,259 @@ const en: TranslationType = {
       empty: 'Nobody in your team for now.',
     },
   },
+
+  // --- Projects Page ---
+  projectsPage: {
+    title: 'My Projects',
+    count: 'projects',
+    newProject: 'New project',
+    searchPlaceholder: 'Search for a project...',
+    filters: {
+      all: 'All',
+      active: 'Active',
+      paused: 'Paused',
+      archived: 'Archived',
+    },
+    loading: 'Loading projects...',
+    sections: {
+      activeProjects: 'Active projects',
+      pausedProjects: 'Paused',
+      archivedProjects: 'Archived',
+    },
+    empty: {
+      title: 'No project found',
+      tryAnotherSearch: 'Try another search',
+      createFirst: 'Create your first project to get started',
+      createButton: 'Create a project',
+    },
+    confirmDelete: 'Are you sure you want to delete the project',
+    toasts: {
+      deleted: 'Project deleted!',
+      deleteError: 'Error during deletion',
+      connectionError: 'Connection error',
+      loadError: 'Error loading projects',
+      serverError: 'Server connection error',
+    },
+  },
+
+  // --- Tasks Page (Global To Do) ---
+  tasksPage: {
+    title: 'Global To Do',
+    titleWithProject: 'To Do',
+    count: 'tasks',
+    total: 'total',
+    forThisProject: 'for this project',
+    newTask: 'New task',
+    searchPlaceholder: 'Search for a task...',
+    filters: {
+      allPriorities: 'All priorities',
+      important: 'Important',
+      lessImportant: 'Less important',
+      waiting: 'Waiting',
+    },
+    columns: {
+      important: 'Important',
+      lessImportant: 'Less important',
+      waiting: 'Waiting',
+    },
+    empty: {
+      noImportantTasks: 'No important task',
+      noTasks: 'No task',
+      noWaitingTasks: 'No task waiting',
+      noTasksFound: 'No task found',
+    },
+    toasts: {
+      completed: 'Task completed!',
+      restored: 'Task restored',
+      updateError: 'Error during update',
+      loadError: 'Error loading tasks',
+    },
+  },
+
+  // --- Messages Page ---
+  messagesPage: {
+    title: 'Internal Messaging',
+    subtitle: 'Select a conversation or start a new one to collaborate.',
+    newDiscussion: 'New discussion',
+    newGroup: 'New group',
+    sendError: 'Error sending message',
+    leftGroup: 'You left the group',
+    leaveGroupError: 'Error leaving group',
+    loadUserError: 'Unable to load user',
+  },
+
+  // --- Global Search ---
+  globalSearch: {
+    placeholder: 'Search for projects, tasks, objectives...',
+    title: 'Global Search',
+    description: 'Type at least 2 characters to search across your entire workspace.',
+    tags: {
+      projects: 'Projects',
+      tasks: 'Tasks',
+      objectives: 'Objectives',
+      ideas: 'Ideas',
+    },
+    open: 'Open',
+    noResults: 'No results',
+    noResultsFor: 'We found nothing for',
+    shortcuts: {
+      navigate: 'Navigate',
+      select: 'Select',
+      close: 'Close',
+    },
+  },
+
+  // --- Modals ---
+  modals: {
+    // Project Modal
+    project: {
+      titleCreate: 'New project',
+      titleEdit: 'Edit project',
+      nameLabel: 'Project name *',
+      namePlaceholder: 'Ex: FINEA, BUISPACE...',
+      descriptionLabel: 'Description',
+      descriptionPlaceholder: 'Describe your project...',
+      colorLabel: 'Project color',
+      colors: {
+        green: 'Green',
+        orange: 'Orange',
+        red: 'Red',
+        blue: 'Blue',
+        purple: 'Purple',
+        pink: 'Pink',
+        cyan: 'Cyan',
+        yellow: 'Yellow',
+        indigo: 'Indigo',
+        gray: 'Gray',
+      },
+      cancel: 'Cancel',
+      create: 'Create project',
+      save: 'Save',
+      toasts: {
+        nameRequired: 'Project name is required',
+        updated: 'Project updated!',
+        updateError: 'Error updating project',
+        mustBeConnected: 'You must be logged in',
+        workspaceNotFound: 'Workspace not found',
+        created: 'Project created successfully!',
+        createError: 'Error creating project',
+      },
+    },
+
+    // Task Modal
+    task: {
+      titleCreate: 'New task',
+      titleEdit: 'Edit task',
+      taskTitleLabel: 'Task title *',
+      taskTitlePlaceholder: 'Ex: Create landing page...',
+      descriptionLabel: 'Description',
+      descriptionPlaceholder: 'Describe the task in detail...',
+      projectLabel: 'Project *',
+      priorityLabel: 'Priority',
+      priorities: {
+        important: 'Important',
+        lessImportant: 'Less important',
+        waiting: 'Waiting',
+      },
+      dueDateLabel: 'Due date',
+      tagsLabel: 'Tags (comma separated)',
+      tagsPlaceholder: 'Ex: urgent, design, frontend',
+      cancel: 'Cancel',
+      create: 'Create task',
+      save: 'Save',
+      toasts: {
+        titleRequired: 'Task title is required',
+        projectRequired: 'Please select a project',
+        mustBeConnected: 'You must be logged in',
+        created: 'Task created successfully!',
+        updated: 'Task updated!',
+        createError: 'Error creating task',
+        updateError: 'Error updating task',
+      },
+    },
+
+    // Chat Modals
+    chat: {
+      newDiscussion: 'New discussion',
+      searchPlaceholder: 'Search for a user...',
+      noUserFound: 'No user found for',
+      noUsersAvailable: 'No other users available.',
+      close: 'Close',
+    },
+
+    // Group Modal
+    group: {
+      title: 'New group',
+      nameStep: 'Group name',
+      searchPlaceholder: 'Search for members...',
+      membersSelected: 'member(s) selected',
+      noUserFound: 'No user found',
+      next: 'Next',
+      groupNameLabel: 'Group name',
+      groupNamePlaceholder: 'Ex: Marketing Team',
+      membersCount: 'members (including you)',
+      create: 'Create group',
+    },
+
+    // Objective Modal
+    objective: {
+      titleCreate: 'New objective',
+      titleEdit: 'Edit objective',
+      objectiveTitleLabel: 'Objective title *',
+      descriptionLabel: 'Description',
+      projectLabel: 'Project *',
+      priorityLabel: 'Priority',
+      priorities: {
+        low: 'Low',
+        medium: 'Medium',
+        high: 'High',
+      },
+      checkpointsLabel: 'Checkpoints',
+      addCheckpoint: 'Add checkpoint',
+      targetDateLabel: 'Target date',
+      cancel: 'Cancel',
+      create: 'Create objective',
+      save: 'Save',
+    },
+
+    // Idea Modal
+    idea: {
+      titleCreate: 'New idea',
+      titleEdit: 'Edit idea',
+      ideaTitleLabel: 'Idea title *',
+      contentLabel: 'Content',
+      projectLabel: 'Project',
+      statusLabel: 'Status',
+      statuses: {
+        raw: 'Raw',
+        standby: 'Standby',
+        inProgress: 'In progress',
+        implemented: 'Implemented',
+        archived: 'Archived',
+      },
+      tagsLabel: 'Tags',
+      addTag: 'Add tag',
+      attachmentsLabel: 'Attachments',
+      addAttachment: 'Add attachment',
+      cancel: 'Cancel',
+      create: 'Create idea',
+      save: 'Save',
+      toasts: {
+        titleRequired: 'Title is required',
+        mustBeConnected: 'You must be logged in',
+      },
+    },
+
+    // Common
+    common: {
+      close: 'Close',
+      cancel: 'Cancel',
+      save: 'Save',
+      create: 'Create',
+      delete: 'Delete',
+      loading: 'Loading...',
+    },
+  },
 } as const;
 
 export default en;

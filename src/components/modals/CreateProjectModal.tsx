@@ -4,20 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Palette, Loader2 } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
+import { useTranslation } from '@/lib/i18n';
 import toast from 'react-hot-toast';
-
-const colorOptions = [
-  { name: 'Vert', value: '#22c55e' },
-  { name: 'Orange', value: '#f97316' },
-  { name: 'Rouge', value: '#ef4444' },
-  { name: 'Bleu', value: '#3b82f6' },
-  { name: 'Violet', value: '#8b5cf6' },
-  { name: 'Rose', value: '#ec4899' },
-  { name: 'Cyan', value: '#06b6d4' },
-  { name: 'Jaune', value: '#eab308' },
-  { name: 'Indigo', value: '#6366f1' },
-  { name: 'Gris', value: '#94a3b8' },
-];
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -28,6 +16,20 @@ interface CreateProjectModalProps {
 export default function CreateProjectModal({ isOpen, onClose, workspaceId }: CreateProjectModalProps) {
   const { addProject, updateProject, currentProject } = useAppStore();
   const { token, user } = useAuthStore();
+  const { t } = useTranslation();
+
+  const colorOptions = [
+    { name: t.modals.project.colors.green, value: '#22c55e' },
+    { name: t.modals.project.colors.orange, value: '#f97316' },
+    { name: t.modals.project.colors.red, value: '#ef4444' },
+    { name: t.modals.project.colors.blue, value: '#3b82f6' },
+    { name: t.modals.project.colors.purple, value: '#8b5cf6' },
+    { name: t.modals.project.colors.pink, value: '#ec4899' },
+    { name: t.modals.project.colors.cyan, value: '#06b6d4' },
+    { name: t.modals.project.colors.yellow, value: '#eab308' },
+    { name: t.modals.project.colors.indigo, value: '#6366f1' },
+    { name: t.modals.project.colors.gray, value: '#94a3b8' },
+  ];
   
   const [formData, setFormData] = useState({
     name: '',
@@ -71,9 +73,9 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
-      toast.error('Le nom du projet est requis');
+      toast.error(t.modals.project.toasts.nameRequired);
       return;
     }
 
@@ -99,22 +101,22 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
 
         if (data.success) {
           updateProject(currentProject._id, data.data);
-          toast.success('Projet mis à jour !');
+          toast.success(t.modals.project.toasts.updated);
           onClose();
         } else {
-          toast.error(data.error || 'Erreur lors de la mise à jour');
+          toast.error(data.error || t.modals.project.toasts.updateError);
         }
       } else {
         if (!token || !user) {
-          toast.error('Vous devez être connecté');
+          toast.error(t.modals.project.toasts.mustBeConnected);
           return;
         }
 
         // Récupérer le workspace
         const targetWorkspaceId = workspaceId || currentWorkspace?._id;
-        
+
         if (!targetWorkspaceId) {
-          toast.error('Workspace non trouvé');
+          toast.error(t.modals.project.toasts.workspaceNotFound);
           return;
         }
 
@@ -139,15 +141,15 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
         if (data.success) {
           // Ajouter le projet au store
           addProject(data.data);
-          toast.success('Projet créé avec succès !');
+          toast.success(t.modals.project.toasts.created);
           onClose();
         } else {
-          toast.error(data.error || 'Erreur lors de la création');
+          toast.error(data.error || t.modals.project.toasts.createError);
         }
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error(isEditing ? 'Erreur lors de la mise à jour' : 'Erreur lors de la création');
+      toast.error(isEditing ? t.modals.project.toasts.updateError : t.modals.project.toasts.createError);
     } finally {
       setIsSubmitting(false);
     }
@@ -178,7 +180,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-text-main">
-                  {isEditing ? 'Modifier le projet' : 'Nouveau projet'}
+                  {isEditing ? t.modals.project.titleEdit : t.modals.project.titleCreate}
                 </h2>
                 <button
                   onClick={onClose}
@@ -193,13 +195,13 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-2">
-                    Nom du projet *
+                    {t.modals.project.nameLabel}
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Ex: FINEA, BUISPACE..."
+                    placeholder={t.modals.project.namePlaceholder}
                     className="
                       w-full px-4 py-3 text-sm
                       bg-glass-bg border border-glass-border
@@ -213,12 +215,12 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-2">
-                    Description
+                    {t.modals.project.descriptionLabel}
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Décrivez votre projet..."
+                    placeholder={t.modals.project.descriptionPlaceholder}
                     rows={3}
                     className="
                       w-full px-4 py-3 text-sm resize-none
@@ -234,7 +236,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-3 flex items-center gap-2">
                     <Palette className="w-4 h-4" />
-                    Couleur du projet
+                    {t.modals.project.colorLabel}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {colorOptions.map((color) => (
@@ -270,7 +272,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                       transition-all duration-200
                     "
                   >
-                    Annuler
+                    {t.modals.project.cancel}
                   </button>
                   <button
                     type="submit"
@@ -287,7 +289,7 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
                     {isSubmitting ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      isEditing ? 'Enregistrer' : 'Créer le projet'
+                      isEditing ? t.modals.project.save : t.modals.project.create
                     )}
                   </button>
                 </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, User as UserIcon, Loader2 } from 'lucide-react';
 import { Contact, ApiResponse } from '@/types';
+import { useTranslation } from '@/lib/i18n';
 
 import { useAuthStore } from '@/store';
 
@@ -13,6 +14,7 @@ interface NewChatModalProps {
 
 export default function NewChatModal({ isOpen, onClose, onSelectUser }: NewChatModalProps) {
   const { token } = useAuthStore();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,11 +71,11 @@ export default function NewChatModal({ isOpen, onClose, onSelectUser }: NewChatM
             className="w-full max-w-md bg-bg-secondary rounded-2xl shadow-2xl border border-glass-border overflow-hidden flex flex-col max-h-[80vh]"
           >
             <div className="p-4 border-b border-glass-border flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-main">Nouvelle discussion</h2>
-              <button 
+              <h2 className="text-lg font-semibold text-text-main">{t.modals.chat.newDiscussion}</h2>
+              <button
                 onClick={onClose}
                 className="p-2 rounded-full hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
-                title="Fermer"
+                title={t.modals.chat.close}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -84,7 +86,7 @@ export default function NewChatModal({ isOpen, onClose, onSelectUser }: NewChatM
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   type="text"
-                  placeholder="Rechercher un utilisateur..."
+                  placeholder={t.modals.chat.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-bg-tertiary border border-glass-border rounded-xl text-sm text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 transition-all"
@@ -105,11 +107,11 @@ export default function NewChatModal({ isOpen, onClose, onSelectUser }: NewChatM
                   </div>
                   {searchQuery ? (
                      <div className="text-text-muted text-sm">
-                         Aucun utilisateur trouvé pour &quot;{searchQuery}&quot;
+                         {t.modals.chat.noUserFound} &quot;{searchQuery}&quot;
                      </div>
                   ) : (
                     <div className="text-text-muted text-sm max-w-[200px]">
-                      Aucun autre utilisateur disponible.
+                      {t.modals.chat.noUsersAvailable}
                     </div>
                   )}
                 </div>

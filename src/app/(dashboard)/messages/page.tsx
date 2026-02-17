@@ -12,10 +12,12 @@ import NewChatModal from '@/components/messages/NewChatModal';
 import NewGroupModal from '@/components/messages/NewGroupModal';
 import { useSearchParams } from 'next/navigation';
 import { MessageCircle, Send, Users } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function MessagesPage() {
   const { user, token } = useAuthStore();
   const { currentWorkspace } = useAppStore();
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
 
   // State - Direct Messages
@@ -197,7 +199,7 @@ export default function MessagesPage() {
         fetchContacts();
       }
     } catch {
-      toast.error('Erreur lors de l\'envoi du message');
+      toast.error(t.messagesPage.sendError);
     } finally {
       setIsSending(false);
     }
@@ -228,7 +230,7 @@ export default function MessagesPage() {
         fetchConversations();
       }
     } catch {
-      toast.error('Erreur lors de l\'envoi du message');
+      toast.error(t.messagesPage.sendError);
     } finally {
       setIsSending(false);
     }
@@ -284,10 +286,10 @@ export default function MessagesPage() {
       if (response.ok) {
         setSelectedConversation(null);
         fetchConversations();
-        toast.success('Vous avez quitté le groupe');
+        toast.success(t.messagesPage.leftGroup);
       }
     } catch {
-      toast.error('Erreur lors de la sortie du groupe');
+      toast.error(t.messagesPage.leaveGroupError);
     }
   };
 
@@ -324,7 +326,7 @@ export default function MessagesPage() {
             }
           } catch (err) {
             console.error("Failed to fetch user for chat", err);
-            toast.error("Impossible de charger l'utilisateur");
+            toast.error(t.messagesPage.loadUserError);
           }
         };
         fetchUser();
@@ -408,9 +410,9 @@ export default function MessagesPage() {
                 <MessageCircle className="w-12 h-12 text-accent-primary" />
               </div>
             <div className="text-center px-6 relative z-10">
-              <h2 className="text-3xl font-bold text-text-main mb-3 tracking-tight">Messagerie Interne</h2>
+              <h2 className="text-3xl font-bold text-text-main mb-3 tracking-tight">{t.messagesPage.title}</h2>
               <p className="max-w-sm text-text-dim leading-relaxed font-light mx-auto">
-                Sélectionnez une conversation ou démarrez-en une nouvelle pour collaborer.
+                {t.messagesPage.subtitle}
               </p>
               <div className="mt-8 flex items-center gap-3 justify-center flex-wrap">
                 <button
@@ -418,14 +420,14 @@ export default function MessagesPage() {
                   className="px-8 py-3.5 bg-accent-primary text-white font-bold rounded-full hover:opacity-90 transition-all shadow-lg shadow-accent-primary/20 active:scale-95 flex items-center gap-2"
                 >
                   <Send className="w-4 h-4" />
-                  Nouvelle discussion
+                  {t.messagesPage.newDiscussion}
                 </button>
                 <button
                   onClick={() => setShowNewGroupModal(true)}
                   className="px-6 py-3.5 bg-bg-tertiary text-text-main font-bold rounded-full hover:bg-glass-hover transition-all border border-glass-border active:scale-95 flex items-center gap-2"
                 >
                   <Users className="w-4 h-4" />
-                  Nouveau groupe
+                  {t.messagesPage.newGroup}
                 </button>
               </div>
             </div>

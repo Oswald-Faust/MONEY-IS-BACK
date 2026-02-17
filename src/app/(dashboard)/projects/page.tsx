@@ -8,6 +8,7 @@ import CreateProjectModal from '@/components/modals/CreateProjectModal';
 import EditTaskModal from '@/components/modals/EditTaskModal';
 import { useSearchParams } from 'next/navigation';
 import { useAppStore } from '@/store';
+import { useTranslation } from '@/lib/i18n';
 
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store';
@@ -15,6 +16,7 @@ import { useAuthStore } from '@/store';
 export default function ProjectsPage() {
   const { projects, setProjects, setProjectModalOpen, isProjectModalOpen, setCurrentProject, deleteProject, currentWorkspace } = useAppStore();
   const { token } = useAuthStore();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived' | 'paused'>('all');
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +42,7 @@ export default function ProjectsPage() {
   }, [searchParams, token]);
 
   const handleDeleteProject = async (id: string, name: string) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le projet ${name} ?`)) {
+    if (window.confirm(`${t.projectsPage.confirmDelete} ${name} ?`)) {
       try {
         const response = await fetch(`/api/projects?id=${id}`, {
           method: 'DELETE',
@@ -48,16 +50,16 @@ export default function ProjectsPage() {
             'Authorization': `Bearer ${token}`,
           },
         });
-        
+
         const data = await response.json();
         if (data.success) {
           deleteProject(id);
-          toast.success('Projet supprimé !');
+          toast.success(t.projectsPage.toasts.deleted);
         } else {
-          toast.error(data.error || 'Erreur lors de la suppression');
+          toast.error(data.error || t.projectsPage.toasts.deleteError);
         }
       } catch (error) {
-        toast.error('Erreur de connexion');
+        toast.error(t.projectsPage.toasts.connectionError);
       }
     }
   };
@@ -85,13 +87,13 @@ export default function ProjectsPage() {
         if (data.success) {
           setProjects(data.data);
         } else {
-          toast.error(data.error || 'Erreur lors du chargement des projets');
+          toast.error(data.error || t.projectsPage.toasts.loadError);
           // Clean existing projects on error/mismatch
           setProjects([]);
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
-        toast.error('Erreur de connexion au serveur');
+        toast.error(t.projectsPage.toasts.serverError);
       } finally {
         setIsLoading(false);
       }
@@ -126,10 +128,10 @@ export default function ProjectsPage() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-main flex items-center gap-3">
             <FolderKanban className="w-8 h-8 text-indigo-400" />
-            Mes Projets
+            {t.projectsPage.title}
           </h1>
           <p className="text-dim mt-1">
-            {filteredProjects.length} projets
+            {filteredProjects.length} {t.projectsPage.count}
           </p>
         </div>
         
@@ -149,7 +151,7 @@ export default function ProjectsPage() {
           "
         >
           <Plus className="w-4 h-4" />
-          Nouveau projet
+          {t.projectsPage.newProject}
         </motion.button>
       </motion.div>
 
@@ -167,7 +169,7 @@ export default function ProjectsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher un projet..."
+            placeholder={t.projectsPage.searchPlaceholder}
             className="
               w-full pl-12 pr-4 py-3 text-sm
               bg-glass-bg border border-glass-border
@@ -191,10 +193,10 @@ export default function ProjectsPage() {
                   : 'bg-glass-bg text-dim border border-glass-border hover:bg-glass-hover'}
               `}
             >
-              {status === 'all' && 'Tous'}
-              {status === 'active' && 'Actifs'}
-              {status === 'paused' && 'En pause'}
-              {status === 'archived' && 'Archivés'}
+              {status === 'all' && t.projectsPage.filters.all}
+              {status === 'active' && t.projectsPage.filters.active}
+              {status === 'paused' && t.projectsPage.filters.paused}
+              {status === 'archived' && t.projectsPage.filters.archived}
             </button>
           ))}
         </div>
@@ -205,7 +207,7 @@ export default function ProjectsPage() {
         <div className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-            <p className="text-dim">Chargement des projets...</p>
+            <p className="text-dim">{t.projectsPage.loading}</p>
           </div>
         </div>
       ) : (
@@ -218,7 +220,7 @@ export default function ProjectsPage() {
         {activeProjects.length > 0 && (
           <div className="mb-8">
             <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
-              Projets actifs ({activeProjects.length})
+              {t.projectsPage.sections.activeProjects} ({activeProjects.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {activeProjects.map((project, index) => (
@@ -243,7 +245,7 @@ export default function ProjectsPage() {
         {pausedProjects.length > 0 && (
           <div className="mb-8">
             <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
-              En pause ({pausedProjects.length})
+              {t.projectsPage.sections.pausedProjects} ({pausedProjects.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {pausedProjects.map((project, index) => (
@@ -268,7 +270,7 @@ export default function ProjectsPage() {
         {archivedProjects.length > 0 && (
           <div>
             <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
-              Archivés ({archivedProjects.length})
+              {t.projectsPage.sections.archivedProjects} ({archivedProjects.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {archivedProjects.map((project, index) => (
@@ -292,11 +294,11 @@ export default function ProjectsPage() {
         {filteredProjects.length === 0 && (
           <div className="glass-card p-12 text-center">
             <FolderKanban className="w-12 h-12 text-dim mx-auto mb-4 opacity-20" />
-            <h3 className="text-main font-medium mb-2">Aucun projet trouvé</h3>
+            <h3 className="text-main font-medium mb-2">{t.projectsPage.empty.title}</h3>
             <p className="text-dim text-sm mb-4">
               {searchQuery
-                ? 'Essayez une autre recherche'
-                : 'Créez votre premier projet pour commencer'}
+                ? t.projectsPage.empty.tryAnotherSearch
+                : t.projectsPage.empty.createFirst}
             </p>
             <button
               onClick={() => {
@@ -309,7 +311,7 @@ export default function ProjectsPage() {
                 text-white font-medium text-sm
               "
             >
-              Créer un projet
+              {t.projectsPage.empty.createButton}
             </button>
           </div>
         )}

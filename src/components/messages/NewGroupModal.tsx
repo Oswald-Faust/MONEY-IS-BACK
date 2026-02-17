@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Users, Loader2, Check } from 'lucide-react';
 import { Contact, ApiResponse } from '@/types';
 import { useAuthStore } from '@/store';
+import { useTranslation } from '@/lib/i18n';
 
 interface NewGroupModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface NewGroupModalProps {
 
 export default function NewGroupModal({ isOpen, onClose, onGroupCreated, workspaceId }: NewGroupModalProps) {
   const { token } = useAuthStore();
+  const { t } = useTranslation();
   const [step, setStep] = useState<'members' | 'name'>('members');
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<Contact[]>([]);
@@ -132,10 +134,12 @@ export default function NewGroupModal({ isOpen, onClose, onGroupCreated, workspa
                 )}
                 <div>
                   <h2 className="text-lg font-semibold text-text-main">
-                    {step === 'members' ? 'Nouveau groupe' : 'Nom du groupe'}
+                    {step === 'members' ? t.modals.group.title : t.modals.group.nameStep}
                   </h2>
                   {step === 'members' && selectedUsers.length > 0 && (
-                    <p className="text-xs text-accent-primary">{selectedUsers.length} membre{selectedUsers.length > 1 ? 's' : ''} sélectionné{selectedUsers.length > 1 ? 's' : ''}</p>
+                    <p className="text-xs text-accent-primary">
+                      {selectedUsers.length} {t.modals.group.membersSelected}
+                    </p>
                   )}
                 </div>
               </div>
@@ -171,7 +175,7 @@ export default function NewGroupModal({ isOpen, onClose, onGroupCreated, workspa
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     <input
                       type="text"
-                      placeholder="Rechercher des membres..."
+                      placeholder={t.modals.group.searchPlaceholder}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 bg-bg-tertiary border border-glass-border rounded-xl text-sm text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 transition-all"
@@ -191,7 +195,7 @@ export default function NewGroupModal({ isOpen, onClose, onGroupCreated, workspa
                       <div className="w-16 h-16 rounded-2xl bg-bg-tertiary flex items-center justify-center mb-3">
                         <Users className="w-8 h-8 text-text-muted" />
                       </div>
-                      <p className="text-text-muted text-sm">Aucun utilisateur trouvé</p>
+                      <p className="text-text-muted text-sm">{t.modals.group.noUserFound}</p>
                     </div>
                   ) : (
                     users.map((user) => {
@@ -237,7 +241,7 @@ export default function NewGroupModal({ isOpen, onClose, onGroupCreated, workspa
                     disabled={selectedUsers.length < 1}
                     className="w-full py-3 bg-accent-primary text-white font-semibold rounded-xl hover:opacity-90 shadow-lg shadow-accent-primary/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
                   >
-                    Suivant
+                    {t.modals.group.next}
                   </button>
                 </div>
               </>
@@ -255,13 +259,13 @@ export default function NewGroupModal({ isOpen, onClose, onGroupCreated, workspa
                   {/* Name input */}
                   <div>
                     <label className="block text-sm font-medium text-text-muted mb-2">
-                      Nom du groupe
+                      {t.modals.group.groupNameLabel}
                     </label>
                     <input
                       type="text"
                       value={groupName}
                       onChange={(e) => setGroupName(e.target.value)}
-                      placeholder="Ex: Équipe Marketing"
+                      placeholder={t.modals.group.groupNamePlaceholder}
                       className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-xl text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 transition-all"
                       autoFocus
                       maxLength={100}
@@ -271,7 +275,7 @@ export default function NewGroupModal({ isOpen, onClose, onGroupCreated, workspa
                   {/* Member count */}
                   <div className="flex items-center gap-2 text-sm text-text-muted">
                     <Users className="w-4 h-4" />
-                    <span>{selectedUsers.length + 1} membres (vous inclus)</span>
+                    <span>{selectedUsers.length + 1} {t.modals.group.membersCount}</span>
                   </div>
 
                   {/* Members preview */}
@@ -306,7 +310,7 @@ export default function NewGroupModal({ isOpen, onClose, onGroupCreated, workspa
                     ) : (
                       <>
                         <Users className="w-5 h-5" />
-                        Créer le groupe
+                        {t.modals.group.create}
                       </>
                     )}
                   </button>

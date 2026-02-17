@@ -281,6 +281,259 @@ const fr = {
       empty: 'Personne dans votre équipe pour le moment.',
     },
   },
+
+  // --- Projects Page ---
+  projectsPage: {
+    title: 'Mes Projets',
+    count: 'projets',
+    newProject: 'Nouveau projet',
+    searchPlaceholder: 'Rechercher un projet...',
+    filters: {
+      all: 'Tous',
+      active: 'Actifs',
+      paused: 'En pause',
+      archived: 'Archivés',
+    },
+    loading: 'Chargement des projets...',
+    sections: {
+      activeProjects: 'Projets actifs',
+      pausedProjects: 'En pause',
+      archivedProjects: 'Archivés',
+    },
+    empty: {
+      title: 'Aucun projet trouvé',
+      tryAnotherSearch: 'Essayez une autre recherche',
+      createFirst: 'Créez votre premier projet pour commencer',
+      createButton: 'Créer un projet',
+    },
+    confirmDelete: 'Êtes-vous sûr de vouloir supprimer le projet',
+    toasts: {
+      deleted: 'Projet supprimé !',
+      deleteError: 'Erreur lors de la suppression',
+      connectionError: 'Erreur de connexion',
+      loadError: 'Erreur lors du chargement des projets',
+      serverError: 'Erreur de connexion au serveur',
+    },
+  },
+
+  // --- Tasks Page (Global To Do) ---
+  tasksPage: {
+    title: 'To Do Global',
+    titleWithProject: 'To Do',
+    count: 'tâches',
+    total: 'au total',
+    forThisProject: 'pour ce projet',
+    newTask: 'Nouvelle tâche',
+    searchPlaceholder: 'Rechercher une tâche...',
+    filters: {
+      allPriorities: 'Toutes les priorités',
+      important: 'Important',
+      lessImportant: 'Moins important',
+      waiting: 'En attente',
+    },
+    columns: {
+      important: 'Important',
+      lessImportant: 'Moins important',
+      waiting: 'En attente',
+    },
+    empty: {
+      noImportantTasks: 'Aucune tâche importante',
+      noTasks: 'Aucune tâche',
+      noWaitingTasks: 'Aucune tâche en attente',
+      noTasksFound: 'Aucune tâche trouvée',
+    },
+    toasts: {
+      completed: 'Tâche terminée !',
+      restored: 'Tâche rétablie',
+      updateError: 'Erreur lors de la mise à jour',
+      loadError: 'Erreur lors du chargement des tâches',
+    },
+  },
+
+  // --- Messages Page ---
+  messagesPage: {
+    title: 'Messagerie Interne',
+    subtitle: 'Sélectionnez une conversation ou démarrez-en une nouvelle pour collaborer.',
+    newDiscussion: 'Nouvelle discussion',
+    newGroup: 'Nouveau groupe',
+    sendError: 'Erreur lors de l\'envoi du message',
+    leftGroup: 'Vous avez quitté le groupe',
+    leaveGroupError: 'Erreur lors de la sortie du groupe',
+    loadUserError: 'Impossible de charger l\'utilisateur',
+  },
+
+  // --- Global Search ---
+  globalSearch: {
+    placeholder: 'Rechercher des projets, tâches, objectifs...',
+    title: 'Recherche Globale',
+    description: 'Tapez au moins 2 caractères pour rechercher dans tout votre espace de travail.',
+    tags: {
+      projects: 'Projets',
+      tasks: 'Tâches',
+      objectives: 'Objectifs',
+      ideas: 'Idées',
+    },
+    open: 'Ouvrir',
+    noResults: 'Aucun résultat',
+    noResultsFor: 'Nous n\'avons rien trouvé pour',
+    shortcuts: {
+      navigate: 'Naviguer',
+      select: 'Sélectionner',
+      close: 'Fermer',
+    },
+  },
+
+  // --- Modals ---
+  modals: {
+    // Project Modal
+    project: {
+      titleCreate: 'Nouveau projet',
+      titleEdit: 'Modifier le projet',
+      nameLabel: 'Nom du projet *',
+      namePlaceholder: 'Ex: FINEA, BUISPACE...',
+      descriptionLabel: 'Description',
+      descriptionPlaceholder: 'Décrivez votre projet...',
+      colorLabel: 'Couleur du projet',
+      colors: {
+        green: 'Vert',
+        orange: 'Orange',
+        red: 'Rouge',
+        blue: 'Bleu',
+        purple: 'Violet',
+        pink: 'Rose',
+        cyan: 'Cyan',
+        yellow: 'Jaune',
+        indigo: 'Indigo',
+        gray: 'Gris',
+      },
+      cancel: 'Annuler',
+      create: 'Créer le projet',
+      save: 'Enregistrer',
+      toasts: {
+        nameRequired: 'Le nom du projet est requis',
+        updated: 'Projet mis à jour !',
+        updateError: 'Erreur lors de la mise à jour',
+        mustBeConnected: 'Vous devez être connecté',
+        workspaceNotFound: 'Workspace non trouvé',
+        created: 'Projet créé avec succès !',
+        createError: 'Erreur lors de la création',
+      },
+    },
+
+    // Task Modal
+    task: {
+      titleCreate: 'Nouvelle tâche',
+      titleEdit: 'Modifier la tâche',
+      taskTitleLabel: 'Titre de la tâche *',
+      taskTitlePlaceholder: 'Ex: Créer la landing page...',
+      descriptionLabel: 'Description',
+      descriptionPlaceholder: 'Décrivez la tâche en détail...',
+      projectLabel: 'Projet *',
+      priorityLabel: 'Priorité',
+      priorities: {
+        important: 'Important',
+        lessImportant: 'Moins important',
+        waiting: 'En attente',
+      },
+      dueDateLabel: 'Date d\'échéance',
+      tagsLabel: 'Tags (séparés par des virgules)',
+      tagsPlaceholder: 'Ex: urgent, design, frontend',
+      cancel: 'Annuler',
+      create: 'Créer la tâche',
+      save: 'Enregistrer',
+      toasts: {
+        titleRequired: 'Le titre de la tâche est requis',
+        projectRequired: 'Veuillez sélectionner un projet',
+        mustBeConnected: 'Vous devez être connecté',
+        created: 'Tâche créée avec succès !',
+        updated: 'Tâche mise à jour !',
+        createError: 'Erreur lors de la création de la tâche',
+        updateError: 'Erreur lors de la mise à jour de la tâche',
+      },
+    },
+
+    // Chat Modals
+    chat: {
+      newDiscussion: 'Nouvelle discussion',
+      searchPlaceholder: 'Rechercher un utilisateur...',
+      noUserFound: 'Aucun utilisateur trouvé pour',
+      noUsersAvailable: 'Aucun autre utilisateur disponible.',
+      close: 'Fermer',
+    },
+
+    // Group Modal
+    group: {
+      title: 'Nouveau groupe',
+      nameStep: 'Nom du groupe',
+      searchPlaceholder: 'Rechercher des membres...',
+      membersSelected: 'membre(s) sélectionné(s)',
+      noUserFound: 'Aucun utilisateur trouvé',
+      next: 'Suivant',
+      groupNameLabel: 'Nom du groupe',
+      groupNamePlaceholder: 'Ex: Équipe Marketing',
+      membersCount: 'membres (vous inclus)',
+      create: 'Créer le groupe',
+    },
+
+    // Objective Modal
+    objective: {
+      titleCreate: 'Nouvel objectif',
+      titleEdit: 'Modifier l\'objectif',
+      objectiveTitleLabel: 'Titre de l\'objectif *',
+      descriptionLabel: 'Description',
+      projectLabel: 'Projet *',
+      priorityLabel: 'Priorité',
+      priorities: {
+        low: 'Basse',
+        medium: 'Moyenne',
+        high: 'Haute',
+      },
+      checkpointsLabel: 'Points de contrôle',
+      addCheckpoint: 'Ajouter un point de contrôle',
+      targetDateLabel: 'Date cible',
+      cancel: 'Annuler',
+      create: 'Créer l\'objectif',
+      save: 'Enregistrer',
+    },
+
+    // Idea Modal
+    idea: {
+      titleCreate: 'Nouvelle idée',
+      titleEdit: 'Modifier l\'idée',
+      ideaTitleLabel: 'Titre de l\'idée *',
+      contentLabel: 'Contenu',
+      projectLabel: 'Projet',
+      statusLabel: 'Statut',
+      statuses: {
+        raw: 'Brut',
+        standby: 'En attente',
+        inProgress: 'En cours',
+        implemented: 'Implémenté',
+        archived: 'Archivé',
+      },
+      tagsLabel: 'Tags',
+      addTag: 'Ajouter un tag',
+      attachmentsLabel: 'Pièces jointes',
+      addAttachment: 'Ajouter une pièce jointe',
+      cancel: 'Annuler',
+      create: 'Créer l\'idée',
+      save: 'Enregistrer',
+      toasts: {
+        titleRequired: 'Le titre est requis',
+        mustBeConnected: 'Vous devez être connecté',
+      },
+    },
+
+    // Common
+    common: {
+      close: 'Fermer',
+      cancel: 'Annuler',
+      save: 'Enregistrer',
+      create: 'Créer',
+      delete: 'Supprimer',
+      loading: 'Chargement...',
+    },
+  },
 } as const;
 
 export default fr;

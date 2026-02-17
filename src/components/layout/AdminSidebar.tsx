@@ -10,7 +10,6 @@ import {
   Users,
   Building2,
   CreditCard,
-  Settings,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -30,7 +29,6 @@ const adminNavItems = [
   { icon: CreditCard, label: 'Abonnements', href: '/admin/subscriptions' },
   { icon: Activity, label: 'Logs Système', href: '/admin/logs' },
   { icon: ShieldCheck, label: 'Contrôle d\'Accès', href: '/admin/access' },
-  { icon: Settings, label: 'Configuration', href: '/admin/settings' },
 ];
 
 import { ThemeToggle } from '@/components/ThemeToggle';

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, Calendar, Flag, FolderKanban } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
+import { useTranslation } from '@/lib/i18n';
 import toast from 'react-hot-toast';
 import type { TaskPriority, Project } from '@/types';
 import UserSelector from '@/components/ui/UserSelector';
@@ -15,17 +16,18 @@ interface CreateTaskModalProps {
   defaultProjectId?: string;
 }
 
-const priorityOptions: { value: TaskPriority; label: string; color: string }[] = [
-  { value: 'important', label: 'Important', color: '#ef4444' },
-  { value: 'less_important', label: 'Moins important', color: '#3b82f6' },
-  { value: 'waiting', label: 'En attente', color: '#94a3b8' },
-];
-
 // Les demoProjects ont été supprimés pour utiliser les vrais projets du store
 
 export default function CreateTaskModal({ isOpen, onClose, projects: propProjects, defaultProjectId }: CreateTaskModalProps) {
   const { addTask, projects: storeProjects } = useAppStore();
   const { token, user } = useAuthStore();
+  const { t } = useTranslation();
+
+  const priorityOptions: { value: TaskPriority; label: string; color: string }[] = [
+    { value: 'important', label: t.modals.task.priorities.important, color: '#ef4444' },
+    { value: 'less_important', label: t.modals.task.priorities.lessImportant, color: '#3b82f6' },
+    { value: 'waiting', label: t.modals.task.priorities.waiting, color: '#94a3b8' },
+  ];
   
   const [formData, setFormData] = useState({
     title: '',
@@ -52,14 +54,14 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim()) {
-      toast.error('Le titre de la tâche est requis');
+      toast.error(t.modals.task.toasts.titleRequired);
       return;
     }
 
     if (!formData.project) {
-      toast.error('Veuillez sélectionner un projet');
+      toast.error(t.modals.task.toasts.projectRequired);
       return;
     }
 
@@ -67,7 +69,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
 
     try {
       if (!token || !user) {
-        toast.error('Vous devez être connecté');
+        toast.error(t.modals.task.toasts.mustBeConnected);
         return;
       }
 
@@ -92,7 +94,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
 
       if (data.success) {
         addTask(data.data);
-        toast.success('Tâche créée avec succès !');
+        toast.success(t.modals.task.toasts.created);
         setFormData({
           title: '',
           description: '',
@@ -105,7 +107,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
         onClose();
       }
     } catch {
-      toast.error('Erreur lors de la création de la tâche');
+      toast.error(t.modals.task.toasts.createError);
     } finally {
       setIsSubmitting(false);
     }
@@ -135,7 +137,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
             <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto hover:!bg-[var(--bg-card)]">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-text-main">Nouvelle tâche</h2>
+                <h2 className="text-xl font-semibold text-text-main">{t.modals.task.titleCreate}</h2>
                 <button
                   onClick={onClose}
                   className="p-2 rounded-lg hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
@@ -149,13 +151,13 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                 {/* Title */}
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-2">
-                    Titre de la tâche *
+                    {t.modals.task.taskTitleLabel}
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Ex: Créer la landing page..."
+                    placeholder={t.modals.task.taskTitlePlaceholder}
                     className="
                       w-full px-4 py-3 text-sm
                       bg-glass-bg border border-glass-border
@@ -169,12 +171,12 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-2">
-                    Description
+                    {t.modals.task.descriptionLabel}
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Décrivez la tâche en détail..."
+                    placeholder={t.modals.task.descriptionPlaceholder}
                     rows={3}
                     className="
                       w-full px-4 py-3 text-sm resize-none
@@ -191,7 +193,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                   <div>
                     <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
                       <FolderKanban className="w-4 h-4" />
-                      Projet *
+                      {t.modals.task.projectLabel}
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {projectList.map((project) => (
@@ -221,7 +223,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
                     <Flag className="w-4 h-4" />
-                    Priorité
+                    {t.modals.task.priorityLabel}
                   </label>
                   <div className="flex gap-2">
                     {priorityOptions.map((option) => (
@@ -265,7 +267,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Date d&apos;échéance
+                    {t.modals.task.dueDateLabel}
                   </label>
                   <input
                     type="date"
@@ -284,13 +286,13 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                 {/* Tags */}
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-2">
-                    Tags (séparés par des virgules)
+                    {t.modals.task.tagsLabel}
                   </label>
                   <input
                     type="text"
                     value={formData.tags}
                     onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                    placeholder="Ex: urgent, design, frontend"
+                    placeholder={t.modals.task.tagsPlaceholder}
                     className="
                       w-full px-4 py-3 text-sm
                       bg-bg-tertiary border border-glass-border
@@ -314,7 +316,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                       transition-all duration-200
                     "
                   >
-                    Annuler
+                    {t.modals.task.cancel}
                   </button>
                   <button
                     type="submit"
@@ -331,7 +333,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                     {isSubmitting ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      'Créer la tâche'
+                      t.modals.task.create
                     )}
                   </button>
                 </div>

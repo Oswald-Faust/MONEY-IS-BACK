@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Filter, Grid3X3, List, CheckCircle, ChevronLeft } from 'lucide-react';
 import TaskCard from '@/components/ui/TaskCard';
 import type { TaskPriority } from '@/types';
-
+import { useTranslation } from '@/lib/i18n';
 
 import { useAppStore, useAuthStore } from '@/store';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 export default function TasksPage() {
   const { tasks, projects, setTaskModalOpen, setTasks, updateTask, currentWorkspace } = useAppStore();
   const { token } = useAuthStore();
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('project');
@@ -42,10 +43,10 @@ export default function TasksPage() {
       const data = await response.json();
       if (data.success) {
         updateTask(taskId, { status: newStatus });
-        toast.success(newStatus === 'done' ? 'Tâche terminée !' : 'Tâche rétablie');
+        toast.success(newStatus === 'done' ? t.tasksPage.toasts.completed : t.tasksPage.toasts.restored);
       }
     } catch {
-      toast.error('Erreur lors de la mise à jour');
+      toast.error(t.tasksPage.toasts.updateError);
     }
   };
 
@@ -72,7 +73,7 @@ export default function TasksPage() {
              setTasks([]);
         }
       } catch {
-        toast.error('Erreur lors du chargement des tâches');
+        toast.error(t.tasksPage.toasts.loadError);
       }
     };
 
@@ -122,10 +123,10 @@ export default function TasksPage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
               {!projectId && <CheckCircle className="w-8 h-8 text-indigo-400" />}
-              {selectedProject ? `To Do - ${selectedProject.name}` : 'To Do Global'}
+              {selectedProject ? `${t.tasksPage.titleWithProject} - ${selectedProject.name}` : t.tasksPage.title}
             </h1>
             <p className="text-text-dim mt-1">
-              {filteredTasks.length} tâches {selectedProject ? 'pour ce projet' : 'au total'}
+              {filteredTasks.length} {t.tasksPage.count} {selectedProject ? t.tasksPage.forThisProject : t.tasksPage.total}
             </p>
           </div>
         </div>
@@ -137,7 +138,7 @@ export default function TasksPage() {
           className="px-4 py-2.5 rounded-xl flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-sm hover:from-indigo-500 hover:to-purple-500 transition-all duration-200"
         >
           <Plus className="w-4 h-4" />
-          Nouvelle tâche
+          {t.tasksPage.newTask}
         </motion.button>
       </motion.div>
 
@@ -155,7 +156,7 @@ export default function TasksPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher une tâche..."
+            placeholder={t.tasksPage.searchPlaceholder}
             className="w-full pl-12 pr-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-xl text-text-main placeholder-text-muted focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/20 transition-all duration-200"
           />
         </div>
@@ -168,10 +169,10 @@ export default function TasksPage() {
             onChange={(e) => setFilterPriority(e.target.value as TaskPriority | 'all')}
             className="px-4 py-3 text-sm bg-glass-bg border border-glass-border rounded-xl text-text-main focus:border-accent-primary focus:outline-none transition-all duration-200"
           >
-            <option value="all">Toutes les priorités</option>
-            <option value="important">Important</option>
-            <option value="less_important">Moins important</option>
-            <option value="waiting">En attente</option>
+            <option value="all">{t.tasksPage.filters.allPriorities}</option>
+            <option value="important">{t.tasksPage.filters.important}</option>
+            <option value="less_important">{t.tasksPage.filters.lessImportant}</option>
+            <option value="waiting">{t.tasksPage.filters.waiting}</option>
           </select>
         </div>
 
@@ -210,7 +211,7 @@ export default function TasksPage() {
           <div className="glass-card p-4">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-glass-border">
               <div className="w-3 h-3 rounded-full bg-red-500" />
-              <h3 className="text-sm font-semibold text-text-main">Important</h3>
+              <h3 className="text-sm font-semibold text-text-main">{t.tasksPage.columns.important}</h3>
               <span className="ml-auto text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full">
                 {importantTasks.length}
               </span>
@@ -222,7 +223,7 @@ export default function TasksPage() {
                 ))}
               </AnimatePresence>
               {importantTasks.length === 0 && (
-                <p className="text-center text-text-muted text-sm py-8">Aucune tâche importante</p>
+                <p className="text-center text-text-muted text-sm py-8">{t.tasksPage.empty.noImportantTasks}</p>
               )}
             </div>
           </div>
@@ -231,7 +232,7 @@ export default function TasksPage() {
           <div className="glass-card p-4">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-glass-border">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <h3 className="text-sm font-semibold text-text-main">Moins important</h3>
+              <h3 className="text-sm font-semibold text-text-main">{t.tasksPage.columns.lessImportant}</h3>
               <span className="ml-auto text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full">
                 {lessImportantTasks.length}
               </span>
@@ -243,7 +244,7 @@ export default function TasksPage() {
                 ))}
               </AnimatePresence>
               {lessImportantTasks.length === 0 && (
-                <p className="text-center text-text-muted text-sm py-8">Aucune tâche</p>
+                <p className="text-center text-text-muted text-sm py-8">{t.tasksPage.empty.noTasks}</p>
               )}
             </div>
           </div>
@@ -252,7 +253,7 @@ export default function TasksPage() {
           <div className="glass-card p-4">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-glass-border">
               <div className="w-3 h-3 rounded-full bg-gray-400" />
-              <h3 className="text-sm font-semibold text-text-main">En attente</h3>
+              <h3 className="text-sm font-semibold text-text-main">{t.tasksPage.columns.waiting}</h3>
               <span className="ml-auto text-xs text-text-dim bg-glass-bg px-2 py-0.5 rounded-full">
                 {waitingTasks.length}
               </span>
@@ -264,7 +265,7 @@ export default function TasksPage() {
                 ))}
               </AnimatePresence>
               {waitingTasks.length === 0 && (
-                <p className="text-center text-text-muted text-sm py-8">Aucune tâche en attente</p>
+                <p className="text-center text-text-muted text-sm py-8">{t.tasksPage.empty.noWaitingTasks}</p>
               )}
             </div>
           </div>
@@ -286,7 +287,7 @@ export default function TasksPage() {
               ))}
             </AnimatePresence>
             {filteredTasks.length === 0 && (
-              <p className="text-center text-gray-500 text-sm py-8">Aucune tâche trouvée</p>
+              <p className="text-center text-gray-500 text-sm py-8">{t.tasksPage.empty.noTasksFound}</p>
             )}
           </div>
         </motion.div>
