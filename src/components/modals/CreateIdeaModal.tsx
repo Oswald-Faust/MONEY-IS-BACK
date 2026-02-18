@@ -237,7 +237,7 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
               <div>
                 <UserSelector 
                   value={formData.assignees}
-                  onChange={(userIds) => setFormData({ ...formData, assignees: userIds })}
+                  onChange={(userIds) => setFormData({ ...formData, assignees: userIds as string[] })}
                   multiple={true}
                 />
               </div>

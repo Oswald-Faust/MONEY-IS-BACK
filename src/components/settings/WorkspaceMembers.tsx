@@ -11,8 +11,10 @@ import {
   Check,
   Shield,
   User,
-  Copy
+  Copy,
+  FolderKanban
 } from 'lucide-react';
+import ManageMemberProjectsModal from '@/components/modals/ManageMemberProjectsModal';
 import Avatar from '@/components/ui/Avatar';
 import { useAuthStore, useAppStore } from '@/store';
 import toast from 'react-hot-toast';
@@ -114,6 +116,7 @@ export default function WorkspaceMembers() {
   const [invitations, setInvitations] = useState<{ _id: string; email: string; role: string; token: string; inviter?: { firstName: string } }[]>([]);
   const [loading, setLoading] = useState(true);
   const [isInviteModalOpen, setInviteModalOpen] = useState(false);
+  const [managingMember, setManagingMember] = useState<{ id: string; name: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchMembers = useCallback(async () => {
@@ -387,6 +390,21 @@ export default function WorkspaceMembers() {
                                 </span>
                             )}
 
+
+                            
+                            {isAdmin && member.user._id !== ownerId && (
+                                <button
+                                    onClick={() => setManagingMember({
+                                        id: member.user._id, 
+                                        name: `${member.user.firstName} ${member.user.lastName}`
+                                    })}
+                                    className="p-2 hover:bg-indigo-500/10 text-gray-500 hover:text-indigo-400 rounded-lg transition-colors"
+                                    title={t.inviteModal.manageProjectsTitle}
+                                >
+                                    <FolderKanban className="w-4 h-4" />
+                                </button>
+                            )}
+
                             {isAdmin && member.user._id !== ownerId && member.user._id !== user?._id && (
                                 <button
                                     onClick={() => removeMember(member.user._id)}
@@ -415,6 +433,16 @@ export default function WorkspaceMembers() {
             workspaceId={currentWorkspace._id}
             onSuccess={fetchMembers}
           />
+      )}
+      
+      {currentWorkspace && managingMember && (
+        <ManageMemberProjectsModal 
+            isOpen={!!managingMember}
+            onClose={() => setManagingMember(null)}
+            memberId={managingMember.id}
+            memberName={managingMember.name}
+            workspaceId={currentWorkspace._id}
+        />
       )}
     </div>
   );

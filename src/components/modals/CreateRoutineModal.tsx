@@ -194,7 +194,7 @@ export default function CreateRoutineModal({ isOpen, onClose, projects }: Create
                 <div>
                   <UserSelector 
                     value={formData.assignee}
-                    onChange={(userId) => setFormData({ ...formData, assignee: userId })}
+                    onChange={(userId) => setFormData({ ...formData, assignee: userId as string })}
                   />
                 </div>
 

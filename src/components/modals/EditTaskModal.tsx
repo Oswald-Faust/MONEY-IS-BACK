@@ -255,7 +255,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
                 <div>
                    <UserSelector 
                       value={formData.assignees}
-                      onChange={(userIds) => setFormData({ ...formData, assignees: userIds })}
+                      onChange={(userIds) => setFormData({ ...formData, assignees: userIds as string[] })}
                       className="mb-4"
                       multiple={true}
                    />

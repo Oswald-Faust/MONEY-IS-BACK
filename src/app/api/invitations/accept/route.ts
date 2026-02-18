@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     // Add to projects if specified
     // Access projectIds safely
-    const projectIds = (invitation as any).projectIds || [];
+    const projectIds = invitation.projectIds || [];
     
     if (projectIds && projectIds.length > 0) {
         for (const projectId of projectIds) {
@@ -70,17 +70,17 @@ export async function POST(request: NextRequest) {
                 const project = await Project.findById(projectId);
                 // Ensure project belongs to the workspace
                 if (project && project.workspace.toString() === workspace._id.toString()) {
-                    const isAlreadyMember = project.members.some((m: any) => m.user.toString() === auth.userId);
+                    const isAlreadyMember = project.members.some(m => m.user.toString() === auth.userId);
                     const isProjectOwner = project.owner.toString() === auth.userId;
                     
-                    if (!isAlreadyMember && !isProjectOwner) {
-                        project.members.push({
-                            user: auth.userId,
-                            role: invitation.role, // Inherit role from workspace invite
-                            joinedAt: new Date()
-                        });
-                        await project.save();
-                    }
+                        if (!isAlreadyMember && !isProjectOwner) {
+                            project.members.push({
+                                user: new mongoose.Types.ObjectId(auth.userId),
+                                role: invitation.role, // Inherit role from workspace invite
+                                joinedAt: new Date()
+                            });
+                            await project.save();
+                        }
                 }
             } catch (err) {
                 console.error(`Error adding user to project ${projectId} on accept:`, err);
