@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Palette, Loader2 } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
 import { useTranslation } from '@/lib/i18n';
+import { PLAN_LIMITS } from '@/lib/limits';
 import toast from 'react-hot-toast';
 
 interface CreateProjectModalProps {
@@ -14,9 +15,10 @@ interface CreateProjectModalProps {
 }
 
 export default function CreateProjectModal({ isOpen, onClose, workspaceId }: CreateProjectModalProps) {
-  const { addProject, updateProject, currentProject } = useAppStore();
+  const { projects, addProject, updateProject, currentProject } = useAppStore();
   const { token, user } = useAuthStore();
   const { t } = useTranslation();
+
 
   const colorOptions = [
     { name: t.modals.project.colors.green, value: '#22c55e' },
@@ -110,6 +112,25 @@ export default function CreateProjectModal({ isOpen, onClose, workspaceId }: Cre
         if (!token || !user) {
           toast.error(t.modals.project.toasts.mustBeConnected);
           return;
+        }
+
+        // Project Limit Check
+        if (currentWorkspace && projects) {
+          const plan = currentWorkspace.subscriptionPlan || 'starter';
+          const limit = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS]?.maxProjects || 0;
+          const workspaceProjects = projects.filter(p => {
+             if (typeof p.workspace === 'string') return p.workspace === currentWorkspace._id;
+             if (p.workspace && typeof p.workspace === 'object' && '_id' in p.workspace) {
+                return (p.workspace as { _id: string })._id === currentWorkspace._id;
+             }
+             return false;
+          });
+          
+          if (workspaceProjects.length >= limit) {
+             toast.error(`Limite de projets atteinte pour le plan ${plan.toUpperCase()}. Veuillez passer au plan supérieur.`);
+             setIsSubmitting(false);
+             return;
+          }
         }
 
         // Récupérer le workspace

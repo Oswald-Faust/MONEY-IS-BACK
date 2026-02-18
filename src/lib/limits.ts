@@ -1,6 +1,6 @@
 export const PLAN_LIMITS = {
   starter: {
-    maxProjects: 3,
+    maxProjects: 1,
     maxWorkspaces: 1,
     maxMembers: 3,
     storageGB: 2,

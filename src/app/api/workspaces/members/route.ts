@@ -4,6 +4,7 @@ import connectDB from '@/lib/mongodb';
 import Workspace from '@/models/Workspace';
 import User from '@/models/User';
 import Invitation from '@/models/Invitation';
+import Project from '@/models/Project';
 import { verifyAuth } from '@/lib/auth';
 import type { IWorkspace } from '@/models/Workspace';
 
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     if (!auth.success) return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
 
     const body = await request.json();
-    const { workspaceId, email, role = 'editor' } = body;
+    const { workspaceId, email, role = 'editor', projectIds = [] } = body;
 
     if (!workspaceId || !email) {
       return NextResponse.json({ success: false, error: 'Workspace ID et Email requis' }, { status: 400 });
@@ -106,7 +107,6 @@ export async function POST(request: NextRequest) {
         }
         
         // Add directly (User exists)
-        // Ideally send notification, but direct add is fine for MVP + Notification later
         workspace.members.push({
             user: existingUser._id,
             role,
@@ -116,6 +116,25 @@ export async function POST(request: NextRequest) {
         
         // Update user
         await User.findByIdAndUpdate(existingUser._id, { $push: { workspaces: workspace._id } });
+
+        // Add to specified projects
+        if (projectIds && projectIds.length > 0) {
+            for (const projectId of projectIds) {
+                try {
+                    const project = await Project.findById(projectId);
+                    if (project && project.workspace.toString() === workspaceId) {
+                        const isAlreadyMember = project.members.some((m: any) => m.user.toString() === existingUser._id.toString());
+                        const isProjectOwner = project.owner.toString() === existingUser._id.toString();
+                        if (!isAlreadyMember && !isProjectOwner) {
+                            project.members.push({ user: existingUser._id, role, joinedAt: new Date() });
+                            await project.save();
+                        }
+                    }
+                } catch (err) {
+                    console.error(`Error adding user to project ${projectId}:`, err);
+                }
+            }
+        }
 
         return NextResponse.json({
             success: true,
@@ -146,7 +165,8 @@ export async function POST(request: NextRequest) {
             token,
             inviter: auth.userId,
             status: 'pending',
-            expiresAt
+            expiresAt,
+            projectIds: projectIds || []
         });
 
         // Here we would send email via Resend/SMTP

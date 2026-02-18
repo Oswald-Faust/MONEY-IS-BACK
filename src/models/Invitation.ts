@@ -9,6 +9,7 @@ export interface IInvitation extends Document {
   inviter: mongoose.Types.ObjectId;
   status: 'pending' | 'accepted' | 'expired';
   expiresAt: Date;
+  projectIds?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,6 +51,10 @@ const InvitationSchema = new Schema<IInvitation>(
       type: Date,
       required: true,
     },
+    projectIds: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Project',
+    }],
   },
   {
     timestamps: true,

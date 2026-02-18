@@ -16,7 +16,7 @@ interface User {
 
 interface UserSelectorProps {
   value?: string | string[];
-  onChange: (value: any) => void;
+  onChange: (value: string | string[]) => void;
   label?: string;
   className?: string;
   multiple?: boolean;
@@ -89,7 +89,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
   return (
     <div className={`relative ${className}`}>
       {label && (
-        <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-text-dim mb-2 flex items-center gap-2">
           <UserIcon className="w-4 h-4" />
           {label}
         </label>
@@ -120,7 +120,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                     </div>
                   ))}
                   {selectedUsers.length > 5 && (
-                    <div className="w-6 h-6 rounded-full bg-glass-bg border border-glass-border flex items-center justify-center text-xs font-bold text-gray-400">
+                    <div className="w-6 h-6 rounded-full bg-bg-tertiary border border-glass-border flex items-center justify-center text-xs font-bold text-text-muted">
                       +{selectedUsers.length - 5}
                     </div>
                   )}
@@ -133,7 +133,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                 </span>
               </div>
             ) : (
-              <span className="text-gray-400 text-sm">Sélectionner {multiple ? 'des utilisateurs' : 'un utilisateur'}</span>
+              <span className="text-text-muted text-sm italic">Sélectionner {multiple ? 'des utilisateurs' : 'un utilisateur'}</span>
             )}
           </div>
           {isLoading ? (
@@ -156,13 +156,13 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 className="absolute top-full left-0 right-0 mt-2 p-2 bg-[var(--bg-secondary)] border border-glass-border rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto custom-scrollbar"
               >
-                <div className="px-2 pb-2 bg-[var(--bg-secondary)] sticky top-0 z-10">
+                <div className="px-2 pb-2 bg-bg-secondary sticky top-0 z-10">
                   <input
                     type="text"
                     placeholder="Rechercher..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-3 py-2 bg-glass-bg border border-glass-border rounded-lg text-sm text-main focus:outline-none focus:border-indigo-500/50"
+                    className="w-full px-3 py-2 bg-input-bg border border-input-border rounded-lg text-sm text-text-main focus:outline-none focus:border-indigo-500/50"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
@@ -177,10 +177,10 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                       }}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-glass-hover transition-colors text-left"
                     >
-                      <div className="w-8 h-8 rounded-full border border-dashed border-gray-600 flex items-center justify-center">
-                        <UserIcon className="w-4 h-4 text-gray-500" />
+                      <div className="w-8 h-8 rounded-full border border-dashed border-input-border flex items-center justify-center">
+                        <UserIcon className="w-4 h-4 text-text-muted" />
                       </div>
-                      <span className="text-sm text-gray-400">Non assigné</span>
+                      <span className="text-sm text-text-dim">Non assigné</span>
                       {!value && <Check className="w-4 h-4 text-indigo-400 ml-auto" />}
                     </button>
                   )}
@@ -209,10 +209,10 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                           )}
                         </div>
                         <div className="flex flex-col">
-                          <span className={`text-sm font-medium transition-colors ${active ? 'text-indigo-400' : 'text-white group-hover:text-indigo-400'}`}>
+                          <span className={`text-sm font-medium transition-colors ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-text-main group-hover:text-indigo-500'}`}>
                             {user.firstName} {user.lastName}
                           </span>
-                          <span className="text-xs text-dim truncate max-w-[150px]">
+                          <span className="text-xs text-text-muted truncate max-w-[150px]">
                             {user.email}
                           </span>
                         </div>

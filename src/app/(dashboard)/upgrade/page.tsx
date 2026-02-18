@@ -14,7 +14,6 @@ import {
   Clock, 
   Calendar,
   CreditCard,
-  ArrowRight,
   ShieldCheck,
   CheckCircle2,
   Sparkles
@@ -116,7 +115,6 @@ export default function UpgradePage() {
     if (isSuccess && token && !hasRefreshed.current) {
       hasRefreshed.current = true;
       setIsSyncing(true);
-      const targetPlanId = urlParams.get('planId');
       
       toast.success('Paiement réussi ! Finalisation de votre abonnement...', { 
         icon: '🎉',
@@ -227,8 +225,7 @@ export default function UpgradePage() {
           billingCycle
         })
       });
-
-      const data = await response.json();
+      const data: { url?: string; error?: string } = await response.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -280,7 +277,7 @@ export default function UpgradePage() {
           <motion.h1 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight"
+            className="text-4xl md:text-5xl font-bold text-text-main mb-6 tracking-tight"
           >
             Mettre à niveau votre expérience
           </motion.h1>
@@ -288,7 +285,7 @@ export default function UpgradePage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg text-dim max-w-2xl mx-auto"
+            className="text-lg text-text-dim max-w-2xl mx-auto"
           >
             Choisissez le plan qui correspond le mieux à vos ambitions et débloquez tout le potentiel de MONEY IS BACK.
           </motion.p>
@@ -308,16 +305,16 @@ export default function UpgradePage() {
                 <ShieldCheck className="w-8 h-8 text-indigo-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white mb-1">
+                <h2 className="text-xl font-bold text-text-main mb-1">
                   Plan Actuel : {plans.find(p => p.id === currentPlanId)?.name}
-                  <span className="text-indigo-400 ml-2 text-sm font-normal">
+                  <span className="text-indigo-500 dark:text-indigo-400 ml-2 text-sm font-normal">
                     (Workspace: {currentWorkspace?.name})
                   </span>
                 </h2>
                 <div className="flex flex-wrap gap-4 mt-2">
-                  <div className="flex items-center gap-1.5 text-xs text-dim">
+                  <div className="flex items-center gap-1.5 text-xs text-text-dim">
                     <Clock className="w-3.5 h-3.5" />
-                    Fin de l&apos;abonnement : <span className="text-white font-medium ml-1">
+                    Fin de l&apos;abonnement : <span className="text-text-main font-medium ml-1">
                       {currentWorkspace?.subscriptionEnd && !isNaN(new Date(currentWorkspace.subscriptionEnd).getTime())
                         ? new Date(currentWorkspace.subscriptionEnd).toLocaleDateString('fr-FR', {
                             day: 'numeric',
@@ -329,12 +326,12 @@ export default function UpgradePage() {
                           : isSyncing ? 'Chargement...' : 'Date non définie'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-dim">
+                  <div className="flex items-center gap-1.5 text-xs text-text-dim">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    Status : <span className={`${currentWorkspace?.subscriptionStatus === 'active' ? 'text-[#00FFB2]' : 'text-orange-400'} font-medium ml-1 uppercase text-[10px]`}>
+                    Status : <span className={`${currentWorkspace?.subscriptionStatus === 'active' ? 'text-[#00FFB2]' : 'text-orange-500 dark:text-orange-400'} font-medium ml-1 uppercase text-[10px]`}>
                       {currentWorkspace?.subscriptionStatus || (currentPlanId === 'starter' ? 'Actif' : 'Inconnu')}
                       {currentWorkspace?.subscriptionInterval && (
-                        <span className="ml-1 text-dim font-normal normal-case">
+                        <span className="ml-1 text-text-dim font-normal normal-case">
                           ({currentWorkspace.subscriptionInterval === 'month' ? 'Mensuel' : 'Annuel'})
                         </span>
                       )}
@@ -342,13 +339,6 @@ export default function UpgradePage() {
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="w-full md:w-auto">
-                <button className="w-full md:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                   Gérer mon abonnement
-                   <ArrowRight className="w-4 h-4" />
-                </button>
             </div>
           </div>
         </motion.div>
@@ -358,16 +348,16 @@ export default function UpgradePage() {
           <div className="inline-flex items-center p-1.5 bg-secondary border border-glass-border rounded-2xl">
             <button 
               onClick={() => setBillingCycle('monthly')}
-              className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${billingCycle === 'monthly' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'text-dim hover:text-white'}`}
+              className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${billingCycle === 'monthly' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : 'text-text-dim hover:text-text-main'}`}
             >
               Mensuel
             </button>
             <button 
               onClick={() => setBillingCycle('yearly')}
-              className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${billingCycle === 'yearly' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'text-dim hover:text-white'}`}
+              className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${billingCycle === 'yearly' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : 'text-text-dim hover:text-text-main'}`}
             >
               Annuel
-              <span className="text-[10px] bg-[#00FFB2]/20 text-[#00FFB2] px-1.5 py-0.5 rounded-md font-bold uppercase">-25%</span>
+              <span className="text-[10px] bg-[#00FFB2]/20 text-emerald-600 dark:text-[#00FFB2] px-1.5 py-0.5 rounded-md font-bold uppercase">-25%</span>
             </button>
           </div>
         </div>
@@ -391,8 +381,8 @@ export default function UpgradePage() {
                 variants={itemVariants}
                 className={`flex flex-col relative rounded-[32px] border transition-all duration-300 ${
                   plan.popular 
-                    ? 'bg-[#12121e] border-indigo-500/40 shadow-[0_0_40px_rgba(99,102,241,0.1)]' 
-                    : 'bg-secondary border-glass-border hover:border-white/10'
+                    ? 'bg-indigo-600 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.2)] scale-[1.02] z-10' 
+                    : 'bg-bg-secondary border-glass-border hover:border-glass-border'
                 }`}
               >
                 {plan.popular && (
@@ -407,25 +397,28 @@ export default function UpgradePage() {
                   <div className="relative z-10 flex flex-col mb-8">
                     <div 
                       className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6"
-                      style={{ backgroundColor: `${plan.color}15`, border: `1px solid ${plan.color}30` }}
+                      style={{ 
+                        backgroundColor: plan.popular ? 'rgba(255,255,255,0.2)' : `${plan.color}15`, 
+                        border: `1px solid ${plan.popular ? 'rgba(255,255,255,0.4)' : `${plan.color}30`}` 
+                      }}
                     >
-                      <Icon className="w-6 h-6" style={{ color: plan.color }} />
+                      <Icon className={`w-6 h-6 ${plan.popular ? 'text-white' : ''}`} style={plan.popular ? {} : { color: plan.color }} />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                    <p className="text-dim text-sm h-10 leading-relaxed">{plan.description}</p>
+                    <h3 className={`text-2xl font-bold mb-2 tracking-tight ${plan.popular ? 'text-white' : 'text-text-main'}`}>{plan.name}</h3>
+                    <p className={`text-sm h-10 leading-relaxed font-medium ${plan.popular ? 'text-indigo-100' : 'text-text-dim'}`}>{plan.description}</p>
                   </div>
 
                   <div className="relative z-10 flex flex-col mb-8">
                     <div className="flex flex-col">
-                      <span className="text-sm text-dim line-through decoration-indigo-500/50 decoration-2">
+                      <span className={`text-sm line-through decoration-2 ${plan.popular ? 'text-indigo-300 decoration-indigo-200' : 'text-text-muted decoration-indigo-500/50'}`}>
                         {typeof originalPrice === 'number' ? `$${originalPrice}` : originalPrice}
                       </span>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-white">
+                        <span className={`text-3xl font-extrabold ${plan.popular ? 'text-white' : 'text-text-main'}`}>
                           {price === 0 ? 'GRATUIT' : `$${price}`}
                         </span>
                         {typeof price === 'number' && price !== 0 && (
-                          <span className="text-dim text-[10px]">/ {billingCycle === 'monthly' ? 'mois' : 'an'}</span>
+                          <span className={`${plan.popular ? 'text-indigo-100' : 'text-text-dim'} text-[11px] font-medium`}>/ {billingCycle === 'monthly' ? 'mois' : 'an'}</span>
                         )}
                       </div>
                     </div>
@@ -436,10 +429,10 @@ export default function UpgradePage() {
                   <div className="space-y-4 mb-10 flex-1">
                     {plan.features.map((feature, i) => (
                       <div key={i} className="flex items-start gap-3">
-                        <div className="mt-1 w-4 h-4 rounded-full bg-[#00FFB2]/10 border border-[#00FFB2]/20 flex items-center justify-center flex-shrink-0">
-                          <Check className="w-2.5 h-2.5 text-[#00FFB2]" />
+                        <div className={`mt-1 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${plan.popular ? 'bg-white/20 border border-white/40' : 'bg-emerald-500/10 dark:bg-[#00FFB2]/10 border border-emerald-500/20 dark:border-[#00FFB2]/20'}`}>
+                          <Check className={`w-2.5 h-2.5 ${plan.popular ? 'text-white' : 'text-emerald-600 dark:text-[#00FFB2]'}`} />
                         </div>
-                        <span className="text-sm text-dim leading-tight">{feature}</span>
+                        <span className={`text-sm leading-tight ${plan.popular ? 'text-white/90' : 'text-text-dim'}`}>{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -450,10 +443,10 @@ export default function UpgradePage() {
                     className={`
                       w-full py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2
                       ${isCurrent 
-                        ? 'bg-white/5 text-dim border border-white/5 cursor-default' 
+                        ? plan.popular ? 'bg-white/10 text-white/50 cursor-default' : 'bg-bg-tertiary text-text-dim border border-glass-border cursor-default' 
                         : plan.popular
-                          ? 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-lg shadow-indigo-500/25'
-                          : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'
+                          ? 'bg-white text-indigo-600 hover:bg-indigo-50 shadow-lg shadow-white/10'
+                          : 'bg-bg-secondary text-text-main border border-glass-border hover:bg-glass-hover'
                       }
                       ${isUpgrading === plan.id ? 'opacity-50 cursor-wait' : ''}
                     `}
@@ -469,26 +462,26 @@ export default function UpgradePage() {
 
         {/* FAQ or Trust Badges Section */}
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
-           <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+           <div className="p-6 rounded-2xl bg-bg-secondary border border-glass-border">
               <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4">
-                 <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                 <ShieldCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <h4 className="text-white font-bold mb-2">Sécurité Maximale</h4>
-              <p className="text-xs text-dim">Vos données sont encryptées de bout en bout avec les standards les plus élevés du marché.</p>
+              <h4 className="text-text-main font-bold mb-2">Sécurité Maximale</h4>
+              <p className="text-xs text-text-dim">Vos données sont encryptées de bout en bout avec les standards les plus élevés du marché.</p>
            </div>
-           <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+           <div className="p-6 rounded-2xl bg-bg-secondary border border-glass-border">
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
-                 <CreditCard className="w-5 h-5 text-purple-400" />
+                 <CreditCard className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <h4 className="text-white font-bold mb-2">Paiement Sécurisé</h4>
-              <p className="text-xs text-dim">Nous utilisons Stripe pour traiter tous les paiements. Vos informations bancaires ne sont jamais stockées chez nous.</p>
+              <h4 className="text-text-main font-bold mb-2">Paiement Sécurisé</h4>
+              <p className="text-xs text-text-dim">Nous utilisons Stripe pour traiter tous les paiements. Vos informations bancaires ne sont jamais stockées chez nous.</p>
            </div>
-           <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
-              <div className="w-10 h-10 rounded-xl bg-[#00FFB2]/10 flex items-center justify-center mb-4">
-                 <Calendar className="w-5 h-5 text-[#00FFB2]" />
+           <div className="p-6 rounded-2xl bg-bg-secondary border border-glass-border">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-[#00FFB2]/10 flex items-center justify-center mb-4">
+                 <Calendar className="w-5 h-5 text-emerald-600 dark:text-[#00FFB2]" />
               </div>
-              <h4 className="text-white font-bold mb-2">Sans Engagement</h4>
-              <p className="text-xs text-dim">Annulez ou changez de plan à tout moment. Pas de frais cachés, pas de mauvaise surprise.</p>
+              <h4 className="text-text-main font-bold mb-2">Sans Engagement</h4>
+              <p className="text-xs text-text-dim">Annulez ou changez de plan à tout moment. Pas de frais cachés, pas de mauvaise surprise.</p>
            </div>
         </div>
       </div>

@@ -71,13 +71,13 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
           <motion.div
             initial={false}
             animate={{
-              backgroundColor: i + 1 <= currentStep ? '#6366f1' : 'rgba(255,255,255,0.1)',
+              backgroundColor: i + 1 <= currentStep ? '#6366f1' : 'var(--glass-border)',
               scale: i + 1 === currentStep ? 1.1 : 1,
             }}
             className="w-2.5 h-2.5 rounded-full"
           />
           {i < totalSteps - 1 && (
-            <div className={`w-8 h-0.5 ml-2 ${i + 1 < currentStep ? 'bg-indigo-500' : 'bg-white/10'}`} />
+            <div className={`w-8 h-0.5 ml-2 ${i + 1 < currentStep ? 'bg-indigo-500' : 'bg-glass-border'}`} />
           )}
         </div>
       ))}
@@ -183,7 +183,7 @@ export default function OnboardingPage() {
       } else {
         toast.error(resData.error || 'Erreur lors de l\'importation');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erreur de connexion');
     } finally {
       setIsUploadingIcon(false);
@@ -268,9 +268,8 @@ export default function OnboardingPage() {
         }, 1500);
       } else {
         toast.error(resData.error || 'Erreur lors de la création');
-        setIsSubmitting(false);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Submit error:', error);
       toast.error('Erreur de connexion au serveur');
       setIsSubmitting(false);
@@ -293,7 +292,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#0a0a0f] text-white selection:bg-indigo-500/30">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-bg-primary text-text-main selection:bg-indigo-500/30">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -315,16 +314,16 @@ export default function OnboardingPage() {
             <Rocket className="w-8 h-8 text-white" />
           </motion.div>
           
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-gray-400 mb-2">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-main via-text-main to-text-dim mb-2">
             Bienvenue, {user?.firstName || 'User'} !
           </h1>
-          <p className="text-gray-400 max-w-md">
+          <p className="text-text-dim max-w-md">
             Configurons votre espace de travail pour qu&apos;il soit parfait dès le départ.
           </p>
         </div>
 
         {/* Card */}
-        <div className="glass-card bg-[#14141d]/80 backdrop-blur-2xl border border-white/5 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+        <div className="glass-card bg-bg-secondary/80 backdrop-blur-2xl border border-glass-border rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
           
           {/* Progress */}
           <div className="flex justify-center mb-8">
@@ -351,7 +350,7 @@ export default function OnboardingPage() {
               <motion.div key="step1" className="space-y-6">
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-bold mb-2">Commençons par le nom</h2>
-                  <p className="text-gray-400 text-sm">Comment souhaitez-vous appeler votre espace de travail ?</p>
+                  <p className="text-text-dim text-sm">Comment souhaitez-vous appeler votre espace de travail ?</p>
                 </div>
 
                 <div className="relative group">
@@ -364,11 +363,11 @@ export default function OnboardingPage() {
                     value={data.workspaceName}
                     onChange={(e) => updateData('workspaceName', e.target.value)}
                     placeholder="Ex: Agence Acme, Projet X..."
-                    className="w-full bg-white/5 border border-white/10 text-white text-lg rounded-xl pl-12 pr-4 py-4 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-inner placeholder:text-gray-600"
+                    className="w-full bg-input-bg border border-input-border text-text-main text-lg rounded-xl pl-12 pr-4 py-4 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-inner placeholder:text-text-muted"
                   />
                 </div>
                 
-                <div className="flex gap-3 text-xs text-gray-500 justify-center mt-4">
+                <div className="flex gap-3 text-xs text-text-dim justify-center mt-4">
                   <span className="flex items-center gap-1"><Check className="w-3 h-3 text-green-500"/> Espaces illimités</span>
                   <span className="flex items-center gap-1"><Check className="w-3 h-3 text-green-500"/> Invitez votre équipe</span>
                 </div>
@@ -380,7 +379,7 @@ export default function OnboardingPage() {
               <motion.div key="step2" className="space-y-6">
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-bold mb-2">Quel est votre usage ?</h2>
-                  <p className="text-gray-400 text-sm">Nous adapterons l&apos;expérience en fonction de vos besoins.</p>
+                  <p className="text-text-dim text-sm">Nous adapterons l&apos;expérience en fonction de vos besoins.</p>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -402,12 +401,12 @@ export default function OnboardingPage() {
                         relative p-3 rounded-xl border text-left transition-all duration-200 group
                         ${data.useCase === item.id 
                           ? 'bg-indigo-600/10 border-indigo-500 ring-1 ring-indigo-500/50' 
-                          : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10'}
+                          : 'bg-bg-tertiary border-glass-border hover:bg-glass-hover hover:border-glass-border'}
                       `}
                     >
-                      <item.icon className={`w-5 h-5 mb-2 ${data.useCase === item.id ? 'text-indigo-400' : 'text-gray-400 group-hover:text-gray-300'}`} />
+                      <item.icon className={`w-5 h-5 mb-2 ${data.useCase === item.id ? 'text-indigo-400' : 'text-text-dim group-hover:text-text-main'}`} />
                       <div className="font-semibold text-xs mb-0.5">{item.label}</div>
-                      <div className="text-[10px] text-gray-500 line-clamp-1">{item.desc}</div>
+                      <div className="text-[10px] text-text-muted line-clamp-1">{item.desc}</div>
                       
                       {data.useCase === item.id && (
                         <motion.div layoutId="check-badge" className="absolute top-2 right-2">
@@ -427,20 +426,20 @@ export default function OnboardingPage() {
               <motion.div key="step3" className="space-y-6">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold mb-2">Personnalisation</h2>
-                  <p className="text-gray-400 text-sm">Donnez une identité visuelle à votre espace.</p>
+                  <p className="text-text-dim text-sm">Donnez une identité visuelle à votre espace.</p>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex bg-white/5 p-1 rounded-xl mb-6">
+                <div className="flex bg-bg-tertiary p-1 rounded-xl mb-6">
                   <button
                     onClick={() => setPersonalizationMode('color')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${personalizationMode === 'color' ? 'bg-[#14141d] text-indigo-400 shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${personalizationMode === 'color' ? 'bg-bg-secondary text-indigo-400 shadow-sm' : 'text-text-muted hover:text-text-main'}`}
                   >
                     <Palette className="w-4 h-4" /> Couleur
                   </button>
                   <button
                     onClick={() => setPersonalizationMode('image')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${personalizationMode === 'image' ? 'bg-[#14141d] text-indigo-400 shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${personalizationMode === 'image' ? 'bg-bg-secondary text-indigo-400 shadow-sm' : 'text-text-muted hover:text-text-main'}`}
                   >
                     <ImageIcon className="w-4 h-4" /> Image
                   </button>
@@ -458,7 +457,7 @@ export default function OnboardingPage() {
                          <button
                             key={color}
                             onClick={() => { updateData('themeColor', color); updateData('image', undefined); }}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 ${data.themeColor === color && !data.image ? 'ring-2 ring-offset-2 ring-offset-[#14141d] ring-white scale-110' : ''}`}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 ${data.themeColor === color && !data.image ? 'ring-2 ring-offset-2 ring-offset-bg-secondary ring-text-main scale-110' : ''}`}
                             style={{ backgroundColor: color }}
                          >
                            {data.themeColor === color && !data.image && <Check className="w-4 h-4 text-white drop-shadow-md" />}
@@ -467,14 +466,14 @@ export default function OnboardingPage() {
                     </div>
                     
                     <div className="relative">
-                      <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2 block">Code Couleur (Hex)</label>
+                      <label className="text-xs text-text-muted uppercase tracking-wider font-semibold mb-2 block">Code Couleur (Hex)</label>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg border border-white/10" style={{ backgroundColor: data.themeColor }}></div>
+                        <div className="w-10 h-10 rounded-lg border border-glass-border" style={{ backgroundColor: data.themeColor }}></div>
                         <input 
                           type="text" 
                           value={data.themeColor}
                           onChange={(e) => { updateData('themeColor', e.target.value); updateData('image', undefined); }}
-                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 font-mono text-sm focus:border-indigo-500 focus:outline-none"
+                          className="flex-1 bg-input-bg border border-input-border text-text-main rounded-xl px-4 py-2 font-mono text-sm focus:border-indigo-500 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -493,7 +492,7 @@ export default function OnboardingPage() {
                         <button
                           key={img}
                           onClick={() => updateData('image', img)}
-                          className={`relative aspect-video rounded-xl overflow-hidden group border-2 transition-all ${data.image === img ? 'border-indigo-500' : 'border-transparent hover:border-white/20'}`}
+                          className={`relative aspect-video rounded-xl overflow-hidden group border-2 transition-all ${data.image === img ? 'border-indigo-500' : 'border-transparent hover:border-glass-border'}`}
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={img} alt="Workspace cover" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -515,7 +514,7 @@ export default function OnboardingPage() {
                           relative aspect-video rounded-xl overflow-hidden group border-2 transition-all flex flex-col items-center justify-center gap-2
                           ${!PRESET_IMAGES.includes(data.image || '') && data.image 
                             ? 'border-indigo-500 bg-indigo-500/5' 
-                            : 'border-dashed border-white/20 hover:border-indigo-500/50 hover:bg-white/10 bg-white/5'}
+                            : 'border-dashed border-glass-border hover:border-indigo-500/50 hover:bg-glass-hover bg-bg-tertiary'}
                           ${isUploadingIcon ? 'opacity-50 cursor-not-allowed' : ''}
                         `}
                       >
@@ -553,13 +552,13 @@ export default function OnboardingPage() {
                 )}
 
                 {/* Preview */}
-                <div className="mt-8 p-4 bg-white/5 rounded-xl border border-white/5 flex items-center gap-4 relative overflow-hidden">
+                <div className="mt-8 p-4 bg-bg-tertiary rounded-xl border border-glass-border flex items-center gap-4 relative overflow-hidden">
                   {/* Optional Background for Preview */}
                   {data.image && (
                      <div className="absolute inset-0 opacity-20">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={data.image} alt="bg-preview" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#14141d] to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-bg-secondary to-transparent"></div>
                      </div>
                   )}
                   
@@ -573,8 +572,8 @@ export default function OnboardingPage() {
                     )}
                   </div>
                   <div className="z-10">
-                    <h4 className="font-bold text-white text-lg">{data.workspaceName || 'Mon Workspace'}</h4>
-                    <p className="text-xs text-gray-400">Aperçu de votre identité visuelle</p>
+                    <h4 className="font-bold text-text-main text-lg">{data.workspaceName || 'Mon Workspace'}</h4>
+                    <p className="text-xs text-text-dim">Aperçu de votre identité visuelle</p>
                   </div>
                 </div>
               </motion.div>
@@ -585,23 +584,23 @@ export default function OnboardingPage() {
               <motion.div key="step4" className="space-y-6">
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-bold mb-2">Invitez votre équipe</h2>
-                  <p className="text-gray-400 text-sm">Le travail est meilleur ensemble. Ajoutez vos amis dès maintenant.</p>
+                  <p className="text-text-dim text-sm">Le travail est meilleur ensemble. Ajoutez vos amis dès maintenant.</p>
                 </div>
 
                 {/* Copy Link Section */}
-                <div className="bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-indigo-500/30 rounded-xl p-4 mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                     <span className="text-sm font-semibold text-indigo-300 flex items-center gap-2">
+                <div className="bg-indigo-50/50 dark:bg-gradient-to-r dark:from-indigo-900/40 dark:to-purple-900/40 border border-indigo-200 dark:border-indigo-500/30 rounded-2xl p-5 mb-8 shadow-sm dark:shadow-none">
+                  <div className="flex items-center justify-between mb-3">
+                     <span className="text-sm font-bold text-indigo-600 dark:text-indigo-300 flex items-center gap-2">
                        <LinkIcon className="w-4 h-4" /> Lien d&apos;invitation unique
                      </span>
                   </div>
                   <div className="flex gap-2">
-                    <code className="flex-1 bg-black/30 rounded-lg px-3 py-2 text-xs text-gray-400 font-mono overflow-hidden whitespace-nowrap text-ellipsis">
+                    <code className="flex-1 bg-white dark:bg-black/30 border border-indigo-100 dark:border-transparent rounded-xl px-4 py-2.5 text-xs text-indigo-900/70 dark:text-indigo-100/70 font-mono overflow-hidden whitespace-nowrap text-ellipsis">
                       {inviteLink || 'Génération du lien...'}
                     </code>
                     <button 
                       onClick={copyInviteLink}
-                      className="bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 p-2 rounded-lg transition-colors"
+                      className="bg-indigo-600 text-white dark:bg-indigo-500/20 dark:text-indigo-300 p-2.5 rounded-xl hover:bg-indigo-700 dark:hover:bg-indigo-500/40 transition-all shadow-sm active:scale-95"
                     >
                       <Copy className="w-4 h-4" />
                     </button>
@@ -617,12 +616,12 @@ export default function OnboardingPage() {
                       onChange={(e) => setEmailInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddEmail()}
                       placeholder="exemple@email.com"
-                      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none"
+                      className="flex-1 bg-input-bg border border-input-border text-text-main rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none"
                     />
                     <button 
                       onClick={handleAddEmail}
                       disabled={!emailInput || !emailInput.includes('@')}
-                      className="bg-white text-black px-4 rounded-xl font-medium hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="bg-bg-secondary text-text-main border border-glass-border px-4 rounded-xl font-medium hover:bg-glass-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Plus className="w-5 h-5" />
                     </button>
@@ -632,7 +631,7 @@ export default function OnboardingPage() {
                   {data.invitedEmails.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
                       {data.invitedEmails.map((email) => (
-                        <span key={email} className="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full text-sm border border-white/5 animate-in fade-in zoom-in duration-200">
+                        <span key={email} className="inline-flex items-center gap-2 bg-bg-tertiary px-3 py-1.5 rounded-full text-sm border border-glass-border animate-in fade-in zoom-in duration-200">
                           {email}
                           <button onClick={() => removeEmail(email)} className="hover:text-red-400 transition-colors">
                             <X className="w-3 h-3" />
@@ -663,12 +662,12 @@ export default function OnboardingPage() {
                     />
                  </div>
                  
-                 <h2 className="text-3xl font-bold text-white mb-2">Tout est prêt !</h2>
-                 <p className="text-gray-400 mb-8 max-w-sm mx-auto">
+                 <h2 className="text-3xl font-bold text-text-main mb-2">Tout est prêt !</h2>
+                 <p className="text-text-dim mb-8 max-w-sm mx-auto">
                    Votre espace de travail <strong>{data.workspaceName}</strong> a été configuré avec succès.
                  </p>
 
-                 <div className="bg-white/5 rounded-2xl p-6 text-left max-w-sm mx-auto space-y-4 border border-white/5 relative overflow-hidden">
+                 <div className="bg-bg-tertiary rounded-2xl p-6 text-left max-w-sm mx-auto space-y-4 border border-glass-border relative overflow-hidden">
                     {/* Background hint */}
                     {data.image && (
                       /* eslint-disable-next-line @next/next/no-img-element */
@@ -677,22 +676,22 @@ export default function OnboardingPage() {
 
                     <div className="relative z-10 space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Nom</span>
-                        <span className="font-medium">{data.workspaceName}</span>
+                        <span className="text-text-muted">Nom</span>
+                        <span className="font-medium text-text-main">{data.workspaceName}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Usage</span>
-                        <span className="font-medium capitalize">{data.useCase}</span>
+                        <span className="text-text-muted">Usage</span>
+                        <span className="font-medium text-text-main capitalize">{data.useCase}</span>
                       </div>
                        <div className="flex items-center justify-between text-sm">
                         <span className="text-zinc-500">Plan</span>
                         <span className="font-medium text-emerald-400 capitalize">{new URLSearchParams(window.location.search).get('plan') || 'Starter'}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Style</span>
+                        <span className="text-text-muted">Style</span>
                         <div className="flex items-center gap-2">
-                           {data.image ? <span className="text-xs bg-white/10 px-2 py-0.5 rounded">Image</span> : null}
-                           <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: data.themeColor }} />
+                           {data.image ? <span className="text-xs bg-bg-secondary px-2 py-0.5 rounded border border-glass-border">Image</span> : null}
+                           <div className="w-4 h-4 rounded-full border border-glass-border" style={{ backgroundColor: data.themeColor }} />
                         </div>
                       </div>
                     </div>
@@ -703,12 +702,12 @@ export default function OnboardingPage() {
           </motion.div>
 
           {/* User Controls */}
-          <div className="flex justify-between mt-12 pt-6 border-t border-white/5">
+          <div className="flex justify-between mt-12 pt-6 border-t border-glass-border">
             <button
               onClick={prevStep}
               className={`
                 px-6 py-2.5 rounded-xl text-sm font-medium transition-colors
-                ${step === 1 ? 'invisible' : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                ${step === 1 ? 'invisible' : 'text-text-dim hover:text-text-main hover:bg-glass-hover'}
               `}
             >
               Retour
@@ -719,8 +718,8 @@ export default function OnboardingPage() {
                 onClick={nextStep}
                 disabled={step === 1 && !data.workspaceName}
                 className="
-                  px-6 py-2.5 rounded-xl bg-white text-black font-semibold text-sm
-                  hover:bg-gray-100 active:scale-95 transition-all
+                  px-6 py-2.5 rounded-xl bg-text-main text-bg-primary font-semibold text-sm
+                  hover:opacity-90 active:scale-95 transition-all
                   disabled:opacity-50 disabled:cursor-not-allowed
                   flex items-center gap-2
                 "

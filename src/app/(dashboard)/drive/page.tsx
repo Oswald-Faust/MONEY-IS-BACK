@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Upload, 
-  FolderPlus, 
-  Search, 
-  ChevronRight, 
+import {
+  Upload,
+  FolderPlus,
+  Search,
+  ChevronRight,
   ChevronLeft,
-  Grid3X3, 
+  Grid3X3,
   List as ListIcon,
   HardDrive,
   Loader2
@@ -16,23 +16,25 @@ import {
 import { FileCard, FolderCard } from '@/components/ui';
 import { useAppStore, useAuthStore } from '@/store';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 
 export default function DrivePage() {
-  const { 
-    driveFiles, 
-    driveFolders, 
+  const {
+    driveFiles,
+    driveFolders,
     projects,
     setUploadModalOpen,
     setCreateFolderModalOpen,
     setDriveFiles,
     setDriveFolders
   } = useAppStore();
-  
+
   const { token } = useAuthStore();
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('project');
-  
+
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -58,7 +60,7 @@ export default function DrivePage() {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
-        
+
         if (data.folders) setDriveFolders(data.folders);
         if (data.files) setDriveFiles(data.files);
         if (data.path) setApiPath(data.path);
@@ -98,7 +100,7 @@ export default function DrivePage() {
 
   // Breadcrumbs logic
   const getBreadcrumbs = () => {
-    const crumbs: { id: string | null; name: string }[] = [{ id: null, name: 'Drive' }];
+    const crumbs: { id: string | null; name: string }[] = [{ id: null, name: t.drivePage.driveFor }];
     apiPath.forEach(p => crumbs.push({ id: p._id, name: p.name }));
     return crumbs;
   };
@@ -115,31 +117,31 @@ export default function DrivePage() {
           {projectId && (
             <button
               onClick={() => router.push(`/projects/${projectId}`)}
-              className="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white hover:bg-white/[0.08] transition-all"
+              className="p-2 rounded-xl bg-glass-bg border border-glass-border text-text-muted hover:text-text-main hover:bg-glass-hover transition-all"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
           )}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
               <HardDrive className="w-8 h-8 text-indigo-400" />
-              {selectedProject ? `Drive - ${selectedProject.name}` : 'Mon Drive Global'}
+              {selectedProject ? `${t.drivePage.driveFor} - ${selectedProject.name}` : t.drivePage.title}
             </h1>
-            <p className="text-gray-500 mt-1 uppercase text-[10px] font-bold tracking-widest">
-              {filteredFiles.length} fichiers • {filteredFolders.length} dossiers
+            <p className="text-text-muted mt-1 uppercase text-[10px] font-bold tracking-widest">
+              {filteredFiles.length} {t.drivePage.files} • {filteredFolders.length} {t.drivePage.folders}
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setCreateFolderModalOpen(true, projectId || undefined, currentFolderId || undefined)}
-            className="px-4 py-2.5 rounded-xl flex items-center gap-2 bg-white/[0.03] border border-white/10 text-white font-medium text-sm hover:bg-white/[0.08] transition-all"
+            className="px-4 py-2.5 rounded-xl flex items-center gap-2 bg-glass-bg border border-glass-border text-text-main font-medium text-sm hover:bg-glass-hover transition-all"
           >
             <FolderPlus className="w-4 h-4" />
-            Dossier
+            {t.drivePage.newFolder}
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -148,21 +150,21 @@ export default function DrivePage() {
             className="px-4 py-2.5 rounded-xl flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-sm hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg shadow-indigo-500/20"
           >
             <Upload className="w-4 h-4" />
-            Nouveau fichier
+            {t.drivePage.newFile}
           </motion.button>
         </div>
       </motion.div>
 
       {/* Toolbar & Breadcrumbs */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-y border-white/5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-y border-glass-border">
         <div className="flex items-center gap-2 text-sm font-medium">
           {getBreadcrumbs().map((crumb, idx) => (
             <React.Fragment key={crumb.id || 'root'}>
-              {idx > 0 && <ChevronRight className="w-4 h-4 text-gray-700" />}
+              {idx > 0 && <ChevronRight className="w-4 h-4 text-text-muted" />}
               <button
                 onClick={() => setCurrentFolderId(crumb.id)}
-                className={`hover:text-white transition-colors uppercase tracking-widest text-[10px] ${
-                  crumb.id === currentFolderId ? 'text-white font-bold' : 'text-gray-500'
+                className={`hover:text-text-main transition-colors uppercase tracking-widest text-[10px] ${
+                  crumb.id === currentFolderId ? 'text-text-main font-bold' : 'text-text-muted'
                 }`}
               >
                 {crumb.name}
@@ -173,25 +175,25 @@ export default function DrivePage() {
 
         <div className="flex items-center gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher..."
-              className="pl-9 pr-4 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-all w-64"
+              placeholder={t.drivePage.searchPlaceholder}
+              className="pl-9 pr-4 py-2 bg-input-bg border border-input-border rounded-xl text-sm text-text-main focus:outline-none focus:border-indigo-500/50 transition-all w-64 placeholder:text-text-muted"
             />
           </div>
-          <div className="flex items-center bg-white/[0.03] rounded-xl p-1 border border-white/10">
+          <div className="flex items-center bg-glass-bg rounded-xl p-1 border border-glass-border">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-gray-500 hover:text-white'}`}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-text-muted hover:text-text-main'}`}
             >
               <Grid3X3 className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-gray-500 hover:text-white'}`}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-text-muted hover:text-text-main'}`}
             >
               <ListIcon className="w-4 h-4" />
             </button>
@@ -206,7 +208,7 @@ export default function DrivePage() {
         </div>
       ) : filteredFolders.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Dossiers</h2>
+          <h2 className="text-xs font-bold text-text-muted uppercase tracking-[0.2em] ml-1">{t.drivePage.foldersSection}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence mode="popLayout">
               {filteredFolders.map(folder => (
@@ -220,8 +222,8 @@ export default function DrivePage() {
       {/* Files Section */}
       {!loading && (
         <div className="space-y-4">
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Fichiers récents</h2>
-          <div className={viewMode === 'grid' 
+          <h2 className="text-xs font-bold text-text-muted uppercase tracking-[0.2em] ml-1">{t.drivePage.recentFiles}</h2>
+          <div className={viewMode === 'grid'
             ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
             : "space-y-2"
           }>
@@ -235,14 +237,14 @@ export default function DrivePage() {
       )}
 
       {!loading && filteredFiles.length === 0 && filteredFolders.length === 0 && (
-        <div className="text-center py-32 bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
-          <HardDrive className="w-16 h-16 text-gray-600 mx-auto mb-6 opacity-20" />
-          <p className="text-gray-500 font-medium tracking-wide">Ce dossier est vide</p>
-          <button 
+        <div className="text-center py-32 bg-bg-tertiary rounded-3xl border border-dashed border-glass-border">
+          <HardDrive className="w-16 h-16 text-text-muted mx-auto mb-6 opacity-20" />
+          <p className="text-text-dim font-medium tracking-wide">{t.drivePage.emptyMessage}</p>
+          <button
             onClick={() => setUploadModalOpen(true)}
             className="mt-4 text-indigo-400 hover:text-indigo-300 text-sm font-bold uppercase tracking-widest transition-colors"
           >
-            Uploader mon premier fichier
+            {t.drivePage.uploadFirst}
           </button>
         </div>
       )}

@@ -1,10 +1,10 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Invitation from '@/models/Invitation';
 import Workspace from '@/models/Workspace';
 import User from '@/models/User';
+import Project from '@/models/Project';
 import { verifyAuth } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Token requis' }, { status: 400 });
     }
 
+    // Cast as any to access projectIds if not in type definition yet, or relying on schema
     const invitation = await Invitation.findOne({ token, status: 'pending' });
 
     if (!invitation) {
@@ -33,11 +34,6 @@ export async function POST(request: NextRequest) {
         await invitation.save();
         return NextResponse.json({ success: false, error: 'Invitation expirée' }, { status: 410 });
     }
-
-    // Verify email match?
-    // Users might want to accept with a different email than invited. 
-    // Generally, we allow it, but we might warn. 
-    // For now, let's allow it but we assume the user accepts it.
 
     const workspace = await Workspace.findById(invitation.workspace);
     if (!workspace) {
@@ -63,6 +59,34 @@ export async function POST(request: NextRequest) {
 
     // Add to user
     await User.findByIdAndUpdate(auth.userId, { $addToSet: { workspaces: workspace._id } });
+
+    // Add to projects if specified
+    // Access projectIds safely
+    const projectIds = (invitation as any).projectIds || [];
+    
+    if (projectIds && projectIds.length > 0) {
+        for (const projectId of projectIds) {
+            try {
+                const project = await Project.findById(projectId);
+                // Ensure project belongs to the workspace
+                if (project && project.workspace.toString() === workspace._id.toString()) {
+                    const isAlreadyMember = project.members.some((m: any) => m.user.toString() === auth.userId);
+                    const isProjectOwner = project.owner.toString() === auth.userId;
+                    
+                    if (!isAlreadyMember && !isProjectOwner) {
+                        project.members.push({
+                            user: auth.userId,
+                            role: invitation.role, // Inherit role from workspace invite
+                            joinedAt: new Date()
+                        });
+                        await project.save();
+                    }
+                }
+            } catch (err) {
+                console.error(`Error adding user to project ${projectId} on accept:`, err);
+            }
+        }
+    }
 
     // Mark accepted
     invitation.status = 'accepted';

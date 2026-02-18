@@ -180,17 +180,17 @@ export default function ProjectTeamPage() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.push(`/projects/${id}`)}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-dim hover:text-white transition-all"
+            className="p-2 rounded-xl bg-bg-secondary hover:bg-glass-hover text-text-dim hover:text-text-main transition-all border border-glass-border"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
             <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-bold text-dim uppercase tracking-widest">Projet</span>
+                <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Projet</span>
                 <span className="w-1 h-1 rounded-full bg-loading-bar"></span>
-                <span className="text-xs font-bold text-dim uppercase tracking-widest">Équipe</span>
+                <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Équipe</span>
             </div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-text-main flex items-center gap-3">
               <Users className="w-8 h-8 text-indigo-400" />
               Gestion de l&apos;équipe
             </h1>
@@ -219,21 +219,21 @@ export default function ProjectTeamPage() {
             animate={{ opacity: 1, y: 0 }}
             className="glass-card p-6 border-l-4 border-indigo-500"
         >
-            <h3 className="text-lg font-bold text-white mb-4">Ajouter un membre au projet</h3>
+            <h3 className="text-lg font-bold text-text-main mb-4">Ajouter un membre au projet</h3>
             <form onSubmit={handleAddMember} className="flex flex-col md:flex-row gap-4 items-end">
                 <div className="flex-1 w-full">
                     <UserSelector 
                         value={newMemberId}
-                        onChange={setNewMemberId}
+                        onChange={(val) => setNewMemberId(val as string)}
                         label="Sélectionner un utilisateur"
                     />
                 </div>
                 <div className="w-full md:w-48">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Rôle</label>
+                    <label className="block text-sm font-medium text-text-muted mb-2">Rôle</label>
                     <select 
                         value={newMemberRole}
-                        onChange={(e) => setNewMemberRole(e.target.value as any)}
-                        className="w-full px-4 py-3 bg-glass-bg border border-glass-border rounded-xl text-main focus:outline-none focus:border-indigo-500"
+                        onChange={(e) => setNewMemberRole(e.target.value as 'admin' | 'editor')}
+                        className="w-full px-4 py-3 bg-bg-secondary border border-glass-border rounded-xl text-text-main focus:outline-none focus:border-indigo-500"
                     >
                         <option value="editor">Éditeur</option>
                         <option value="admin">Administrateur</option>
@@ -253,12 +253,12 @@ export default function ProjectTeamPage() {
       {/* Team List & Stats */}
       <div className="grid grid-cols-1 gap-6">
         {loading ? (
-            <div className="text-center py-20 text-dim">
+            <div className="text-center py-20 text-text-dim">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
                 Chargement de l&apos;équipe...
             </div>
         ) : members.length === 0 ? (
-            <div className="text-center py-20 text-dim">
+            <div className="text-center py-20 text-text-dim">
                 Aucun membre dans ce projet (à part le propriétaire ?)
             </div>
         ) : (
@@ -267,27 +267,27 @@ export default function ProjectTeamPage() {
                     key={member.user?._id || Math.random()}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass-card p-6 flex flex-col lg:flex-row items-center gap-6 group hover:bg-white/[0.02] transition-colors"
+                    className="glass-card p-6 flex flex-col lg:flex-row items-center gap-6 group hover:bg-glass-hover transition-colors"
                 >
                     {/* User Info */}
                     <div className="flex items-center gap-4 min-w-[250px] w-full lg:w-auto">
                         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px]">
-                            <div className="w-full h-full rounded-full bg-black overflow-hidden relative">
+                            <div className="w-full h-full rounded-full bg-bg-primary overflow-hidden relative">
                                 {member.user?.avatar ? (
                                     <Image src={member.user.avatar} alt={member.user.firstName} fill className="object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-xl font-bold text-white bg-glass-bg">
+                                    <div className="w-full h-full flex items-center justify-center text-xl font-bold text-text-main bg-bg-secondary">
                                         {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
                                     </div>
                                 )}
                             </div>
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-white">
+                            <h3 className="text-lg font-bold text-text-main">
                                 {member.user?.firstName} {member.user?.lastName}
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
-                                <span className="text-sm text-dim">{member.user?.email}</span>
+                                <span className="text-sm text-text-dim">{member.user?.email}</span>
                             </div>
                             <div className="mt-2 flex items-center gap-2">
                                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
@@ -307,23 +307,23 @@ export default function ProjectTeamPage() {
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full border-t lg:border-t-0 lg:border-l border-white/5 pt-4 lg:pt-0 lg:pl-6">
-                        <div className="bg-white/5 rounded-xl p-3 text-center">
-                            <div className="text-xs text-dim uppercase tracking-wider font-bold mb-1">Tâches</div>
-                            <div className="text-xl font-bold text-white">{member.stats.totalTasks}</div>
+                    <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full border-t lg:border-t-0 lg:border-l border-glass-border pt-4 lg:pt-0 lg:pl-6">
+                        <div className="bg-bg-secondary rounded-xl p-3 text-center border border-glass-border">
+                            <div className="text-[10px] text-text-dim uppercase tracking-wider font-bold mb-1">Tâches</div>
+                            <div className="text-xl font-bold text-text-main">{member.stats.totalTasks}</div>
                         </div>
-                        <div className="bg-white/5 rounded-xl p-3 text-center">
-                            <div className="text-xs text-dim uppercase tracking-wider font-bold mb-1">En cours</div>
-                            <div className="text-xl font-bold text-blue-400">{member.stats.inProgressTasks}</div>
+                        <div className="bg-bg-secondary rounded-xl p-3 text-center border border-glass-border">
+                            <div className="text-[10px] text-text-dim uppercase tracking-wider font-bold mb-1">En cours</div>
+                            <div className="text-xl font-bold text-blue-500 dark:text-blue-400">{member.stats.inProgressTasks}</div>
                         </div>
-                        <div className="bg-white/5 rounded-xl p-3 text-center">
-                            <div className="text-xs text-dim uppercase tracking-wider font-bold mb-1">Terminées</div>
-                            <div className="text-xl font-bold text-green-400">{member.stats.completedTasks}</div>
+                        <div className="bg-bg-secondary rounded-xl p-3 text-center border border-glass-border">
+                            <div className="text-[10px] text-text-dim uppercase tracking-wider font-bold mb-1">Terminées</div>
+                            <div className="text-xl font-bold text-emerald-500 dark:text-green-400">{member.stats.completedTasks}</div>
                         </div>
-                         <div className="bg-white/5 rounded-xl p-3 text-center relative overflow-hidden">
-                             <div className="absolute inset-0 bg-green-500/5" style={{ height: `${member.stats.completionRate}%`, bottom: 0, top: 'auto', zIndex: 0 }}></div>
-                            <div className="text-xs text-dim uppercase tracking-wider font-bold mb-1 relative z-10">Succès</div>
-                            <div className="text-xl font-bold text-emerald-400 relative z-10">{member.stats.completionRate}%</div>
+                         <div className="bg-bg-secondary rounded-xl p-3 text-center relative overflow-hidden border border-glass-border">
+                             <div className="absolute inset-x-0 bottom-0 bg-emerald-500/10 dark:bg-green-500/5 transition-all" style={{ height: `${member.stats.completionRate}%`, zIndex: 0 }}></div>
+                            <div className="text-[10px] text-text-dim uppercase tracking-wider font-bold mb-1 relative z-10">Succès</div>
+                            <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 relative z-10">{member.stats.completionRate}%</div>
                         </div>
                     </div>
 
@@ -334,14 +334,14 @@ export default function ProjectTeamPage() {
                                 <select 
                                     value={member.role}
                                     onChange={(e) => handleChangeRole(member.user._id, e.target.value)}
-                                    className="bg-black/20 text-xs text-dim border border-white/10 rounded-lg p-2 focus:outline-none"
+                                    className="bg-bg-primary text-xs text-text-dim border border-glass-border rounded-lg p-2 focus:outline-none"
                                 >
                                     <option value="editor">Éditeur</option>
                                     <option value="admin">Administrateur</option>
                                 </select>
                                 <button 
                                     onClick={() => handleRemoveMember(member.user._id)}
-                                    className="p-2 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-colors flex items-center justify-center gap-2"
+                                    className="p-2 rounded-lg hover:bg-red-500/10 text-text-dim hover:text-red-500 transition-colors flex items-center justify-center gap-2"
                                     title="Retirer du projet"
                                 >
                                     <Trash2 className="w-4 h-4" />
