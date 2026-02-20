@@ -9,6 +9,8 @@ export interface IUser extends Document {
   lastName: string;
   email: string;
   password: string;
+  authProvider: 'password' | 'google';
+  googleId?: string | null;
   avatar?: string;
   bio?: string;
   profileColor?: string;
@@ -52,6 +54,16 @@ const UserSchema = new Schema<IUser>(
       required: [true, 'Le mot de passe est requis'],
       minlength: [8, 'Le mot de passe doit contenir au moins 8 caractères'],
       select: false,
+    },
+    authProvider: {
+      type: String,
+      enum: ['password', 'google'],
+      default: 'password',
+    },
+    googleId: {
+      type: String,
+      default: null,
+      sparse: true,
     },
     avatar: {
       type: String,

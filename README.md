@@ -34,3 +34,33 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Google OAuth (Inscription / Connexion)
+
+Le projet supporte maintenant la création/connexion via Google avec le flux OAuth2 côté serveur.
+
+Variables d'environnement requises:
+
+```bash
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+JWT_SECRET=...
+MONGODB_URI=...
+```
+
+Configuration Google Cloud Console:
+
+1. Créer un identifiant OAuth 2.0 (Web Application).
+2. Ajouter l'URI de redirection autorisée:
+   - `http://localhost:3000/api/auth/google/callback` (local)
+   - `https://votre-domaine.com/api/auth/google/callback` (production)
+3. Ajouter les origines JavaScript autorisées correspondantes.
+
+Flux utilisé:
+
+- `GET /api/auth/google/start`
+- `GET /api/auth/google/callback`
+- `GET /api/auth/google/session`
+
+Les pages `/login` et `/register` proposent le bouton `Continuer avec Google`.

@@ -252,8 +252,8 @@ export default function SecureIdsPage() {
           </div>
           
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-2">Zone sécurisée</h2>
-            <p className="text-dim">
+            <h2 className="text-2xl font-bold text-text-main mb-2">Zone sécurisée</h2>
+            <p className="text-text-dim">
               Cette section contient des informations sensibles.
               Veuillez confirmer votre identité pour continuer.
             </p>
@@ -261,21 +261,21 @@ export default function SecureIdsPage() {
 
           <form onSubmit={handleUnlock} className="w-full space-y-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-dim uppercase tracking-wider">Mot de passe sécurisé</label>
+              <label className="text-xs font-bold text-text-dim uppercase tracking-wider">Mot de passe sécurisé</label>
               <div className="relative">
                 <Input 
                   type={showAdminPassword ? "text" : "password"} 
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   placeholder="Votre mot de passe..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-dim focus:outline-none focus:border-red-500/50 transition-all pl-10 pr-10"
+                  className="w-full bg-bg-tertiary border border-border-main rounded-xl px-4 py-3 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all pl-10 pr-10"
                   autoFocus
                 />
-                <Key className="w-5 h-5 text-dim absolute left-3 top-1/2 -translate-y-1/2" />
+                <Key className="w-5 h-5 text-text-dim absolute left-3 top-1/2 -translate-y-1/2" />
                 <button
                   type="button"
                   onClick={() => setShowAdminPassword(!showAdminPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-dim hover:text-text-main transition-colors"
                 >
                   {showAdminPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -304,7 +304,7 @@ export default function SecureIdsPage() {
           
           <button 
             onClick={() => router.back()}
-            className="text-sm text-dim hover:text-white transition-colors flex items-center gap-2"
+            className="text-sm text-text-dim hover:text-text-main transition-colors flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" /> Retour
           </button>
@@ -320,8 +320,8 @@ export default function SecureIdsPage() {
           <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
             <Unlock className="w-8 h-8 text-red-500" />
           </div>
-          <h1 className="text-3xl font-bold text-white">Sélecteur de Projet Secouru</h1>
-          <p className="text-dim">
+          <h1 className="text-3xl font-bold text-text-main">Sélecteur de Projet Secouru</h1>
+          <p className="text-text-dim">
             Les accès sécurisés sont cloisonnés par projet. Veuillez sélectionner un projet pour accéder à ses identifiants confidentiels.
           </p>
         </div>
@@ -341,24 +341,24 @@ export default function SecureIdsPage() {
                   {project.name.substring(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-white truncate group-hover:text-red-400 transition-colors">{project.name}</h3>
-                  <p className="text-xs text-dim">Accéder au coffre-fort</p>
+                  <h3 className="font-bold text-text-main truncate group-hover:text-red-400 transition-colors">{project.name}</h3>
+                  <p className="text-xs text-text-dim">Accéder au coffre-fort</p>
                 </div>
-                <ArrowLeft className="w-4 h-4 text-dim group-hover:text-red-500 rotate-180 transition-all" />
+                <ArrowLeft className="w-4 h-4 text-text-dim group-hover:text-red-500 rotate-180 transition-all" />
               </motion.div>
             </Link>
           ))}
           
           {projects.length === 0 && (
             <div className="col-span-full py-20 glass-card flex flex-col items-center justify-center text-center space-y-4 border-dashed border-2">
-              <ShieldAlert className="w-12 h-12 text-dim" />
+              <ShieldAlert className="w-12 h-12 text-text-dim" />
               <div>
-                <p className="text-white font-bold">Aucun projet trouvé</p>
-                <p className="text-dim text-sm">Créez d&apos;abord un projet pour y stocker des accès sécurisés.</p>
+                <p className="text-text-main font-bold">Aucun projet trouvé</p>
+                <p className="text-text-dim text-sm">Créez d&apos;abord un projet pour y stocker des accès sécurisés.</p>
               </div>
               <button 
                 onClick={() => router.push('/projects')}
-                className="text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="text-indigo-500 hover:text-indigo-400 transition-colors"
               >
                 Gérer les projets
               </button>
@@ -377,18 +377,18 @@ export default function SecureIdsPage() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.back()}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-dim hover:text-white transition-all"
+            className="p-2 rounded-xl bg-bg-tertiary hover:bg-bg-secondary text-text-dim hover:text-text-main transition-all"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
             <div className="flex items-center gap-2 mb-1">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/20 uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-wider">
                     Confidentiel
                 </span>
-                <p className="text-xs font-bold text-dim uppercase tracking-widest">Coffre-fort du projet</p>
+                <p className="text-xs font-bold text-text-dim uppercase tracking-widest">Coffre-fort du projet</p>
             </div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-text-main flex items-center gap-3">
               <Unlock className="w-8 h-8 text-red-500" />
               Accès Sécurisés
             </h1>
@@ -429,8 +429,8 @@ export default function SecureIdsPage() {
                   <div className="p-6 space-y-4">
                       <div className="flex justify-between items-start">
                           <div>
-                            <h3 className="font-bold text-lg text-white mb-1 group-hover:text-red-400 transition-colors">{item.title}</h3>
-                            <p className="text-xs text-dim uppercase tracking-wider">{item.category || 'Général'}</p>
+                            <h3 className="font-bold text-lg text-text-main mb-1 group-hover:text-red-500 transition-colors">{item.title}</h3>
+                            <p className="text-xs text-text-dim uppercase tracking-wider">{item.category || 'Général'}</p>
                           </div>
                           
                           <button 
@@ -453,12 +453,12 @@ export default function SecureIdsPage() {
                           )}
                           
                           {item.username && (
-                            <div className="flex items-center gap-3 text-sm bg-white/5 p-2 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors">
-                                <span className="text-dim shrink-0 w-4 font-mono select-none">ID</span>
-                                <span className="text-white font-mono select-all flex-1 truncate">{item.username}</span>
+                            <div className="flex items-center gap-3 text-sm bg-bg-tertiary p-2 rounded-lg border border-border-main group-hover:border-border-secondary transition-colors">
+                                <span className="text-text-dim shrink-0 w-4 font-mono select-none">ID</span>
+                                <span className="text-text-main font-mono select-all flex-1 truncate">{item.username}</span>
                                 <button 
                                     onClick={() => copyToClipboard(item.username!)}
-                                    className="p-1 hover:text-white text-dim transition-colors"
+                                    className="p-1 hover:text-text-main text-text-dim transition-colors"
                                 >
                                     <Copy className="w-3 h-3" />
                                 </button>
@@ -496,8 +496,8 @@ export default function SecureIdsPage() {
                       </div>
 
                       {item.notes && (
-                          <div className="pt-2 border-t border-white/5">
-                              <p className="text-sm text-dim italic line-clamp-2 hover:line-clamp-none transition-all cursor-help">
+                          <div className="pt-2 border-t border-border-main">
+                              <p className="text-sm text-text-dim italic line-clamp-2 hover:line-clamp-none transition-all cursor-help">
                                   {item.notes}
                               </p>
                           </div>
@@ -537,89 +537,89 @@ export default function SecureIdsPage() {
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     className="glass-card w-full max-w-lg p-0 border-red-500/20 shadow-2xl relative z-10 overflow-hidden"
                 >
-                    <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <div className="p-6 border-b border-border-main flex justify-between items-center bg-bg-secondary">
+                        <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
                             <ShieldAlert className="w-5 h-5 text-red-500" />
                             Nouvel accès sécurisé
                         </h3>
-                        <button onClick={() => setIsCreateModalOpen(false)} className="text-dim hover:text-white transition-colors">
+                        <button onClick={() => setIsCreateModalOpen(false)} className="text-text-dim hover:text-text-main transition-colors">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
                     
                     <form onSubmit={handleCreate} className="p-6 space-y-4">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-dim uppercase">Titre (Requis)</label>
+                            <label className="text-xs font-bold text-text-dim uppercase">Titre (Requis)</label>
                             <input 
                                 type="text" 
                                 value={newItem.title}
                                 onChange={(e) => setNewItem({...newItem, title: e.target.value})}
                                 placeholder="Ex: Accès Base de Données Prod"
-                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-dim focus:outline-none focus:border-red-500/50 transition-all"
+                                className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
                                 autoFocus
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-dim uppercase">Catégorie</label>
+                                <label className="text-xs font-bold text-text-dim uppercase">Catégorie</label>
                                 <select 
                                     value={newItem.category}
                                     onChange={(e) => setNewItem({...newItem, category: e.target.value})}
-                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500/50 transition-all appearance-none"
+                                    className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main focus:outline-none focus:border-red-500/50 transition-all appearance-none"
                                 >
-                                    <option className="bg-zinc-900" value="Général">Général</option>
-                                    <option className="bg-zinc-900" value="Serveur">Serveur</option>
-                                    <option className="bg-zinc-900" value="Base de données">Base de données</option>
-                                    <option className="bg-zinc-900" value="Service Tiers">Service Tiers</option>
-                                    <option className="bg-zinc-900" value="Réseaux Sociaux">Réseaux Sociaux</option>
-                                    <option className="bg-zinc-900" value="Email">Email</option>
-                                    <option className="bg-zinc-900" value="Autre">Autre</option>
+                                    <option className="bg-bg-tertiary text-text-main" value="Général">Général</option>
+                                    <option className="bg-bg-tertiary text-text-main" value="Serveur">Serveur</option>
+                                    <option className="bg-bg-tertiary text-text-main" value="Base de données">Base de données</option>
+                                    <option className="bg-bg-tertiary text-text-main" value="Service Tiers">Service Tiers</option>
+                                    <option className="bg-bg-tertiary text-text-main" value="Réseaux Sociaux">Réseaux Sociaux</option>
+                                    <option className="bg-bg-tertiary text-text-main" value="Email">Email</option>
+                                    <option className="bg-bg-tertiary text-text-main" value="Autre">Autre</option>
                                 </select>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-dim uppercase">Lien / URL</label>
+                                <label className="text-xs font-bold text-text-dim uppercase">Lien / URL</label>
                                 <input 
                                     type="text" 
                                     value={newItem.link}
                                     onChange={(e) => setNewItem({...newItem, link: e.target.value})}
                                     placeholder="https://..."
-                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-dim focus:outline-none focus:border-red-500/50 transition-all"
+                                    className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-dim uppercase">Nom d&apos;utilisateur / ID</label>
+                            <label className="text-xs font-bold text-text-dim uppercase">Nom d&apos;utilisateur / ID</label>
                             <input 
                                 type="text" 
                                 value={newItem.username}
                                 onChange={(e) => setNewItem({...newItem, username: e.target.value})}
                                 placeholder="admin@example.com"
-                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-dim focus:outline-none focus:border-red-500/50 transition-all"
+                                className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-dim uppercase text-red-300">Mot de passe / Secret (Requis)</label>
+                            <label className="text-xs font-bold text-text-dim uppercase text-red-500">Mot de passe / Secret (Requis)</label>
                             <div className="relative">
                                 <input 
                                     type="text" 
                                     value={newItem.password}
                                     onChange={(e) => setNewItem({...newItem, password: e.target.value})}
                                     placeholder="Le secret à protéger..."
-                                    className="w-full bg-red-900/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-white placeholder-red-300/30 focus:outline-none focus:border-red-500/50 transition-all font-mono"
+                                    className="w-full bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-text-main placeholder:text-red-500/30 focus:outline-none focus:border-red-500/50 transition-all font-mono"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-dim uppercase">Notes</label>
+                            <label className="text-xs font-bold text-text-dim uppercase">Notes</label>
                             <textarea 
                                 value={newItem.notes}
                                 onChange={(e) => setNewItem({...newItem, notes: e.target.value})}
                                 placeholder="Détails supplémentaires..."
-                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-dim focus:outline-none focus:border-red-500/50 transition-all min-h-[80px] resize-none"
+                                className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all min-h-[80px] resize-none"
                             />
                         </div>
 
@@ -627,7 +627,7 @@ export default function SecureIdsPage() {
                             <button 
                                 type="button" 
                                 onClick={() => setIsCreateModalOpen(false)}
-                                className="px-4 py-2 rounded-lg text-dim hover:text-white hover:bg-white/5 transition-all font-medium"
+                                className="px-4 py-2 rounded-lg text-text-dim hover:text-text-main hover:bg-bg-tertiary transition-all font-medium"
                             >
                                 Annuler
                             </button>
@@ -663,36 +663,36 @@ export default function SecureIdsPage() {
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     className="glass-card w-full max-w-md p-0 border-indigo-500/20 shadow-2xl relative z-10 overflow-hidden"
                 >
-                    <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <div className="p-6 border-b border-border-main flex justify-between items-center bg-bg-secondary">
+                        <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
                             <Key className="w-5 h-5 text-indigo-400" />
                             Mot de passe du projet
                         </h3>
-                        <button onClick={() => setIsPasswordModalOpen(false)} className="text-dim hover:text-white transition-colors">
+                        <button onClick={() => setIsPasswordModalOpen(false)} className="text-text-dim hover:text-text-main transition-colors">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
                     
                     <form onSubmit={handleUpdateProjectPassword} className="p-6 space-y-4">
-                        <p className="text-sm text-dim">
+                        <p className="text-sm text-text-dim">
                             Définissez un mot de passe spécifique pour ce projet. S&apos;il est vide, le mot de passe de votre compte sera utilisé par défaut.
                         </p>
                         
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-dim uppercase">Nouveau mot de passe</label>
+                            <label className="text-xs font-bold text-text-dim uppercase">Nouveau mot de passe</label>
                             <div className="relative">
                                 <input 
                                     type={showNewProjectPassword ? "text" : "password"} 
                                     value={newProjectPassword}
                                     onChange={(e) => setNewProjectPassword(e.target.value)}
                                     placeholder="Nouveau secret..."
-                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-dim focus:outline-none focus:border-indigo-500/50 transition-all pr-12"
+                                    className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-3 text-text-main placeholder:text-text-muted focus:outline-none focus:border-indigo-500/50 transition-all pr-12"
                                     autoFocus
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowNewProjectPassword(!showNewProjectPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-white"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-dim hover:text-text-main"
                                 >
                                     {showNewProjectPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
@@ -703,7 +703,7 @@ export default function SecureIdsPage() {
                             <button 
                                 type="button" 
                                 onClick={() => setIsPasswordModalOpen(false)}
-                                className="px-4 py-2 rounded-lg text-dim hover:text-white hover:bg-white/5 transition-all font-medium"
+                                className="px-4 py-2 rounded-lg text-text-dim hover:text-text-main hover:bg-bg-tertiary transition-all font-medium"
                             >
                                 Annuler
                             </button>

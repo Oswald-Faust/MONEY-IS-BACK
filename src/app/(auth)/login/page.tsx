@@ -2,15 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { setAuth, setLoading } = useAuthStore();
+  const { setAuth } = useAuthStore();
   
   // Check for email in search params for prefill
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -20,6 +18,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+
+  const handleGoogleAuth = () => {
+    setIsGoogleSubmitting(true);
+    const urlParams = new URLSearchParams(window.location.search);
+    const callbackUrl = urlParams.get('callbackUrl');
+    const next = callbackUrl
+      ? `/api/auth/google/start?mode=login&callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : '/api/auth/google/start?mode=login';
+
+    window.location.assign(next);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +55,7 @@ export default function LoginPage() {
       } else {
         toast.error(data.error || 'Erreur de connexion');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erreur de connexion au serveur');
     } finally {
       setIsSubmitting(false);
@@ -169,6 +179,38 @@ export default function LoginPage() {
               )}
             </motion.button>
           </form>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            disabled={isGoogleSubmitting}
+            onClick={handleGoogleAuth}
+            className="
+              w-full mt-4 py-3.5 px-6 rounded-xl
+              bg-white text-gray-800 border border-gray-200
+              font-semibold text-sm
+              hover:bg-gray-50
+              focus:outline-none focus:ring-2 focus:ring-indigo-500/30
+              disabled:opacity-50 disabled:cursor-not-allowed
+              transition-all duration-200
+              flex items-center justify-center gap-3
+            "
+          >
+            {isGoogleSubmitting ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
+                  <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.655 32.657 29.207 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.959 3.041l5.657-5.657C34.053 6.053 29.277 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+                  <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 16.108 18.961 13 24 13c3.059 0 5.842 1.154 7.959 3.041l5.657-5.657C34.053 6.053 29.277 4 24 4c-7.682 0-14.636 4.337-17.694 10.691z"/>
+                  <path fill="#4CAF50" d="M24 44c5.176 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.145 35.091 26.715 36 24 36c-5.186 0-9.623-3.328-11.283-7.946l-6.522 5.025C9.204 39.556 16.584 44 24 44z"/>
+                  <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.084 5.571.001-.001 6.19 5.238 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+                </svg>
+                Continuer avec Google
+              </>
+            )}
+          </motion.button>
 
           {/* Divider */}
           <div className="relative my-6">
