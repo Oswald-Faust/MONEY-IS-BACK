@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
@@ -15,7 +15,6 @@ function sanitizeNextPath(path: string | null): string {
 
 export default function GoogleSuccessPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { setAuth } = useAuthStore();
 
   useEffect(() => {
@@ -37,7 +36,8 @@ export default function GoogleSuccessPage() {
         setAuth(data.data.user, data.data.token);
         toast.success('Connexion Google réussie');
 
-        const nextPath = sanitizeNextPath(searchParams.get('next'));
+        const urlParams = new URLSearchParams(window.location.search);
+        const nextPath = sanitizeNextPath(urlParams.get('next'));
         window.location.replace(nextPath);
       } catch {
         toast.error('Erreur de finalisation Google');
@@ -46,7 +46,7 @@ export default function GoogleSuccessPage() {
     };
 
     void finalizeGoogleAuth();
-  }, [router, searchParams, setAuth]);
+  }, [router, setAuth]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg-primary p-6">

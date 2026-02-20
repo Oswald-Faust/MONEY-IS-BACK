@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         role: 'user',
         authProvider: 'google',
         googleId: profile.sub,
-        avatar: profile.picture || null,
+        ...(profile.picture ? { avatar: profile.picture } : {}),
         preferences: {
           theme: 'dark',
           notifications: true,
