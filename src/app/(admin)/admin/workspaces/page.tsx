@@ -14,6 +14,7 @@ import {
 import { useAuthStore } from '@/store';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 
 function WorkspacesList() {
   const [workspaces, setWorkspaces] = useState<any[]>([]);
@@ -169,9 +170,9 @@ function WorkspacesList() {
                     }`} />
                     {ws.subscriptionStatus === 'active' ? 'Abonnement Actif' : 'Pas d\'abonnement'}
                   </div>
-                  <button className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-all group/btn">
+                  <Link href={`/admin/workspaces/${ws._id}`} className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-all group/btn">
                     <ExternalLink className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </motion.div>

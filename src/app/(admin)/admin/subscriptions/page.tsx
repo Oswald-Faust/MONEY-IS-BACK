@@ -23,6 +23,7 @@ import {
 import { useAuthStore } from '@/store';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 export default function AdminSubscriptionsPage() {
   const [data, setData] = useState<any>(null);
@@ -288,6 +289,13 @@ export default function AdminSubscriptionsPage() {
                             <p className="text-sm font-semibold text-main">{ws.name}</p>
                             <p className="text-[10px] text-dim font-bold uppercase">{ws.subscriptionId ? `ID: ${ws.subscriptionId.slice(0, 12)}...` : 'Pas d\'ID Stripe'}</p>
                           </div>
+                          <Link
+                            href={`/admin/workspaces/${ws._id}`}
+                            className="p-1.5 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-colors"
+                            title="Voir le détail du workspace"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </Link>
                         </div>
                       </td>
                       <td className="px-6 py-4">
