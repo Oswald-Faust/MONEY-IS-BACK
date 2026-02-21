@@ -29,7 +29,21 @@ export default function AdminSubscriptionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [planFilter, setPlanFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [drafts, setDrafts] = useState<Record<string, {
+    subscriptionPlan: string;
+    subscriptionStatus: string;
+    subscriptionInterval: string;
+    subscriptionEnd: string;
+  }>>({});
+  const [updatingWorkspaceId, setUpdatingWorkspaceId] = useState<string | null>(null);
   const { token } = useAuthStore();
+
+  const toInputDate = (value?: string) => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toISOString().slice(0, 10);
+  };
 
   const fetchSubscriptions = async () => {
     try {
@@ -40,6 +54,23 @@ export default function AdminSubscriptionsPage() {
       const result = await res.json();
       if (result.success) {
         setData(result.data);
+        const nextDrafts: Record<string, {
+          subscriptionPlan: string;
+          subscriptionStatus: string;
+          subscriptionInterval: string;
+          subscriptionEnd: string;
+        }> = {};
+
+        (result.data?.workspaces || []).forEach((ws: any) => {
+          nextDrafts[ws._id] = {
+            subscriptionPlan: ws.subscriptionPlan || 'starter',
+            subscriptionStatus: ws.subscriptionStatus || 'inactive',
+            subscriptionInterval: ws.subscriptionInterval || '',
+            subscriptionEnd: toInputDate(ws.subscriptionEnd),
+          };
+        });
+
+        setDrafts(nextDrafts);
       }
     } catch (error) {
       toast.error('Erreur lors du chargement des abonnements');
@@ -51,6 +82,63 @@ export default function AdminSubscriptionsPage() {
   useEffect(() => {
     fetchSubscriptions();
   }, [planFilter, statusFilter, token]);
+
+  const updateDraft = (workspaceId: string, patch: Partial<{
+    subscriptionPlan: string;
+    subscriptionStatus: string;
+    subscriptionInterval: string;
+    subscriptionEnd: string;
+  }>) => {
+    setDrafts((prev) => ({
+      ...prev,
+      [workspaceId]: {
+        ...(prev[workspaceId] || {
+          subscriptionPlan: 'starter',
+          subscriptionStatus: 'inactive',
+          subscriptionInterval: '',
+          subscriptionEnd: '',
+        }),
+        ...patch,
+      },
+    }));
+  };
+
+  const saveWorkspaceSubscription = async (workspaceId: string) => {
+    const draft = drafts[workspaceId];
+    if (!draft) return;
+
+    try {
+      setUpdatingWorkspaceId(workspaceId);
+
+      const response = await fetch('/api/admin/workspaces', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          workspaceId,
+          subscriptionPlan: draft.subscriptionPlan,
+          subscriptionStatus: draft.subscriptionStatus,
+          subscriptionInterval: draft.subscriptionInterval || null,
+          subscriptionEnd: draft.subscriptionEnd || null,
+        }),
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        toast.error(result.error || 'Impossible de mettre à jour l\'abonnement');
+        return;
+      }
+
+      toast.success('Abonnement mis à jour');
+      await fetchSubscriptions();
+    } catch (error) {
+      toast.error('Erreur serveur lors de la mise à jour');
+    } finally {
+      setUpdatingWorkspaceId(null);
+    }
+  };
 
   const planColors: any = {
     starter: 'bg-bg-tertiary text-dim border-glass-border',
@@ -171,7 +259,7 @@ export default function AdminSubscriptionsPage() {
                   <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Plan</th>
                   <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Statut</th>
                   <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider">Prochain Paiement</th>
-                  <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider text-right">Action</th>
+                  <th className="px-6 py-4 text-xs font-bold text-dim uppercase tracking-wider text-right">Assigner</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-glass-border">
@@ -235,9 +323,61 @@ export default function AdminSubscriptionsPage() {
                         {ws.subscriptionEnd ? new Date(ws.subscriptionEnd).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button className="p-2 rounded-lg hover:bg-glass-hover text-dim hover:text-main transition-all">
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
+                        <div className="flex flex-col items-end gap-2 min-w-[230px]">
+                          <div className="grid grid-cols-2 gap-2 w-full">
+                            <select
+                              value={drafts[ws._id]?.subscriptionPlan || ws.subscriptionPlan || 'starter'}
+                              onChange={(e) => updateDraft(ws._id, { subscriptionPlan: e.target.value })}
+                              className="bg-bg-secondary border border-glass-border rounded-lg px-2 py-1 text-xs text-main"
+                            >
+                              <option value="starter">Starter (Gratuit)</option>
+                              <option value="pro">Pro</option>
+                              <option value="team">Team</option>
+                              <option value="business">Business</option>
+                              <option value="enterprise">Enterprise</option>
+                            </select>
+
+                            <select
+                              value={drafts[ws._id]?.subscriptionStatus || ws.subscriptionStatus || 'inactive'}
+                              onChange={(e) => updateDraft(ws._id, { subscriptionStatus: e.target.value })}
+                              className="bg-bg-secondary border border-glass-border rounded-lg px-2 py-1 text-xs text-main"
+                            >
+                              <option value="active">Actif</option>
+                              <option value="inactive">Inactif</option>
+                              <option value="trialing">Trial</option>
+                              <option value="past_due">Retard</option>
+                              <option value="canceled">Annulé</option>
+                              <option value="unpaid">Impayé</option>
+                            </select>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 w-full">
+                            <select
+                              value={drafts[ws._id]?.subscriptionInterval || ''}
+                              onChange={(e) => updateDraft(ws._id, { subscriptionInterval: e.target.value })}
+                              className="bg-bg-secondary border border-glass-border rounded-lg px-2 py-1 text-xs text-main"
+                            >
+                              <option value="">Sans intervalle</option>
+                              <option value="month">Mensuel</option>
+                              <option value="year">Annuel</option>
+                            </select>
+
+                            <input
+                              type="date"
+                              value={drafts[ws._id]?.subscriptionEnd || ''}
+                              onChange={(e) => updateDraft(ws._id, { subscriptionEnd: e.target.value })}
+                              className="bg-bg-secondary border border-glass-border rounded-lg px-2 py-1 text-xs text-main"
+                            />
+                          </div>
+
+                          <button
+                            onClick={() => saveWorkspaceSubscription(ws._id)}
+                            disabled={updatingWorkspaceId === ws._id}
+                            className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+                          >
+                            {updatingWorkspaceId === ws._id ? 'Enregistrement...' : 'Enregistrer'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

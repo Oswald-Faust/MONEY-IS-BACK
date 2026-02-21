@@ -131,7 +131,7 @@ export interface Workspace {
     image?: string;
     theme: 'dark' | 'light' | 'system';
   };
-  subscriptionPlan: 'starter' | 'pro' | 'team' | 'enterprise';
+  subscriptionPlan: 'starter' | 'pro' | 'team' | 'business' | 'enterprise';
   subscriptionStatus?: string;
   subscriptionInterval?: 'month' | 'year';
   subscriptionEnd?: string;
@@ -303,4 +303,3 @@ export interface Conversation {
   createdAt: string;
   updatedAt: string;
 }
-

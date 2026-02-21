@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
         .populate('creator', 'firstName lastName avatar')
         .populate('assignee', 'firstName lastName avatar')
         .populate('assignees', 'firstName lastName avatar')
-        .populate('project', 'name color');
+        .populate('project', 'name color')
+        .populate('comments.user', 'firstName lastName avatar');
       
       if (!idea) {
         return NextResponse.json({ success: false, error: 'Idée non trouvée' }, { status: 404 });
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest) {
       .populate('assignee', 'firstName lastName avatar')
       .populate('assignees', 'firstName lastName avatar')
       .populate('project', 'name color')
+      .populate('comments.user', 'firstName lastName avatar')
       .sort({ createdAt: -1 });
 
     return NextResponse.json({
@@ -140,6 +142,7 @@ export async function POST(request: NextRequest) {
     await idea.populate('creator', 'firstName lastName avatar');
     await idea.populate('assignee', 'firstName lastName avatar');
     await idea.populate('assignees', 'firstName lastName avatar');
+    await idea.populate('comments.user', 'firstName lastName avatar');
     if (projectId) {
       await idea.populate('project', 'name color');
     }
@@ -194,7 +197,8 @@ export async function PATCH(request: NextRequest) {
       .populate('creator', 'firstName lastName avatar')
       .populate('assignee', 'firstName lastName avatar')
       .populate('assignees', 'firstName lastName avatar')
-      .populate('project', 'name color');
+      .populate('project', 'name color')
+      .populate('comments.user', 'firstName lastName avatar');
 
     if (!updatedIdea) {
       return NextResponse.json({ success: false, error: 'Idée non trouvée' }, { status: 404 });

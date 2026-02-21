@@ -15,11 +15,12 @@ interface CreateObjectiveModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: Objective | null;
+  prefillData?: { title?: string; description?: string; project?: any; assignees?: any } | null;
   defaultProjectId?: string;
   workspaceId?: string;
 }
 
-export default function CreateObjectiveModal({ isOpen, onClose, initialData, defaultProjectId: propProjectId, workspaceId }: CreateObjectiveModalProps) {
+export default function CreateObjectiveModal({ isOpen, onClose, initialData, prefillData, defaultProjectId: propProjectId, workspaceId }: CreateObjectiveModalProps) {
   const { projects, addObjective, updateObjective } = useAppStore();
   const { token } = useAuthStore();
   const searchParams = useSearchParams();
@@ -62,6 +63,21 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
           targetDate: initialData.targetDate ? new Date(initialData.targetDate).toISOString().split('T')[0] : '',
           assignees: loadedAssignees
         });
+      } else if (prefillData) {
+        let loadedAssignees: string[] = [];
+        if (prefillData.assignees && Array.isArray(prefillData.assignees)) {
+            loadedAssignees = prefillData.assignees.map((u: any) => typeof u === 'object' ? u._id : u);
+        }
+
+        setFormData({
+            title: prefillData.title || '',
+            description: prefillData.description || '',
+            project: typeof prefillData.project === 'object' && prefillData.project ? prefillData.project._id : (prefillData.project as string) || defaultProjectId || '',
+            priority: 'medium' as 'low' | 'medium' | 'high',
+            checkpoints: [{ id: '1', title: '', completed: false }],
+            targetDate: '',
+            assignees: loadedAssignees
+        });
       } else {
         setFormData({
             title: '',
@@ -74,7 +90,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, def
         });
       }
     }
-  }, [isOpen, defaultProjectId, initialData]);
+  }, [isOpen, defaultProjectId, initialData, prefillData]);
 
   const addCheckpoint = () => {
     setFormData(prev => ({
