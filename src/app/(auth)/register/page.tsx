@@ -130,7 +130,7 @@ export default function RegisterPage() {
             <span className="text-2xl font-bold text-white">MB</span>
           </motion.div>
           <h1 className="text-2xl font-bold text-text-main mb-2">Créer un compte</h1>
-          <p className="text-text-dim">Rejoignez MONEY IS BACK</p>
+          <p className="text-text-dim">Rejoignez Edwin</p>
         </div>
 
         {/* Register Form */}

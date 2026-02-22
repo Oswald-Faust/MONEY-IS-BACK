@@ -25,7 +25,7 @@ const plans = [
     id: 'starter',
     price: { monthly: 0, yearly: 0 },
     originalPrice: { monthly: 0, yearly: 0 },
-    description: 'Pour explorer les bases de MONEY IS BACK.',
+    description: 'Pour explorer les bases de Edwin.',
     features: [
       '1 Utilisateur maximum',
       '1 Projet maximum',
@@ -287,7 +287,7 @@ export default function UpgradePage() {
             transition={{ delay: 0.1 }}
             className="text-lg text-text-dim max-w-2xl mx-auto"
           >
-            Choisissez le plan qui correspond le mieux à vos ambitions et débloquez tout le potentiel de MONEY IS BACK.
+            Choisissez le plan qui correspond le mieux à vos ambitions et débloquez tout le potentiel de Edwin.
           </motion.p>
         </div>
 

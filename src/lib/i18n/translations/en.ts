@@ -23,7 +23,7 @@ const en: TranslationType = {
     creatorMode: 'Creator Mode',
     exploreFeature: 'Explore Feature',
     madeWithLove: 'Made with ❤️ in Paris',
-    allRightsReserved: '© 2026 MONEY IS BACK Inc. All rights reserved.',
+    allRightsReserved: '© 2026 Edwin Inc. All rights reserved.',
     monthly: 'Monthly',
     yearly: 'Yearly (-25%)',
     perMonth: '/mo',
@@ -171,8 +171,8 @@ const en: TranslationType = {
     subtitle: 'Everything you need to know about the platform to boost your productivity.',
     items: [
       {
-        question: 'What is MONEY IS BACK?',
-        answer: "MONEY IS BACK is a revolutionary project management platform that centralizes your tasks, documents, drive storage, goals and team communication in a single, lightning-fast interface.",
+        question: 'What is Edwin?',
+        answer: "Edwin is a revolutionary project management platform that centralizes your tasks, documents, drive storage, goals and team communication in a single, lightning-fast interface.",
       },
       {
         question: 'Is my data secure?',
@@ -187,7 +187,7 @@ const en: TranslationType = {
         answer: 'Storage depends on your subscription. The Free plan includes 1 GB, the Pro plan 10 GB, and the Team plan offers unlimited storage to support your business growth without constraints.',
       },
       {
-        question: 'How does the transition to MONEY IS BACK work?',
+        question: 'How does the transition to Edwin work?',
         answer: 'We offer smooth import tools for Trello, Asana and Notion. You can migrate your tasks and history in just a few clicks so you never lose your progress.',
       },
       {

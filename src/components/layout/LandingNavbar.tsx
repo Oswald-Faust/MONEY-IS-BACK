@@ -10,6 +10,7 @@ import {
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
+import Image from 'next/image';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -66,8 +67,8 @@ export const LandingNavbar = () => {
                     className="bg-bg-secondary/80 backdrop-blur-xl border border-glass-border flex items-center justify-between shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
                 >
                     <Link href="/" className="flex items-center gap-2 group shrink-0">
-                        <div className="w-8 h-8 rounded-full bg-accent-primary/10 flex items-center justify-center border border-glass-border group-hover:border-[#00FFB2]/50 transition-colors">
-                            <span className="text-text-main font-bold text-xs font-mono">M</span>
+                        <div className="w-8 h-8 rounded-full bg-accent-primary/10 flex items-center justify-center border border-glass-border group-hover:border-[#00FFB2]/50 transition-colors overflow-hidden">
+                            <Image src="/icone.jpeg" alt="Logo" width={32} height={32} className="object-cover w-full h-full" />
                         </div>
                         <AnimatePresence initial={false}>
                             {!scrolled && (
@@ -78,7 +79,7 @@ export const LandingNavbar = () => {
                                     transition={{ duration: 0.2 }}
                                     className="text-lg font-bold text-text-main tracking-tight hidden sm:block whitespace-nowrap overflow-hidden"
                                 >
-                                    MONEY IS BACK
+                                    Edwin
                                 </motion.span>
                             )}
                         </AnimatePresence>

@@ -171,15 +171,17 @@ export default function Sidebar() {
                           fill 
                           className="object-cover"
                         />
-                      ) : (
+                      ) : currentWorkspace?.name ? (
                         <span className="text-white font-bold text-sm">
-                          {currentWorkspace?.name ? currentWorkspace.name.substring(0, 2).toUpperCase() : 'MB'}
+                          {currentWorkspace.name.substring(0, 2).toUpperCase()}
                         </span>
+                      ) : (
+                        <Image src="/icone.jpeg" alt="Edwin Logo" fill className="object-cover" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h1 className="font-semibold text-text-main text-sm truncate">
-                        {currentWorkspace?.name || 'MONEY IS BACK'}
+                        {currentWorkspace?.name || 'Edwin'}
                       </h1>
                       <div className="flex items-center gap-1">
                         <p className="text-[10px] text-text-dim font-bold uppercase tracking-wider">{t.common.workspace}</p>

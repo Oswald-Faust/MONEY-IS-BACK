@@ -69,7 +69,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-xl text-zinc-400 max-w-2xl mx-auto mb-12 font-light leading-relaxed"
           >
-            Nous avons créé MONEY IS BACK pour résoudre un problème simple : la fragmentation des outils. 
+            Nous avons créé Edwin pour résoudre un problème simple : la fragmentation des outils. 
             Une seule plateforme, une source unique de vérité.
           </motion.p>
         </div>

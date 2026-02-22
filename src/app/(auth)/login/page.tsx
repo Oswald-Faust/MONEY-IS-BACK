@@ -86,7 +86,7 @@ export default function LoginPage() {
             <span className="text-2xl font-bold text-white">MB</span>
           </motion.div>
           <h1 className="text-2xl font-bold text-text-main mb-2">Bon retour !</h1>
-          <p className="text-text-dim">Connectez-vous à MONEY IS BACK</p>
+          <p className="text-text-dim">Connectez-vous à Edwin</p>
         </div>
 
         {/* Login Form */}

@@ -92,7 +92,7 @@ const plans = [
 const faqs = [
     {
         question: "Can I upgrade myself or do I have to upgrade my entire Workspace?",
-        answer: "Vous devez mettre à niveau l'ensemble de votre espace de travail. Avec MONEY IS BACK, les forfaits sont appliqués à l'espace de travail dans son ensemble pour garantir que tout le monde ait accès aux mêmes outils de collaboration."
+        answer: "Vous devez mettre à niveau l'ensemble de votre espace de travail. Avec Edwin, les forfaits sont appliqués à l'espace de travail dans son ensemble pour garantir que tout le monde ait accès aux mêmes outils de collaboration."
     },
     {
         question: "What payment methods do you accept?",
@@ -144,7 +144,7 @@ export default function PricingPage() {
   const [employeeCount, setEmployeeCount] = useState([50]);
 
   const calculateSavings = (employees: number) => {
-    // Arbitrary calculation based on "MONEY IS BACK can save a 500 person company $282,000 per year"
+    // Arbitrary calculation based on "Edwin can save a 500 person company $282,000 per year"
     // ($282,000 / 500) = $564 per person/year approximately
     return (employees * 564).toLocaleString();
   };
@@ -319,7 +319,7 @@ export default function PricingPage() {
              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
              <div className="relative z-10">
                  <h2 className="text-3xl md:text-5xl font-black mb-4">
-                     MONEY IS BACK peut faire économiser à une entreprise de {employeeCount[0]} personnes<br />
+                     Edwin peut faire économiser à une entreprise de {employeeCount[0]} personnes<br />
                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400">
                          ${calculateSavings(employeeCount[0])} par an
                      </span>
@@ -369,7 +369,7 @@ export default function PricingPage() {
                   Une seule app pour les remplacer toutes.
               </h2>
               <p className="text-xl text-indigo-900/60 mb-10 max-w-2xl mx-auto">
-                  Arrêtez de jongler entre les applications. Remettez votre équipe sur les rails avec MONEY IS BACK.
+                  Arrêtez de jongler entre les applications. Remettez votre équipe sur les rails avec Edwin.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Link href="/register" className="px-10 py-4 bg-indigo-600 text-white font-bold rounded-xl text-lg hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-1">

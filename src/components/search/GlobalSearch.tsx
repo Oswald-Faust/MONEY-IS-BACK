@@ -295,7 +295,7 @@ export default function GlobalSearch() {
                   </div>
                 </div>
                 <div className="text-[10px] text-indigo-400/50 font-bold uppercase tracking-[0.2em]">
-                  MONEY IS BACK SEARCH
+                  Edwin SEARCH
                 </div>
               </div>
             </div>

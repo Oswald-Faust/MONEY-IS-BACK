@@ -19,7 +19,7 @@ const categories = [
   {
     title: "Mise en route",
     icon: Zap,
-    description: "Tout ce dont vous avez besoin pour démarrer rapidement avec MONEY IS BACK.",
+    description: "Tout ce dont vous avez besoin pour démarrer rapidement avec Edwin.",
     links: ["Installation", "Configuration initiale", "Guide de démarrage rapide", "Concepts clés"]
   },
   {
@@ -85,7 +85,7 @@ export default function DocsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-xl text-zinc-400 max-w-2xl mx-auto mb-12 font-light leading-relaxed"
           >
-            Tout ce que vous devez savoir pour maîtriser MONEY IS BACK et booster votre productivité.
+            Tout ce que vous devez savoir pour maîtriser Edwin et booster votre productivité.
           </motion.p>
 
           <motion.div 

@@ -21,7 +21,7 @@ export const LandingFooter = () => {
                             <div className="w-8 h-8 rounded-full bg-glass-bg flex items-center justify-center border border-glass-border">
                                 <span className="text-text-main font-bold text-xs">M</span>
                             </div>
-                            <span className="text-text-main font-bold text-xl">MONEY IS BACK</span>
+                            <span className="text-text-main font-bold text-xl">Edwin</span>
                         </Link>
                         <p className="text-text-dim text-sm mb-6 max-w-sm">
                             {t.footer.description}

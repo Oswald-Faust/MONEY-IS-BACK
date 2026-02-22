@@ -169,7 +169,7 @@ export default function DashboardLayout({
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                   <span className="text-white font-bold text-xs">MB</span>
                 </div>
-                <span className="font-semibold text-text-main text-sm">MONEY IS BACK</span>
+                <span className="font-semibold text-text-main text-sm">Edwin</span>
               </div>
             </div>
 

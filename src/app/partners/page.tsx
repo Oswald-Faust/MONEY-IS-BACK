@@ -62,7 +62,7 @@ export default function PartnersPage() {
             transition={{ delay: 0.1 }}
             className="text-xl text-zinc-400 font-light mb-12"
           >
-            Rejoignez notre programme de partenariat et créez de la valeur pour vos clients avec l'infrastructure MONEY IS BACK.
+            Rejoignez notre programme de partenariat et créez de la valeur pour vos clients avec l'infrastructure Edwin.
           </motion.p>
 
           <div className="flex justify-center gap-6">

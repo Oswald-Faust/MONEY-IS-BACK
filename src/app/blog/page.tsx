@@ -97,7 +97,7 @@ export default function BlogPage() {
                    Le manifeste pour un travail sans distractions
                  </h2>
                  <p className="text-zinc-400 text-lg mb-10 font-light leading-relaxed">
-                   Pourquoi nous croyons que l'attention est la ressource la plus précieuse du 21e siècle et comment nous avons conçu MONEY IS BACK pour la protéger.
+                   Pourquoi nous croyons que l'attention est la ressource la plus précieuse du 21e siècle et comment nous avons conçu Edwin pour la protéger.
                  </p>
                  <div className="flex items-center gap-4">
                    <div className="w-12 h-12 rounded-full bg-zinc-800" />

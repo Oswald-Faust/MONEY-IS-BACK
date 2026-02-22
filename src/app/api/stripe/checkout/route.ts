@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
             currency: 'usd',
             product_data: {
               name: config.name,
-              description: `Abonnement MONEY IS BACK - ${planId} (${billingCycle})`,
+              description: `Abonnement Edwin - ${planId} (${billingCycle})`,
             },
             unit_amount: priceData.amount,
             recurring: {
