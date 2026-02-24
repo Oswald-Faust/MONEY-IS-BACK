@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Activity,
   ArrowLeft,
+  Mail,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -29,6 +30,7 @@ const adminNavItems = [
   { icon: CreditCard, label: 'Abonnements', href: '/admin/subscriptions' },
   { icon: Activity, label: 'Logs Système', href: '/admin/logs' },
   { icon: ShieldCheck, label: 'Contrôle d\'Accès', href: '/admin/access' },
+  { icon: Mail, label: 'E-mails et Campagnes', href: '/admin/emails' },
 ];
 
 import { ThemeToggle } from '@/components/ThemeToggle';

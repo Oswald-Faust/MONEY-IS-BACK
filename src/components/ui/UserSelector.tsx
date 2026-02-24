@@ -20,9 +20,10 @@ interface UserSelectorProps {
   label?: string;
   className?: string;
   multiple?: boolean;
+  projectId?: string;
 }
 
-export default function UserSelector({ value, onChange, label = "Assigné à", className = "", multiple = false }: UserSelectorProps) {
+export default function UserSelector({ value, onChange, label = "Assigné à", className = "", multiple = false, projectId }: UserSelectorProps) {
   const { token } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,14 +36,50 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
       
       try {
         setIsLoading(true);
-        const response = await fetch('/api/users', {
+        let url = '/api/users';
+        if (projectId) {
+          url = `/api/projects/members?projectId=${projectId}`;
+        }
+
+        const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
         const data = await response.json();
         if (data.success) {
-          setUsers(data.data);
+          if (projectId) {
+            // Transform project members to User structure
+            const owner = data.data.owner ? {
+              _id: data.data.owner._id,
+              firstName: data.data.owner.firstName,
+              lastName: data.data.owner.lastName,
+              avatar: data.data.owner.avatar,
+              email: data.data.owner.email,
+            } : null;
+
+            const members = (data.data.members || []).map((m: { user: User }) => {
+              if (!m.user) return null;
+              return {
+                _id: m.user._id,
+                firstName: m.user.firstName,
+                lastName: m.user.lastName,
+                avatar: m.user.avatar,
+                email: m.user.email,
+              };
+            }).filter(Boolean) as User[];
+
+            // Combine owner and members, removing duplicates
+            const allUsers = owner ? [owner, ...members] : members;
+            const uniqueUsersMap = new Map<string, User>();
+            allUsers.forEach((u: User) => {
+              uniqueUsersMap.set(u._id, u);
+            });
+            const uniqueUsers = Array.from(uniqueUsersMap.values());
+            setUsers(uniqueUsers);
+          } else {
+            setUsers(data.data);
+          }
         }
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -52,7 +89,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
     };
 
     fetchUsers();
-  }, [token]);
+  }, [token, projectId]);
 
   // Helper to check if a user is selected
   const isSelected = (userId: string) => {

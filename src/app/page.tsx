@@ -529,7 +529,7 @@ const PricingCard = ({ plan, price, highlight = false, billingCycle, originalPri
                                     </span>
                                 )}
                                 {(price !== '0' && price !== 'FREE' && price !== 'GRATUIT') && (
-                                    <span className="text-text-muted ml-1">{plan === 'Team' ? t.common.perMonth : t.common.perUserMonth}</span>
+                                    <span className="text-text-muted ml-1">{(plan === 'Team' || plan === 'Pro' || plan === 'Business') ? t.common.perMonth : t.common.perUserMonth}</span>
                                 )}
                             </div>
                         </div>

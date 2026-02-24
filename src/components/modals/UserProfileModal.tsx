@@ -40,12 +40,12 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm z-50"
           >
-            <div className="glass-card overflow-hidden relative">
+            <div className="glass-card overflow-hidden relative border-glass-border bg-bg-secondary">
               {/* Header / Cover */}
-              <div className="h-24 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 relative">
+              <div className="h-24 bg-gradient-to-r from-accent-primary/10 to-accent-secondary/10 relative">
                 <button
                   onClick={onClose}
-                  className="absolute top-2 right-2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
+                  className="absolute top-3 right-3 p-2 rounded-xl bg-glass-bg text-text-muted hover:text-text-main hover:bg-glass-hover transition-all border border-glass-border"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -54,34 +54,36 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
               {/* Avatar & Info */}
               <div className="px-6 pb-6 -mt-10 relative">
                 <div className="flex flex-col items-center">
-                  <div className="p-1.5 rounded-full bg-[#1A1A1A] mb-3">
+                  <div className="p-1 rounded-full bg-bg-secondary mb-4 ring-4 ring-bg-primary shadow-xl">
                     <Avatar 
                       src={user.avatar} 
                       fallback={user.firstName} 
                       color={user.profileColor} 
                       size="xl" 
-                      className="w-20 h-20 text-2xl"
+                      className="w-24 h-24 text-2xl shadow-inner"
                     />
                   </div>
                   
-                  <h2 className="text-xl font-bold text-white mb-1">
+                  <h2 className="text-2xl font-bold text-text-main mb-1">
                     {user.firstName} {user.lastName}
                   </h2>
-                  <p className="text-sm text-dim mb-4">{user.role || 'Membre'}</p>
+                  <p className="text-sm font-bold text-accent-primary uppercase tracking-widest mb-6">
+                    {user.role === 'admin' ? 'Administrateur' : 'Membre du projet'}
+                  </p>
 
-                  <div className="w-full space-y-3">
+                  <div className="w-full space-y-4">
                      {user.email && (
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                           <Mail className="w-4 h-4 text-dim" />
-                           <span className="text-sm text-gray-300">{user.email}</span>
+                        <div className="flex items-center gap-3 p-3.5 rounded-xl bg-bg-tertiary border border-glass-border">
+                           <Mail className="w-5 h-5 text-text-muted" />
+                           <span className="text-sm text-text-dim break-all">{user.email}</span>
                         </div>
                      )}
                      
                      <button
                         onClick={handleMessage}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors"
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-accent-primary hover:opacity-90 text-white font-bold transition-all shadow-lg shadow-accent-primary/20"
                      >
-                        <MessageSquare className="w-4 h-4" />
+                        <MessageSquare className="w-5 h-5" />
                         Envoyer un message
                      </button>
                   </div>

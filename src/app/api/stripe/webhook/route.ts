@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe';
 import dbConnect from '@/lib/mongodb';
 import Workspace from '@/models/Workspace';
 import Stripe from 'stripe';
+import { sendPaymentNotification } from '@/lib/mail';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -55,6 +56,14 @@ export async function POST(req: NextRequest) {
       
       const updatedWorkspace = await Workspace.findByIdAndUpdate(workspaceId, update, { new: true });
       console.log('Updated workspace result:', updatedWorkspace?.subscriptionPlan);
+
+      // Send payment confirmation email
+      if (session.customer_details?.email) {
+        const amount = session.amount_total ? `${(session.amount_total / 100).toFixed(2)} ${session.currency?.toUpperCase()}` : 'N/A';
+        sendPaymentNotification(session.customer_details.email, planId || 'pro', amount).catch(err => {
+          console.error('Error sending payment notification email:', err);
+        });
+      }
       break;
     }
 

@@ -5,14 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, Calendar, Flag, FolderKanban } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
-import type { TaskPriority, Project } from '@/types';
+import type { TaskPriority, Task, User, Project } from '@/types';
 import UserSelector from '@/components/ui/UserSelector';
+import TagSelector from '@/components/ui/TagSelector';
 
 interface EditTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  task: any; // We'll use any for now to avoid complexity with task types
-  onUpdate?: (updatedTask: any) => void;
+  task: Task | null;
+  onUpdate?: (updatedTask: Task) => void;
 }
 
 const priorityOptions: { value: TaskPriority; label: string; color: string }[] = [
@@ -32,7 +33,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
     priority: 'less_important' as TaskPriority,
     dueDate: '',
     assignees: [] as string[],
-    tags: '',
+    tags: [] as string[],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,19 +42,19 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
       // Handle assignees: try to get list, fallback to single assignee
       let loadedAssignees: string[] = [];
       if (task.assignees && Array.isArray(task.assignees)) {
-        loadedAssignees = task.assignees.map((u: any) => typeof u === 'object' ? u._id : u);
+        loadedAssignees = task.assignees.map((u: string | User) => typeof u === 'object' ? u._id : u);
       } else if (task.assignee) {
-        loadedAssignees = [typeof task.assignee === 'object' ? task.assignee._id : task.assignee];
+        loadedAssignees = [typeof task.assignee === 'object' ? (task.assignee as User)._id : task.assignee];
       }
 
       setFormData({
         title: task.title || '',
         description: task.description || '',
-        project: task.project?._id || task.project || '',
+        project: typeof task.project === 'object' ? (task.project as Project)._id : (task.project as string) || '',
         priority: task.priority || 'less_important',
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
         assignees: loadedAssignees,
-        tags: task.tags ? task.tags.join(', ') : '',
+        tags: task.tags || [],
       });
     }
   }, [task]);
@@ -79,7 +80,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
         return;
       }
 
-      const response = await fetch(`/api/tasks?id=${task._id}`, {
+      const response = await fetch(`/api/tasks?id=${task?._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
           priority: formData.priority,
           dueDate: formData.dueDate || undefined,
           assignees: formData.assignees,
-          tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+          tags: formData.tags,
         }),
       });
 
@@ -134,7 +135,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
           >
-            <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto">
+            <div className="glass-card p-6 m-4 max-h-[90vh] overflow-y-auto hover:!bg-bg-card">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-text-main">Modifier la tâche</h2>
@@ -258,6 +259,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
                       onChange={(userIds) => setFormData({ ...formData, assignees: userIds as string[] })}
                       className="mb-4"
                       multiple={true}
+                      projectId={formData.project}
                    />
                 </div>
 
@@ -281,23 +283,11 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
                   />
                 </div>
 
-                {/* Tags */}
                 <div>
-                  <label className="block text-sm font-medium text-text-muted mb-2">
-                    Tags (séparés par des virgules)
-                  </label>
-                  <input
-                    type="text"
+                  <TagSelector 
                     value={formData.tags}
-                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                    placeholder="Ex: urgent, design, frontend"
-                    className="
-                      w-full px-4 py-3 text-sm
-                      bg-glass-bg border border-glass-border
-                      rounded-xl text-main placeholder-dim
-                      focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
-                      transition-all duration-200
-                    "
+                    onChange={(tags) => setFormData({ ...formData, tags })}
+                    placeholder="Ajouter des tags..."
                   />
                 </div>
 

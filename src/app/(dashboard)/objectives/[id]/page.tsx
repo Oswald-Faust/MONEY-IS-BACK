@@ -53,15 +53,15 @@ interface Objective {
 }
 
 const statusConfig = {
-  not_started: { label: 'Pas commencé', color: 'bg-gray-500/10 text-gray-400 border-gray-500/20', icon: Circle },
-  in_progress: { label: 'En cours', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20', icon: Clock },
-  completed: { label: 'Terminé', color: 'bg-green-500/10 text-green-400 border-green-500/20', icon: CheckCircle2 },
+  not_started: { label: 'Pas commencé', color: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/20', icon: Circle },
+  in_progress: { label: 'En cours', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', icon: Clock },
+  completed: { label: 'Terminé', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', icon: CheckCircle2 },
 };
 
 const priorityConfig = {
-  high: { label: 'Haute', color: 'text-red-400 bg-red-500/10 border-red-500/20' },
-  medium: { label: 'Moyenne', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-  low: { label: 'Basse', color: 'text-green-400 bg-green-500/10 border-green-500/20' },
+  high: { label: 'Haute', color: 'text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20' },
+  medium: { label: 'Moyenne', color: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' },
+  low: { label: 'Basse', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
 };
 
 export default function ObjectiveDetailPage() {
@@ -140,7 +140,7 @@ export default function ObjectiveDetailPage() {
       <div className="flex items-start gap-4">
         <button 
           onClick={() => router.back()}
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-dim hover:text-white transition-all mt-1"
+          className="p-2 rounded-xl bg-bg-tertiary hover:bg-glass-hover text-text-dim hover:text-text-main transition-all mt-1 border border-glass-border"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -170,10 +170,10 @@ export default function ObjectiveDetailPage() {
                   {statusConfig[objective.status].label}
                 </span>
               </div>
-              <h1 className="text-3xl font-bold text-white leading-tight">{objective.title}</h1>
+              <h1 className="text-3xl font-bold text-text-main leading-tight">{objective.title}</h1>
             </div>
 
-            <button className="p-2 rounded-xl hover:bg-white/5 text-dim hover:text-white transition-colors">
+            <button className="p-2 rounded-xl bg-bg-tertiary hover:bg-glass-hover text-text-dim hover:text-text-main transition-colors border border-glass-border">
               <MoreVertical className="w-5 h-5" />
             </button>
           </div>
@@ -209,15 +209,15 @@ export default function ObjectiveDetailPage() {
             {/* Progress Section */}
             <div className="glass-card p-8">
               <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-indigo-400" />
+                  <h3 className="text-sm font-bold text-text-main flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-accent-primary" />
                       Progression
                   </h3>
-                  <span className="text-2xl font-bold text-indigo-400">{objective.progress}%</span>
+                  <span className="text-2xl font-bold text-accent-primary">{objective.progress}%</span>
               </div>
-              <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
+              <div className="h-3 w-full bg-bg-tertiary rounded-full overflow-hidden border border-glass-border">
                   <motion.div 
-                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500"
+                      className="h-full bg-gradient-to-r from-accent-primary to-accent-secondary"
                       initial={{ width: 0 }}
                       animate={{ width: `${objective.progress}%` }}
                       transition={{ duration: 1, ease: "easeOut" }}
@@ -227,9 +227,9 @@ export default function ObjectiveDetailPage() {
 
           {/* Description Card */}
           <div className="glass-card p-8 space-y-6">
-            <h3 className="text-sm font-bold text-dim uppercase tracking-wider">Description</h3>
+            <h3 className="text-sm font-bold text-text-dim uppercase tracking-wider">Description</h3>
             <div className="prose prose-invert max-w-none">
-              <p className="whitespace-pre-wrap text-gray-300 leading-relaxed text-lg">
+              <p className="whitespace-pre-wrap text-text-dim leading-relaxed text-lg">
                 {objective.description || 'Aucune description fournie.'}
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function ObjectiveDetailPage() {
 
           {/* Checkpoints */}
           <div className="glass-card p-8 space-y-6">
-            <h3 className="text-sm font-bold text-dim uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-sm font-bold text-text-dim uppercase tracking-wider flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
               Étapes clés ({objective.checkpoints.filter(c => c.completed).length}/{objective.checkpoints.length})
             </h3>
@@ -250,25 +250,25 @@ export default function ObjectiveDetailPage() {
                     className={`
                       flex items-center gap-4 p-4 rounded-xl border transition-all
                       ${checkpoint.completed 
-                        ? 'bg-green-500/5 border-green-500/20' 
-                        : 'bg-white/5 border-white/5'}
+                        ? 'bg-emerald-500/5 border-emerald-500/20' 
+                        : 'bg-bg-tertiary border-glass-border'}
                     `}
                   >
                     <div className={`
                       w-6 h-6 rounded-full flex items-center justify-center border transition-all
                       ${checkpoint.completed
-                        ? 'bg-green-500 border-green-500 text-black'
-                        : 'border-white/20 text-transparent'}
+                        ? 'bg-emerald-500 border-emerald-500 text-white dark:text-black'
+                        : 'border-glass-border text-transparent'}
                     `}>
                       <Check className="w-3.5 h-3.5" />
                     </div>
-                    <span className={checkpoint.completed ? 'text-gray-400 line-through' : 'text-white'}>
+                    <span className={checkpoint.completed ? 'text-text-muted line-through' : 'text-text-main'}>
                       {checkpoint.title}
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-dim italic">Aucune étape définie</p>
+                <p className="text-text-muted italic">Aucune étape définie</p>
               )}
             </div>
           </div>
@@ -280,14 +280,14 @@ export default function ObjectiveDetailPage() {
           <div className="glass-card p-4 space-y-2">
             <button 
               onClick={() => setIsEditModalOpen(true)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-dim hover:text-white transition-colors text-sm font-medium"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-bg-tertiary/50 hover:bg-glass-hover text-text-dim hover:text-text-main transition-colors text-sm font-medium border border-transparent hover:border-glass-border"
             >
-              <Edit className="w-4 h-4" />
+              <Edit className="w-4 h-4 text-text-muted" />
               Modifier l&apos;objectif
             </button>
             <button 
               onClick={handleDelete}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors text-sm font-medium"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-colors text-sm font-medium border border-transparent hover:border-red-500/20"
             >
               <Trash2 className="w-4 h-4" />
               Supprimer
@@ -296,11 +296,11 @@ export default function ObjectiveDetailPage() {
           
             {/* Create Activity Logs Placeholder */}
            <div className="glass-card p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Clock className="w-4 h-4 text-indigo-400" />
+            <h3 className="text-sm font-bold text-text-main flex items-center gap-2">
+              <Clock className="w-4 h-4 text-accent-primary" />
               Activité
             </h3>
-             <p className="text-sm text-dim italic">Bientôt disponible</p>
+             <p className="text-sm text-text-muted italic">Bientôt disponible</p>
           </div>
 
         </div>

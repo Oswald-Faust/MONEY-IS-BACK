@@ -10,14 +10,19 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Edwin | Gestion de Projets",
-  description: "Plateforme de gestion de projets ultra-personnalisée pour centraliser vos business",
+  title: "Edwin - Votre plateforme de tout-en-un pour vos projets",
+  description: "Gérez votre équipe, vos tâches, vos objectifs et bien plus.",
   keywords: ["gestion de projet", "saas", "productivity", "tâches", "collaboration"],
   authors: [{ name: "Mathias MERCIER" }],
   openGraph: {
-    title: "Edwin | Gestion de Projets",
-    description: "Plateforme de gestion de projets ultra-personnalisée",
+    title: "Edwin - Votre plateforme de tout-en-un pour vos projets",
+    description: "Gérez votre équipe, vos tâches, vos objectifs et bien plus.",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Edwin - Votre plateforme de tout-en-un pour vos projets",
+    description: "Gérez votre équipe, vos tâches, vos objectifs et bien plus.",
   },
 };
 

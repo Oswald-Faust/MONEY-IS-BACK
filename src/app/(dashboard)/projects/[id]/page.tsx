@@ -97,6 +97,7 @@ export default function ProjectDetailPage() {
     if (!project || !user) return false;
     
     // Check if owner (handle both string and populated object)
+    if (!project.owner) return false;
     const ownerId = typeof project.owner === 'string' ? project.owner : (project.owner as any)._id;
     if (ownerId === user._id) return true;
 

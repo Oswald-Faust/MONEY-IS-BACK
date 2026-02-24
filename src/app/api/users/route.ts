@@ -28,8 +28,7 @@ export async function GET(request: NextRequest) {
     const userWorkspaceIds = currentUser.workspaces || [];
 
     // Build query conditions
-    const conditions: any = { 
-      _id: { $ne: auth.userId },
+    const conditions: Record<string, any> = { 
       workspaces: { $in: userWorkspaceIds }
     };
     

@@ -263,12 +263,12 @@ export default function SecureIdsPage() {
             <div className="space-y-2">
               <label className="text-xs font-bold text-text-dim uppercase tracking-wider">Mot de passe sécurisé</label>
               <div className="relative">
-                <Input 
+                <input 
                   type={showAdminPassword ? "text" : "password"} 
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   placeholder="Votre mot de passe..."
-                  className="w-full bg-bg-tertiary border border-border-main rounded-xl px-4 py-3 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all pl-10 pr-10"
+                  className="w-full bg-bg-tertiary border border-glass-border rounded-xl px-4 py-3 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all pl-10 pr-10"
                   autoFocus
                 />
                 <Key className="w-5 h-5 text-text-dim absolute left-3 top-1/2 -translate-y-1/2" />
@@ -286,7 +286,7 @@ export default function SecureIdsPage() {
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-200 text-sm flex items-center gap-2"
+                className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-200 text-sm flex items-center gap-2"
               >
                 <ShieldAlert className="w-4 h-4" />
                 {error}
@@ -399,7 +399,7 @@ export default function SecureIdsPage() {
           {isWorkspaceAdmin && (
             <button
               onClick={() => setIsPasswordModalOpen(true)}
-              className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-dim hover:text-white transition-all border border-white/5"
+              className="p-2.5 rounded-xl bg-bg-tertiary hover:bg-glass-hover text-text-dim hover:text-text-main transition-all border border-glass-border"
               title="Gérer le mot de passe du projet"
             >
               <Settings className="w-5 h-5" />
@@ -445,15 +445,15 @@ export default function SecureIdsPage() {
                       <div className="space-y-3">
                           {item.link && (
                               <div className="flex items-center gap-3 text-sm">
-                                  <ExternalLink className="w-4 h-4 text-dim shrink-0" />
-                                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-indigo-300 hover:underline truncate">
+                                  <ExternalLink className="w-4 h-4 text-text-muted shrink-0" />
+                                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline truncate font-medium">
                                       {item.link}
                                   </a>
                               </div>
                           )}
                           
                           {item.username && (
-                            <div className="flex items-center gap-3 text-sm bg-bg-tertiary p-2 rounded-lg border border-border-main group-hover:border-border-secondary transition-colors">
+                            <div className="flex items-center gap-3 text-sm bg-bg-tertiary p-2 rounded-lg border border-glass-border group-hover:border-accent-primary/30 transition-colors">
                                 <span className="text-text-dim shrink-0 w-4 font-mono select-none">ID</span>
                                 <span className="text-text-main font-mono select-all flex-1 truncate">{item.username}</span>
                                 <button 
@@ -466,18 +466,18 @@ export default function SecureIdsPage() {
                           )}
 
                         <div className="flex items-center gap-3 text-sm bg-red-500/5 p-2 rounded-lg border border-red-500/10 group-hover:border-red-500/20 transition-colors">
-                            <span className="text-dim shrink-0 w-4 font-mono select-none">PW</span>
-                            <div className="flex-1 font-mono text-white truncate relative">
+                            <span className="text-text-dim shrink-0 w-4 font-mono select-none">PW</span>
+                            <div className="flex-1 font-mono text-text-main truncate relative">
                                 {revealedIds[item._id] ? (
-                                    <span className="text-red-200">{revealedIds[item._id]}</span>
+                                    <span className="text-red-500 dark:text-red-200 font-bold">{revealedIds[item._id]}</span>
                                 ) : (
-                                    <span className="text-dim tracking-[3px] select-none">••••••••••••</span>
+                                    <span className="text-text-muted tracking-[3px] select-none opacity-50">••••••••••••</span>
                                 )}
                             </div>
                             <div className="flex items-center gap-1">
                                 <button 
                                     onClick={() => toggleReveal(item._id)}
-                                    className="p-1.5 hover:text-white text-dim transition-colors"
+                                    className="p-1.5 hover:text-text-main text-text-dim transition-colors"
                                     title={revealedIds[item._id] ? "Masquer" : "Révéler"}
                                 >
                                     {revealedIds[item._id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -485,7 +485,7 @@ export default function SecureIdsPage() {
                                 {revealedIds[item._id] && (
                                     <button 
                                         onClick={() => copyToClipboard(revealedIds[item._id])}
-                                        className="p-1.5 hover:text-white text-dim transition-colors"
+                                        className="p-1.5 hover:text-text-main text-text-dim transition-colors"
                                         title="Copier"
                                     >
                                         <Copy className="w-3.5 h-3.5" />
@@ -496,8 +496,8 @@ export default function SecureIdsPage() {
                       </div>
 
                       {item.notes && (
-                          <div className="pt-2 border-t border-border-main">
-                              <p className="text-sm text-text-dim italic line-clamp-2 hover:line-clamp-none transition-all cursor-help">
+                           <div className="pt-2 border-t border-glass-border">
+                              <p className="text-sm text-text-muted italic line-clamp-2 hover:line-clamp-none transition-all cursor-help">
                                   {item.notes}
                               </p>
                           </div>
@@ -507,7 +507,7 @@ export default function SecureIdsPage() {
           ))}
           
           {secureIds.length === 0 && (
-              <div className="col-span-full py-12 flex flex-col items-center justify-center text-dim border-2 border-dashed border-white/10 rounded-2xl">
+               <div className="col-span-full py-12 flex flex-col items-center justify-center text-text-muted border-2 border-dashed border-glass-border rounded-2xl">
                   <Lock className="w-12 h-12 mb-4 opacity-20" />
                   <p>Aucun élément sécurisé pour le moment.</p>
                   <button 
@@ -555,7 +555,7 @@ export default function SecureIdsPage() {
                                 value={newItem.title}
                                 onChange={(e) => setNewItem({...newItem, title: e.target.value})}
                                 placeholder="Ex: Accès Base de Données Prod"
-                                className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
+                                className="w-full bg-bg-tertiary border border-glass-border rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
                                 autoFocus
                             />
                         </div>
@@ -566,7 +566,7 @@ export default function SecureIdsPage() {
                                 <select 
                                     value={newItem.category}
                                     onChange={(e) => setNewItem({...newItem, category: e.target.value})}
-                                    className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main focus:outline-none focus:border-red-500/50 transition-all appearance-none"
+                                    className="w-full bg-bg-tertiary border border-glass-border rounded-lg px-4 py-2.5 text-text-main focus:outline-none focus:border-red-500/50 transition-all appearance-none"
                                 >
                                     <option className="bg-bg-tertiary text-text-main" value="Général">Général</option>
                                     <option className="bg-bg-tertiary text-text-main" value="Serveur">Serveur</option>
@@ -584,7 +584,7 @@ export default function SecureIdsPage() {
                                     value={newItem.link}
                                     onChange={(e) => setNewItem({...newItem, link: e.target.value})}
                                     placeholder="https://..."
-                                    className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
+                                    className="w-full bg-bg-tertiary border border-glass-border rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
                                 />
                             </div>
                         </div>
@@ -596,7 +596,7 @@ export default function SecureIdsPage() {
                                 value={newItem.username}
                                 onChange={(e) => setNewItem({...newItem, username: e.target.value})}
                                 placeholder="admin@example.com"
-                                className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
+                                className="w-full bg-bg-tertiary border border-glass-border rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all"
                             />
                         </div>
 
@@ -619,7 +619,7 @@ export default function SecureIdsPage() {
                                 value={newItem.notes}
                                 onChange={(e) => setNewItem({...newItem, notes: e.target.value})}
                                 placeholder="Détails supplémentaires..."
-                                className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all min-h-[80px] resize-none"
+                                className="w-full bg-bg-tertiary border border-glass-border rounded-lg px-4 py-2.5 text-text-main placeholder:text-text-muted focus:outline-none focus:border-red-500/50 transition-all min-h-[80px] resize-none"
                             />
                         </div>
 
@@ -663,7 +663,7 @@ export default function SecureIdsPage() {
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     className="glass-card w-full max-w-md p-0 border-indigo-500/20 shadow-2xl relative z-10 overflow-hidden"
                 >
-                    <div className="p-6 border-b border-border-main flex justify-between items-center bg-bg-secondary">
+                    <div className="p-6 border-b border-glass-border flex justify-between items-center bg-bg-secondary">
                         <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
                             <Key className="w-5 h-5 text-indigo-400" />
                             Mot de passe du projet
@@ -686,7 +686,7 @@ export default function SecureIdsPage() {
                                     value={newProjectPassword}
                                     onChange={(e) => setNewProjectPassword(e.target.value)}
                                     placeholder="Nouveau secret..."
-                                    className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-3 text-text-main placeholder:text-text-muted focus:outline-none focus:border-indigo-500/50 transition-all pr-12"
+                                    className="w-full bg-bg-tertiary border border-glass-border rounded-lg px-4 py-3 text-text-main placeholder:text-text-muted focus:outline-none focus:border-indigo-500/50 transition-all pr-12"
                                     autoFocus
                                 />
                                 <button
@@ -723,9 +723,4 @@ export default function SecureIdsPage() {
       </AnimatePresence>
     </div>
   );
-}
-
-// Helper component since default Input was missing
-function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
-    return <input className={className} {...props} />;
 }

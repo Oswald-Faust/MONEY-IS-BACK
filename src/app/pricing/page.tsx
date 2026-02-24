@@ -250,7 +250,7 @@ export default function PricingPage() {
                                           
                                           {plan.price.monthly !== 0 && (
                                               <span className={`text-sm ml-1 ${plan.highlight ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                  {plan.name === 'Team' ? '/mois' : '/user/mois'}
+                                                  {(plan.name === 'Team' || plan.name === 'Pro') ? '/mois' : '/user/mois'}
                                               </span>
                                           )}
                                       </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
+import { sendWelcomeEmail } from '@/lib/mail';
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,6 +48,11 @@ export async function POST(request: NextRequest) {
         notifications: true,
         language: 'fr',
       },
+    });
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user.email, user.firstName).catch(err => {
+      console.error('Error sending welcome email:', err);
     });
 
     // Workspace creation moved to onboarding step

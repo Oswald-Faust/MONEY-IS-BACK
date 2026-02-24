@@ -111,26 +111,26 @@ export default function UserHoverCard({ user, children }: UserHoverCardProps) {
         <AnimatePresence>
           {isHovered && (
             <motion.div
-              initial={{ opacity: 0, y: 5, scale: 0.95 }}
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 5, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="absolute bottom-full left-0 mb-2 z-50 min-w-[280px]" 
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-[100] min-w-[280px]" 
             >
               {/* Invisible bridge to handle gap if any, though bottom-full + mb-2 creates gap. 
                   We can make the div taller or just rely on timeout. Timeout is safer. */}
                   
               <div 
-                className="glass-card p-4 shadow-2xl border border-white/10 bg-[#0F0F0F] relative backdrop-blur-xl"
+                className="glass-card p-5 shadow-2xl border border-glass-border bg-bg-secondary relative backdrop-blur-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                 {/* Arrow */}
-                <div className="absolute left-6 -bottom-1.5 w-3 h-3 bg-[#0F0F0F] border-r border-b border-white/10 rotate-45 z-0" />
+                  {/* Arrow - Centered at Top */}
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-bg-secondary border-l border-t border-glass-border rotate-45 z-0 shadow-lg" />
                 
                 <div className="relative z-10">
                     {!showQuickMessage ? (
                         <>
-                            <div className="flex items-start gap-3 mb-3">
+                            <div className="flex items-start gap-3 mb-4">
                                 <Avatar 
                                     src={user.avatar} 
                                     fallback={user.firstName} 
@@ -138,14 +138,14 @@ export default function UserHoverCard({ user, children }: UserHoverCardProps) {
                                     size="md"
                                 />
                                 <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-bold text-white truncate">
+                                    <h4 className="text-sm font-bold text-text-main truncate">
                                     {user.firstName} {user.lastName}
                                     </h4>
-                                    <p className="text-xs text-dim truncate">
-                                    {user.email || 'Membre'}
+                                    <p className="text-xs text-text-dim break-all mt-0.5">
+                                    {user.email || 'Membre du projet'}
                                     </p>
-                                    <p className="text-[10px] text-indigo-400 mt-0.5 uppercase tracking-wider font-bold">
-                                        {user.role === 'admin' ? 'Admin' : 'Membre'}
+                                    <p className="text-[10px] text-accent-primary mt-1 uppercase tracking-widest font-bold">
+                                        {user.role === 'admin' ? 'Administrateur' : 'Membre'}
                                     </p>
                                 </div>
                             </div>
@@ -153,32 +153,32 @@ export default function UserHoverCard({ user, children }: UserHoverCardProps) {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setShowQuickMessage(true)}
-                                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white text-xs font-medium transition-colors border border-white/5"
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-bg-tertiary hover:bg-glass-hover text-text-main text-xs font-semibold transition-colors border border-glass-border"
                                 >
-                                    <MessageSquare className="w-3 h-3" />
-                                    Écrire
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    Message
                                 </button>
                                 <button
                                     onClick={handleMessage}
-                                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors"
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-accent-primary hover:opacity-90 text-white text-xs font-semibold transition-all shadow-lg shadow-accent-primary/20"
                                 >
                                     Discussion
                                 </button>
                             </div>
                         </>
                     ) : (
-                        <form onSubmit={handleQuickSend} className="space-y-2">
-                            <div className="flex items-center justify-between pb-1 border-b border-white/5">
-                                <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                                    <MessageSquare className="w-3 h-3 text-indigo-400" />
+                        <form onSubmit={handleQuickSend} className="space-y-3">
+                            <div className="flex items-center justify-between pb-2 border-b border-glass-border">
+                                <span className="text-xs font-bold text-text-main flex items-center gap-2">
+                                    <MessageSquare className="w-3.5 h-3.5 text-accent-primary" />
                                     Message à {user.firstName}
                                 </span>
                                 <button 
                                     type="button"
                                     onClick={() => setShowQuickMessage(false)}
-                                    className="text-dim hover:text-white transition-colors p-1 hover:bg-white/5 rounded"
+                                    className="text-text-muted hover:text-text-main transition-colors p-1.5 hover:bg-glass-hover rounded-lg"
                                 >
-                                    <X className="w-3 h-3" />
+                                    <X className="w-3.5 h-3.5" />
                                 </button>
                             </div>
                             
@@ -188,13 +188,13 @@ export default function UserHoverCard({ user, children }: UserHoverCardProps) {
                                 onChange={(e) => setMessage(e.target.value)}
                                 placeholder="Votre message..."
                                 rows={2}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-xs text-white placeholder-dim focus:outline-none focus:border-indigo-500/50 resize-none"
+                                className="w-full bg-bg-tertiary border border-glass-border rounded-lg p-2.5 text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:border-accent-primary/50 resize-none transition-all"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault();
                                         handleQuickSend(e);
                                     }
-                                    e.stopPropagation(); // Prevent event bubbling
+                                    e.stopPropagation(); 
                                 }}
                                 onClick={(e) => e.stopPropagation()}
                             />

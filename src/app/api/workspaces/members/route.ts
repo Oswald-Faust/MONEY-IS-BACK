@@ -6,14 +6,16 @@ import User from '@/models/User';
 import Invitation from '@/models/Invitation';
 import Project from '@/models/Project';
 import { verifyAuth } from '@/lib/auth';
+import { sendInvitationEmail, sendWorkspaceWelcomeEmail } from '@/lib/mail';
 import type { IWorkspace } from '@/models/Workspace';
+import type { IUser } from '@/models/User';
 
 // GET /api/workspaces/members?workspaceId=...
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
     const auth = await verifyAuth(request);
-    if (!auth.success) return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
+    if (!auth.success || !auth.userId) return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
 
     const { searchParams } = new URL(request.url);
     const workspaceId = searchParams.get('workspaceId');
@@ -26,8 +28,14 @@ export async function GET(request: NextRequest) {
     const workspace = await Workspace.findById(workspaceId);
     if (!workspace) return NextResponse.json({ success: false, error: 'Workspace non trouvé' }, { status: 404 });
 
-    const isMember = workspace.members.some(m => m.user.toString() === auth.userId) || workspace.owner.toString() === auth.userId;
-    if (!isMember) return NextResponse.json({ success: false, error: 'Accès refusé' }, { status: 403 });
+    const userId = auth.userId;
+    const isMember = workspace.members.some(m => m.user.toString() === userId) || 
+                     workspace.owner.toString() === userId;
+    
+    if (!isMember) {
+      console.warn(`[API] Access denied to workspace ${workspaceId} for user ${userId}`);
+      return NextResponse.json({ success: false, error: 'Accès refusé' }, { status: 403 });
+    }
 
     // Populate members
     await workspace.populate('members.user', 'firstName lastName email avatar role');
@@ -49,7 +57,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: Error | any) {
     console.error('Get members error:', error);
     return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
   }
@@ -123,7 +131,7 @@ export async function POST(request: NextRequest) {
                 try {
                     const project = await Project.findById(projectId);
                     if (project && project.workspace.toString() === workspaceId) {
-                        const isAlreadyMember = project.members.some((m: any) => m.user.toString() === existingUser._id.toString());
+                        const isAlreadyMember = project.members.some((m: { user: any }) => m.user.toString() === existingUser._id.toString());
                         const isProjectOwner = project.owner.toString() === existingUser._id.toString();
                         if (!isAlreadyMember && !isProjectOwner) {
                             project.members.push({ user: existingUser._id, role, joinedAt: new Date() });
@@ -135,6 +143,11 @@ export async function POST(request: NextRequest) {
                 }
             }
         }
+
+        // Notify user via email
+        const inviter = await User.findById(auth.userId);
+        const inviterName = inviter ? `${inviter.firstName} ${inviter.lastName}` : 'Un membre';
+        sendWorkspaceWelcomeEmail(email, workspace.name, inviterName).catch(err => console.error('Error sending welcome email:', err));
 
         return NextResponse.json({
             success: true,
@@ -169,8 +182,9 @@ export async function POST(request: NextRequest) {
             projectIds: projectIds || []
         });
 
-        // Here we would send email via Resend/SMTP
-        // await sendInvitationEmail(email, token, workspace.name);
+        const inviter = await User.findById(auth.userId);
+        const inviterName = inviter ? `${inviter.firstName} ${inviter.lastName}` : 'Un membre';
+        sendInvitationEmail(email, token, workspace.name, inviterName).catch(err => console.error('Error sending invitation email:', err));
 
         return NextResponse.json({
             success: true,
@@ -180,7 +194,7 @@ export async function POST(request: NextRequest) {
         });
     }
 
-  } catch (error: any) {
+  } catch (error: Error | any) {
     console.error('Invite member error:', error);
     return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
   }

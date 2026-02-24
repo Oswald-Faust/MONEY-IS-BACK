@@ -8,6 +8,7 @@ import { useTranslation } from '@/lib/i18n';
 import toast from 'react-hot-toast';
 import type { TaskPriority, Project } from '@/types';
 import UserSelector from '@/components/ui/UserSelector';
+import TagSelector from '@/components/ui/TagSelector';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -36,7 +37,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
     priority: 'less_important' as TaskPriority,
     dueDate: '',
     assignees: [] as string[],
-    tags: '',
+    tags: [] as string[],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,7 +87,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
           priority: formData.priority,
           dueDate: formData.dueDate || undefined,
           assignees: formData.assignees,
-          tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+          tags: formData.tags,
         }),
       });
 
@@ -102,7 +103,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
           priority: 'less_important',
           dueDate: '',
           assignees: [],
-          tags: '',
+          tags: [],
         });
         onClose();
       }
@@ -260,6 +261,7 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                       onChange={(userIds) => setFormData({ ...formData, assignees: userIds as string[] })}
                       className="mb-4"
                       multiple={true}
+                      projectId={formData.project}
                    />
                 </div>
 
@@ -283,23 +285,11 @@ export default function CreateTaskModal({ isOpen, onClose, projects: propProject
                   />
                 </div>
 
-                {/* Tags */}
                 <div>
-                  <label className="block text-sm font-medium text-text-muted mb-2">
-                    {t.modals.task.tagsLabel}
-                  </label>
-                  <input
-                    type="text"
+                  <TagSelector 
                     value={formData.tags}
-                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    onChange={(tags) => setFormData({ ...formData, tags })}
                     placeholder={t.modals.task.tagsPlaceholder}
-                    className="
-                      w-full px-4 py-3 text-sm
-                      bg-bg-tertiary border border-glass-border
-                      rounded-xl text-text-main placeholder-text-muted
-                      focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
-                      transition-all duration-200
-                    "
                   />
                 </div>
 

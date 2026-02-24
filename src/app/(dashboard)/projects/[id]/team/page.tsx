@@ -297,7 +297,7 @@ export default function ProjectTeamPage() {
                                 }`}>
                                     {member.role === 'admin' ? 'Administrateur' : 'Éditeur'}
                                 </span>
-                                {project.owner === member.user?._id && (
+                                {((typeof project.owner === 'string' ? project.owner : (project.owner as any)?._id) === member.user?._id) && (
                                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
                                         Propriétaire
                                      </span>

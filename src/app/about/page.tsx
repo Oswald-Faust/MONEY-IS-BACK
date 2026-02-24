@@ -4,11 +4,9 @@ import { motion } from 'framer-motion';
 import { LandingNavbar } from '@/components/layout/LandingNavbar';
 import { LandingFooter } from '@/components/layout/LandingFooter';
 import { 
-  Users, 
   Target, 
   Shield, 
   Zap, 
-  Globe, 
   Heart 
 } from 'lucide-react';
 import Image from 'next/image';
@@ -59,7 +57,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8, delay: 0.1 }}
             className="text-5xl md:text-7xl font-medium tracking-tight mb-8"
           >
-            Bâtir l'avenir du <br/> 
+            Bâtir l&apos;avenir du <br/> 
             <span className="text-zinc-500">travail collaboratif.</span>
           </motion.h1>
           
@@ -149,22 +147,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team CTA */}
-      <section className="py-32 px-6 bg-gradient-to-b from-[#050505] to-indigo-950/20">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-medium mb-8">Rejoignez l'aventure</h2>
-          <p className="text-xl text-zinc-400 mb-12 font-light">
-            Nous sommes toujours à la recherche de talents passionnés pour rejoindre notre équipe.
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-[#00FFB2] text-black rounded-full font-bold text-lg hover:shadow-[0_0_40px_rgba(0,255,178,0.3)] transition-all"
-          >
-            VOIR LES POSTES OUVERTS
-          </motion.button>
-        </div>
-      </section>
+
 
       <LandingFooter />
     </main>

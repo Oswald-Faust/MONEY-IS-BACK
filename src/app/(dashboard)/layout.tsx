@@ -81,17 +81,22 @@ export default function DashboardLayout({
             setWorkspaces(data.data);
             
             const activeWs = state.currentWorkspace;
-            if (!activeWs) {
+            const foundActiveWs = activeWs ? data.data.find((ws: Workspace) => ws._id === activeWs._id) : null;
+            
+            if (!foundActiveWs && data.data.length > 0) {
+              // User no longer has access to this workspace or none set
               setCurrentWorkspace(data.data[0]);
-            } else {
-              const updated = (data.data as Workspace[]).find((ws) => ws._id === activeWs._id);
-              if (updated && (
-                updated.subscriptionPlan !== activeWs.subscriptionPlan || 
-                updated.subscriptionStatus !== activeWs.subscriptionStatus ||
-                updated.name !== activeWs.name
-              )) {
-                setCurrentWorkspace(updated);
+            } else if (foundActiveWs) {
+              // Update if changed
+              if (
+                foundActiveWs.subscriptionPlan !== activeWs?.subscriptionPlan || 
+                foundActiveWs.subscriptionStatus !== activeWs?.subscriptionStatus ||
+                foundActiveWs.name !== activeWs?.name
+              ) {
+                setCurrentWorkspace(foundActiveWs);
               }
+            } else if (data.data.length === 0) {
+              setCurrentWorkspace(null);
             }
           }
         } catch (error) {

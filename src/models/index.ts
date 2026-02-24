@@ -8,6 +8,10 @@ export { default as Objective } from './Objective';
 export { default as Idea } from './Idea';
 export { default as DriveFolder } from './DriveFolder';
 export { default as DriveFile } from './DriveFile';
+export { default as EmailTemplate } from './EmailTemplate';
+export { default as EmailConfig } from './EmailConfig';
+export { default as EmailCampaign } from './EmailCampaign';
+export { default as EmailSendLog } from './EmailSendLog';
 
 export type { IUser, UserRole } from './User';
 export type { IWorkspace } from './Workspace';
@@ -19,3 +23,7 @@ export type { IObjective } from './Objective';
 export type { IIdea } from './Idea';
 export type { IDriveFolder } from './DriveFolder';
 export type { IDriveFile } from './DriveFile';
+export type { IEmailTemplate } from './EmailTemplate';
+export type { IEmailConfig } from './EmailConfig';
+export type { IEmailCampaign } from './EmailCampaign';
+export type { IEmailSendLog } from './EmailSendLog';

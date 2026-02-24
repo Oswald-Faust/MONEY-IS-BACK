@@ -6,6 +6,7 @@ import { Plus, Search, FolderKanban } from 'lucide-react';
 import ProjectCard from '@/components/ui/ProjectCard';
 import CreateProjectModal from '@/components/modals/CreateProjectModal';
 import EditTaskModal from '@/components/modals/EditTaskModal';
+import type { Project, Task } from '@/types';
 import { useSearchParams } from 'next/navigation';
 import { useAppStore } from '@/store';
 import { useTranslation } from '@/lib/i18n';
@@ -20,7 +21,7 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived' | 'paused'>('all');
   const [isLoading, setIsLoading] = useState(true);
-  const [editingTask, setEditingTask] = useState<any>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const searchParams = useSearchParams();
 
   // Handle URL params for direct task access
@@ -58,13 +59,13 @@ export default function ProjectsPage() {
         } else {
           toast.error(data.error || t.projectsPage.toasts.deleteError);
         }
-      } catch (error) {
+      } catch {
         toast.error(t.projectsPage.toasts.connectionError);
       }
     }
   };
 
-  const handleEditProject = (project: any) => {
+  const handleEditProject = (project: Project) => {
     setCurrentProject(project);
     setProjectModalOpen(true);
   };
@@ -102,7 +103,7 @@ export default function ProjectsPage() {
     if (token && currentWorkspace) {
       fetchProjects();
     }
-  }, [token, currentWorkspace, setProjects]);
+  }, [token, currentWorkspace, setProjects, t.projectsPage.toasts.loadError, t.projectsPage.toasts.serverError]);
 
   // Filter projects
   const filteredProjects = projects.filter((project) => {
@@ -126,11 +127,11 @@ export default function ProjectsPage() {
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-main flex items-center gap-3">
-            <FolderKanban className="w-8 h-8 text-indigo-400" />
+          <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
+            <FolderKanban className="w-8 h-8 text-accent-primary" />
             {t.projectsPage.title}
           </h1>
-          <p className="text-dim mt-1">
+          <p className="text-text-muted mt-1 font-medium">
             {filteredProjects.length} {t.projectsPage.count}
           </p>
         </div>
@@ -144,13 +145,13 @@ export default function ProjectsPage() {
           }}
           className="
             px-4 py-2.5 rounded-xl flex items-center gap-2
-            bg-gradient-to-r from-indigo-600 to-purple-600
-            text-white font-medium text-sm
-            hover:from-indigo-500 hover:to-purple-500
-            transition-all duration-200
+            bg-accent-primary
+            text-white font-bold text-sm
+            hover:opacity-90
+            transition-all duration-200 shadow-lg shadow-accent-primary/20
           "
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           {t.projectsPage.newProject}
         </motion.button>
       </motion.div>
@@ -172,9 +173,9 @@ export default function ProjectsPage() {
             placeholder={t.projectsPage.searchPlaceholder}
             className="
               w-full pl-12 pr-4 py-3 text-sm
-              bg-glass-bg border border-glass-border
-              rounded-xl text-main placeholder-dim
-              focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
+              bg-bg-tertiary border border-glass-border
+              rounded-xl text-text-main placeholder:text-text-muted
+              focus:border-accent-primary/50 focus:outline-none focus:ring-4 focus:ring-accent-primary/5
               transition-all duration-200
             "
           />
@@ -187,10 +188,10 @@ export default function ProjectsPage() {
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`
-                px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 uppercase tracking-widest
                 ${statusFilter === status
-                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                  : 'bg-glass-bg text-dim border border-glass-border hover:bg-glass-hover'}
+                  ? 'bg-accent-primary/10 text-accent-primary border border-accent-primary/20 shadow-sm'
+                  : 'bg-bg-tertiary text-text-muted border border-glass-border hover:bg-glass-hover hover:text-text-main'}
               `}
             >
               {status === 'all' && t.projectsPage.filters.all}
@@ -219,7 +220,7 @@ export default function ProjectsPage() {
         {/* Active Projects */}
         {activeProjects.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
+            <h2 className="text-xs font-bold text-text-muted mb-6 uppercase tracking-[0.2em] ml-1">
               {t.projectsPage.sections.activeProjects} ({activeProjects.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -292,10 +293,10 @@ export default function ProjectsPage() {
         )}
 
         {filteredProjects.length === 0 && (
-          <div className="glass-card p-12 text-center">
-            <FolderKanban className="w-12 h-12 text-dim mx-auto mb-4 opacity-20" />
-            <h3 className="text-main font-medium mb-2">{t.projectsPage.empty.title}</h3>
-            <p className="text-dim text-sm mb-4">
+          <div className="glass-card p-16 text-center border-dashed border-2 bg-bg-secondary/50">
+            <FolderKanban className="w-16 h-16 text-text-muted mx-auto mb-6 opacity-20" />
+            <h3 className="text-xl font-bold text-text-main mb-2">{t.projectsPage.empty.title}</h3>
+            <p className="text-text-dim text-sm mb-8 max-w-xs mx-auto">
               {searchQuery
                 ? t.projectsPage.empty.tryAnotherSearch
                 : t.projectsPage.empty.createFirst}
@@ -336,7 +337,7 @@ export default function ProjectsPage() {
           window.history.replaceState({}, '', url);
         }}
         task={editingTask}
-        onUpdate={(updatedTask) => {
+        onUpdate={() => {
              // Optional: update local state if needed, though simpler just to rely on modal
         }}
       />

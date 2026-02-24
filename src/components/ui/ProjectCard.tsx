@@ -87,11 +87,11 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
 
                 {/* Project Name & Description */}
                 <div className="min-w-0">
-                  <h3 className="text-lg font-bold text-main group-hover:text-main truncate transition-colors">
+                  <h3 className="text-lg font-bold text-text-main group-hover:text-accent-primary truncate transition-colors">
                     {project.name}
                   </h3>
                   {project.description && (
-                    <p className="text-sm text-dim mt-0.5 line-clamp-1 group-hover:text-main transition-colors">
+                    <p className="text-sm text-text-muted mt-0.5 line-clamp-1 group-hover:text-text-dim transition-colors">
                       {project.description}
                     </p>
                   )}
@@ -107,7 +107,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                   }}
                   className={`
                     p-2 rounded-xl transition-all flex-shrink-0
-                    ${showMenu ? 'bg-glass-hover text-main' : 'bg-glass-bg text-dim hover:bg-glass-hover'}
+                    ${showMenu ? 'bg-glass-hover text-text-main' : 'bg-glass-bg text-text-muted hover:bg-glass-hover hover:text-text-main'}
                   `}
                 >
                   <MoreHorizontal className="w-5 h-5" />
@@ -119,7 +119,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 mt-2 w-48 z-50 overflow-hidden rounded-2xl bg-[#1a1a24] border border-white/10 shadow-2xl backdrop-blur-xl"
+                      className="absolute right-0 mt-2 w-48 z-50 overflow-hidden rounded-2xl bg-bg-card border border-glass-border shadow-2xl backdrop-blur-xl"
                     >
                       <div className="p-1.5 space-y-1">
                         <button
@@ -129,9 +129,9 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                             setShowMenu(false);
                             onEdit?.(project);
                           }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-200 hover:text-white hover:bg-glass-hover rounded-xl transition-all group/item"
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-text-main hover:bg-glass-hover rounded-xl transition-all group/item"
                         >
-                          <Edit3 className="w-4 h-4 text-dim group-hover/item:text-indigo-400 transition-colors" />
+                          <Edit3 className="w-4 h-4 text-text-muted group-hover/item:text-accent-primary transition-colors" />
                           {t.common.edit}
                         </button>
                         <div className="h-px bg-glass-bg mx-2" />
@@ -162,9 +162,9 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                     <CheckCircle className="w-4 h-4 text-indigo-400" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">{t.common.tasks}</span>
-                    <span className="font-semibold text-main leading-tight">
-                      {project.completedTasksCount} <span className="text-dim">/ {project.tasksCount}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-text-muted font-bold">{t.common.tasks}</span>
+                    <span className="font-semibold text-text-main leading-tight">
+                      {project.completedTasksCount} <span className="text-text-dim text-xs">/ {project.tasksCount}</span>
                     </span>
                   </div>
                 </div>
@@ -175,8 +175,8 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
                       <Users className="w-4 h-4 text-purple-400" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-wider text-muted font-bold">{t.common.team}</span>
-                      <span className="font-semibold text-main leading-tight">{project.members.length}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-text-muted font-bold">{t.common.team}</span>
+                    <span className="font-semibold text-text-main leading-tight">{project.members.length}</span>
                     </div>
                   </div>
                 )}
@@ -185,8 +185,8 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
               {/* Progress Bar Container */}
               <div className="relative pt-2">
                 <div className="flex items-center justify-between text-xs mb-3">
-                  <span className="text-muted font-bold uppercase tracking-widest">{t.common.progress}</span>
-                  <span className="font-black text-main px-2 py-0.5 rounded-md bg-glass-bg" style={{ color: project.color }}>
+                  <span className="text-text-muted font-bold uppercase tracking-widest">{t.common.progress}</span>
+                  <span className="font-black text-text-main px-2.5 py-1 rounded-lg bg-bg-tertiary shadow-sm" style={{ color: project.color }}>
                     {progress}%
                   </span>
                 </div>

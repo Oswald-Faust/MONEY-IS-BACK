@@ -3,7 +3,9 @@ import connectDB from '@/lib/mongodb';
 import Task from '@/models/Task';
 import Project from '@/models/Project';
 import User from '@/models/User';
+import Workspace from '@/models/Workspace';
 import { verifyAuth } from '@/lib/auth';
+import { sendActionNotification } from '@/lib/mail';
 
 // ... imports
 
@@ -174,6 +176,21 @@ export async function POST(request: NextRequest) {
     await Project.findByIdAndUpdate(projectId, {
       $inc: { tasksCount: 1 },
     });
+
+    // Send action notification to workspace owner
+    const workspace = await Workspace.findById(project.workspace).populate('owner');
+    if (workspace && workspace.owner && (workspace.owner as any).email && (workspace.owner as any)._id.toString() !== auth.userId) {
+      const owner = workspace.owner as any;
+      const creator = await User.findById(auth.userId);
+      const actorName = creator ? `${creator.firstName} ${creator.lastName}` : 'Un membre';
+      
+      sendActionNotification(
+        owner.email,
+        actorName,
+        `vient de créer la tâche "${title}"`,
+        workspace.name
+      ).catch(err => console.error('Error sending action notification:', err));
+    }
 
     await task.populate('project', 'name color');
     await task.populate('creator', 'firstName lastName avatar');

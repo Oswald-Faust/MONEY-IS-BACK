@@ -2,18 +2,19 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lightbulb, Loader2, Plus, Paperclip, Image as ImageIcon, File as FileIcon, Trash2 } from 'lucide-react';
+import { X, Lightbulb, Loader2, Paperclip, Image as ImageIcon, File as FileIcon, Trash2 } from 'lucide-react';
 import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
-import type { Idea, Attachment } from '@/types';
+import type { Idea, Attachment, User } from '@/types';
 import UserSelector from '@/components/ui/UserSelector';
+import TagSelector from '@/components/ui/TagSelector';
 
 import { useSearchParams } from 'next/navigation';
 
 interface CreateIdeaModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData?: any; // Idea type
+  initialData?: Idea | null;
   workspaceId?: string;
 }
 
@@ -42,13 +43,13 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
         if (initialData.assignees && Array.isArray(initialData.assignees)) {
             loadedAssignees = initialData.assignees.map((u: any) => typeof u === 'object' ? u._id : u);
         } else if (initialData.assignee) {
-            loadedAssignees = [typeof initialData.assignee === 'object' ? initialData.assignee._id : initialData.assignee];
+            loadedAssignees = [typeof initialData.assignee === 'object' ? (initialData.assignee as User)._id : initialData.assignee];
         }
 
         setFormData({
             title: initialData.title,
             content: initialData.content,
-            project: typeof initialData.project === 'object' ? initialData.project._id : initialData.project || '',
+            project: typeof initialData.project === 'object' ? (initialData.project as any)._id : (initialData.project as string) || '',
             status: initialData.status,
             tags: initialData.tags || [],
             assignees: loadedAssignees
@@ -60,19 +61,7 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
     }
   }, [isOpen, defaultProjectId, initialData]);
 
-  const [newTag, setNewTag] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
-
-  const handleAddTag = () => {
-    if (newTag && !formData.tags.includes(newTag)) {
-      setFormData(prev => ({ ...prev, tags: [...prev.tags, newTag] }));
-      setNewTag('');
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setFormData(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -233,47 +222,22 @@ export default function CreateIdeaModal({ isOpen, onClose, initialData, workspac
                 />
               </div>
 
-              {/* Assignee */}
               <div>
                 <UserSelector 
                   value={formData.assignees}
                   onChange={(userIds) => setFormData({ ...formData, assignees: userIds as string[] })}
                   multiple={true}
+                  projectId={formData.project}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-text-muted ml-1">Tags</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {formData.tags.map(tag => (
-                    <span 
-                      key={tag}
-                      className="px-2 py-1 rounded-lg bg-bg-tertiary border border-glass-border text-[10px] font-bold text-text-muted flex items-center gap-1"
-                    >
-                      {tag}
-                      <button type="button" onClick={() => handleRemoveTag(tag)}>
-                        <X className="w-3 h-3 hover:text-text-main" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newTag}
-                    onChange={e => setNewTag(e.target.value)}
-                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                    placeholder="Ajouter un tag..."
-                    className="flex-1 px-4 py-2 bg-bg-tertiary border border-glass-border rounded-xl text-sm text-text-main focus:border-amber-500/30 outline-none transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddTag}
-                    className="p-2 rounded-xl bg-bg-tertiary border border-glass-border text-text-muted hover:text-text-main hover:bg-glass-hover"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
+                <TagSelector 
+                  value={formData.tags}
+                  onChange={(tags) => setFormData({ ...formData, tags })}
+                  label="Tags"
+                  placeholder="Ajouter des tags..."
+                />
               </div>
 
               <div className="space-y-2">

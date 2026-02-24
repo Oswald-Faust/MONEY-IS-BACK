@@ -262,6 +262,7 @@ export default function CreateObjectiveModal({ isOpen, onClose, initialData, pre
                   value={formData.assignees}
                   onChange={(userIds) => setFormData({ ...formData, assignees: userIds as string[] })}
                   multiple={true}
+                  projectId={formData.project}
                />
             </div>
 
