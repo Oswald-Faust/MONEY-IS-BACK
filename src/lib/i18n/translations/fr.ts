@@ -19,7 +19,7 @@ const fr = {
     projects: 'Projets',
     tools: 'Outils',
     creatorMode: 'Mode Créateur',
-    exploreFeature: 'Explore Feature',
+    exploreFeature: 'Commencer',
     madeWithLove: 'Fait avec ❤️ à Paris',
     allRightsReserved: '© 2026 Edwin Inc. Tous droits réservés.',
     monthly: 'Mensuel',

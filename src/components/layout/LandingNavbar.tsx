@@ -89,7 +89,7 @@ export const LandingNavbar = () => {
                     <div className="hidden md:flex items-center gap-6 text-sm font-medium text-text-dim mx-4">
                         <Link href="/#features" className="hover:text-text-main transition-colors">{t.navbar.product}</Link>
                         <Link href="/about" className="hover:text-text-main transition-colors">{t.navbar.about}</Link>
-                        <Link href="/blog" className="hover:text-text-main transition-colors">{t.navbar.blog}</Link>
+                        {/* <Link href="/blog" className="hover:text-text-main transition-colors">{t.navbar.blog}</Link> */}
                         <Link href="/#pricing" className="hover:text-text-main transition-colors">{t.navbar.pricing}</Link>
                         <Link href="/contact" className="hover:text-text-main transition-colors">{t.navbar.contact}</Link>
                     </div>
@@ -159,7 +159,7 @@ export const LandingNavbar = () => {
                         <div className="flex flex-col gap-6 items-center text-center">
                             <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.product}</Link>
                             <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.about}</Link>
-                            <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.blog}</Link>
+                            {/* <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.blog}</Link> */}
                             <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.contact}</Link>
                             <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-main">{t.navbar.pricing}</Link>
                             <hr className="w-20 border-glass-border" />
