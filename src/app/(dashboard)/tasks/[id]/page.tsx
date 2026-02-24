@@ -51,8 +51,11 @@ interface Task {
   };
   dueDate?: string;
   createdAt: string;
+  updatedAt: string;
   tags: string[];
-  attachments?: string[];
+  subtasks?: { id: string, title: string, completed: boolean }[];
+  attachments?: any[];
+  order?: number;
   comments?: {
     id: string;
     user: {
@@ -533,7 +536,7 @@ export default function TaskDetailPage() {
       <EditTaskModal 
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        task={task}
+        task={task as any}
         onUpdate={handleUpdateTask}
       />
     </div>

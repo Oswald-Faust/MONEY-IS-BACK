@@ -19,6 +19,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import Image from 'next/image';
 import CreateIdeaModal from '@/components/modals/CreateIdeaModal';
 import CreateObjectiveModal from '@/components/modals/CreateObjectiveModal';
 
@@ -38,7 +39,7 @@ interface Idea {
   _id: string;
   title: string;
   content: string;
-  status: 'raw' | 'standby' | 'in_progress' | 'implemented';
+  status: 'raw' | 'standby' | 'in_progress' | 'implemented' | 'archived';
   project?: {
     _id: string;
     name: string;
@@ -51,9 +52,11 @@ interface Idea {
     avatar?: string;
   };
   createdAt: string;
+  updatedAt: string;
   tags: string[];
-  attachments?: string[];
+  attachments?: { id: string, name: string, url: string }[];
   comments?: Comment[];
+  votes?: string[];
 }
 
 const statusConfig = {
@@ -61,6 +64,7 @@ const statusConfig = {
   standby: { label: 'Mise de côté', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
   in_progress: { label: 'En cours', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
   implemented: { label: 'Terminé', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  archived: { label: 'Archivé', color: 'bg-red-500/10 text-red-400 border-red-500/20' },
 };
 
 export default function IdeaDetailPage() {
@@ -244,7 +248,7 @@ export default function IdeaDetailPage() {
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white">
                 {idea.creator?.avatar ? (
-                  <img src={idea.creator.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  <Image src={idea.creator.avatar} alt="" width={24} height={24} className="w-full h-full rounded-full object-cover" />
                 ) : (
                   idea.creator?.firstName?.[0] || '?'
                 )}
@@ -328,7 +332,7 @@ export default function IdeaDetailPage() {
                     <div key={comment.id} className="flex gap-3">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white">
                         {comment.user?.avatar ? (
-                          <img src={comment.user.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                          <Image src={comment.user.avatar} alt="" width={32} height={32} className="w-full h-full rounded-full object-cover" />
                         ) : (
                           comment.user?.firstName?.[0] || '?'
                         )}
@@ -423,7 +427,7 @@ export default function IdeaDetailPage() {
             });
           }
         }}
-        initialData={idea}
+        initialData={idea as any}
       />
       )}
 
