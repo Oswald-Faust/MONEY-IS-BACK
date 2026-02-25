@@ -124,7 +124,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
   );
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${isOpen ? 'z-[70]' : 'z-10'} ${className}`}>
       {label && (
         <label className="block text-sm font-medium text-text-dim mb-2 flex items-center gap-2">
           <UserIcon className="w-4 h-4" />
@@ -137,10 +137,10 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={`
-            w-full flex items-center justify-between px-4 py-3 
-            bg-glass-bg border border-glass-border rounded-xl 
+            w-full flex items-center justify-between px-4 py-3
+            bg-glass-bg border border-glass-border rounded-xl
             text-main hover:bg-glass-hover transition-all
-            ${isOpen ? 'ring-2 ring-indigo-500/20 border-indigo-500/50' : ''}
+            ${isOpen ? 'ring-2 ring-indigo-500/20 border-indigo-500/60 shadow-[0_0_0_4px_rgba(99,102,241,0.08)]' : ''}
           `}
         >
           <div className="flex items-center gap-3 overflow-hidden">
@@ -191,15 +191,16 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 right-0 mt-2 p-2 bg-[var(--bg-secondary)] border border-glass-border rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto custom-scrollbar"
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+                className="absolute top-full left-0 right-0 mt-2 p-2 bg-[var(--bg-secondary)]/95 backdrop-blur-xl border border-indigo-500/20 rounded-2xl shadow-2xl shadow-black/20 ring-1 ring-white/5 z-[80] max-h-72 overflow-y-auto custom-scrollbar"
               >
-                <div className="px-2 pb-2 bg-bg-secondary sticky top-0 z-10">
+                <div className="px-2 pb-2 bg-[var(--bg-secondary)]/95 backdrop-blur-xl sticky top-0 z-10">
                   <input
                     type="text"
                     placeholder="Rechercher..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-3 py-2 bg-input-bg border border-input-border rounded-lg text-sm text-text-main focus:outline-none focus:border-indigo-500/50"
+                    className="w-full px-3 py-2.5 bg-input-bg border border-input-border rounded-xl text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-indigo-500/50"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
@@ -212,7 +213,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                         onChange('');
                         setIsOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-glass-hover transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-glass-hover transition-colors text-left"
                     >
                       <div className="w-8 h-8 rounded-full border border-dashed border-input-border flex items-center justify-center">
                         <UserIcon className="w-4 h-4 text-text-muted" />
@@ -229,7 +230,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
                         key={user._id}
                         type="button"
                         onClick={() => handleSelect(user._id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left group ${active ? 'bg-indigo-500/10' : 'hover:bg-glass-hover'}`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-left group ${active ? 'bg-indigo-500/10 border border-indigo-500/20' : 'hover:bg-glass-hover border border-transparent'}`}
                       >
                         <div className="relative">
                           <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">

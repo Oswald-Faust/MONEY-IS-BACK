@@ -12,7 +12,8 @@ import {
   Shield,
   User,
   Copy,
-  FolderKanban
+  FolderKanban,
+  RefreshCw
 } from 'lucide-react';
 import ManageMemberProjectsModal from '@/components/modals/ManageMemberProjectsModal';
 import Avatar from '@/components/ui/Avatar';
@@ -118,6 +119,7 @@ export default function WorkspaceMembers() {
   const [isInviteModalOpen, setInviteModalOpen] = useState(false);
   const [managingMember, setManagingMember] = useState<{ id: string; name: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [resendingInvitationId, setResendingInvitationId] = useState<string | null>(null);
 
   const fetchMembers = useCallback(async () => {
     if (!currentWorkspace || !token) return;
@@ -192,6 +194,33 @@ export default function WorkspaceMembers() {
       }
     } catch {
        toast.error(t.workspaceMembers.toasts.cancelError);
+    }
+  };
+
+  const resendInvitation = async (invitationId: string) => {
+    if (!currentWorkspace?._id || !token) return;
+
+    try {
+      setResendingInvitationId(invitationId);
+      const response = await fetch('/api/workspaces/members', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ workspaceId: currentWorkspace._id, invitationId })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success(t.workspaceMembers.toasts.invitationResent);
+      } else {
+        toast.error(data.error || t.workspaceMembers.toasts.resendError);
+      }
+    } catch {
+      toast.error(t.workspaceMembers.toasts.resendError);
+    } finally {
+      setResendingInvitationId(null);
     }
   };
 
@@ -322,6 +351,14 @@ export default function WorkspaceMembers() {
                             <div className="flex items-center gap-3">
                                 {isAdmin && (
                                     <>
+                                        <button
+                                            onClick={() => resendInvitation(invitation._id)}
+                                            disabled={resendingInvitationId === invitation._id}
+                                            className="p-2 hover:bg-emerald-500/10 text-gray-500 hover:text-emerald-400 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title={t.workspaceMembers.resendInvitationTitle}
+                                        >
+                                            <RefreshCw className={`w-4 h-4 ${resendingInvitationId === invitation._id ? 'animate-spin' : ''}`} />
+                                        </button>
                                         <button
                                             onClick={() => {
                                                 const link = `${window.location.origin}/join/${invitation.token}`;

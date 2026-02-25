@@ -217,7 +217,7 @@ export default function ProjectTeamPage() {
         <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-6 border-l-4 border-indigo-500"
+            className="glass-card relative z-30 overflow-visible p-6 border-l-4 border-indigo-500"
         >
             <h3 className="text-lg font-bold text-text-main mb-4">Ajouter un membre au projet</h3>
             <form onSubmit={handleAddMember} className="flex flex-col md:flex-row gap-4 items-end">

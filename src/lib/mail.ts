@@ -54,21 +54,186 @@ type SendEmailResult = {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
+function buildEmailLayout({
+  accent = '#6366f1',
+  accentSoft = '#eef2ff',
+  preheader,
+  eyebrow,
+  title,
+  subtitle,
+  ctaLabel,
+  ctaUrl,
+  secondaryLabel,
+  secondaryUrl,
+  contentHtml,
+}: {
+  accent?: string;
+  accentSoft?: string;
+  preheader: string;
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  secondaryLabel?: string;
+  secondaryUrl?: string;
+  contentHtml: string;
+}) {
+  return `
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preheader}</div>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f3f5fb;margin:0;padding:24px 12px;font-family:Arial,sans-serif;">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:640px;">
+            <tr>
+              <td style="padding:0 0 10px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="left" style="font-size:12px;color:#667085;padding:0 4px;">
+                      Edwin
+                    </td>
+                    <td align="right" style="font-size:12px;color:#98a2b3;padding:0 4px;">
+                      Notification automatique
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:640px;background:#ffffff;border:1px solid #e6e8f0;border-radius:22px;overflow:hidden;box-shadow:0 12px 32px rgba(16,24,40,.08);">
+            <tr>
+              <td style="padding:0;">
+                <div style="height:6px;background:linear-gradient(90deg, ${accent} 0%, #ffffff 140%);"></div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 28px 18px 28px;background:linear-gradient(180deg, ${accentSoft} 0%, rgba(255,255,255,0) 100%);">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td valign="top">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="padding-right:12px;" valign="middle">
+                            <div style="width:38px;height:38px;border-radius:12px;background:${accent};color:#fff;text-align:center;line-height:38px;font-weight:700;font-size:18px;">E</div>
+                          </td>
+                          <td valign="middle">
+                            <div style="display:inline-block;background:#ffffff;color:${accent};border:1px solid ${accent}22;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
+                              ${eyebrow || 'Edwin'}
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                      <h1 style="margin:16px 0 8px 0;font-size:30px;line-height:1.15;color:#101828;letter-spacing:-0.02em;">${title}</h1>
+                      ${subtitle ? `<p style="margin:0;color:#475467;font-size:15px;line-height:1.6;">${subtitle}</p>` : ''}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:10px 28px 8px 28px;color:#344054;font-size:14px;line-height:1.7;">
+                ${contentHtml}
+              </td>
+            </tr>
+            ${(ctaLabel && ctaUrl) ? `
+              <tr>
+                <td style="padding:10px 28px 8px 28px;">
+                  <a href="${ctaUrl}" style="display:inline-block;background:${accent};color:#ffffff;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:12px;font-size:14px;">
+                    ${ctaLabel}
+                  </a>
+                  ${(secondaryLabel && secondaryUrl) ? `
+                    <a href="${secondaryUrl}" style="display:inline-block;margin-left:8px;color:${accent};text-decoration:none;font-weight:600;padding:12px 10px;font-size:14px;">
+                      ${secondaryLabel}
+                    </a>
+                  ` : ''}
+                </td>
+              </tr>
+            ` : ''}
+            <tr>
+              <td style="padding:8px 28px 0 28px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eaecf0;border-radius:14px;background:#fcfcfd;">
+                  <tr>
+                    <td style="padding:14px 16px;">
+                      <p style="margin:0 0 6px 0;color:#101828;font-size:13px;font-weight:700;">Besoin d’aide ?</p>
+                      <p style="margin:0;color:#667085;font-size:12px;line-height:1.6;">
+                        Répondez à cet e-mail ou contactez-nous depuis votre dashboard. Nous vous aidons à configurer votre espace rapidement.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:14px 28px 22px 28px;">
+                <div style="border-top:1px solid #eaecf0;margin-bottom:14px;"></div>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="color:#667085;font-size:12px;line-height:1.6;">
+                      Cet e-mail a été envoyé automatiquement par <strong style="color:#344054;">Edwin</strong>.<br/>
+                      Si vous n&apos;êtes pas concerné(e), vous pouvez l&apos;ignorer.
+                    </td>
+                    <td align="right" valign="top" style="color:#98a2b3;font-size:11px;">
+                      <a href="${APP_URL}" style="color:#667085;text-decoration:none;">${APP_URL.replace(/^https?:\/\//, '')}</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
   {
     name: 'Bienvenue - Nouvel Utilisateur',
     subject: 'Bienvenue chez Edwin, {{firstName}} !',
-    body: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #eee; border-radius: 14px; background:#fff;">
-        <h1 style="color:#6366f1; margin-top:0;">Bienvenue {{firstName}} !</h1>
-        <p>Votre compte Edwin est prêt.</p>
-        <p>Commencez par finaliser votre onboarding puis créez votre premier workspace.</p>
-        <div style="margin: 28px 0;">
-          <a href="{{{onboardingLink}}}" style="display:inline-block; background:#6366f1; color:#fff; padding:12px 18px; border-radius:8px; text-decoration:none; font-weight:600;">Accéder à mon espace</a>
-        </div>
-        <p style="color:#777; font-size:13px;">Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail.</p>
-      </div>
-    `,
+    body: buildEmailLayout({
+      accent: '#6366f1',
+      accentSoft: '#eef2ff',
+      preheader: 'Votre compte Edwin est prêt. Finalisez votre onboarding et démarrez rapidement.',
+      eyebrow: 'Compte créé',
+      title: 'Bienvenue {{firstName}}',
+      subtitle: 'Votre compte Edwin est prêt. On vous aide à démarrer en quelques étapes simples.',
+      ctaLabel: 'Finaliser mon onboarding',
+      ctaUrl: '{{{onboardingLink}}}',
+      secondaryLabel: 'Ouvrir le dashboard',
+      secondaryUrl: '{{{dashboardUrl}}}',
+      contentHtml: `
+        <p style="margin:0 0 12px 0;">Merci d&apos;avoir rejoint Edwin. Votre espace est prêt pour organiser vos projets, vos membres et vos automatisations.</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:14px 0;background:#f8faff;border:1px solid #e5e7ff;border-radius:14px;">
+          <tr>
+            <td style="padding:14px 16px;">
+              <p style="margin:0 0 8px 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6366f1;">Prochaines étapes</p>
+              <p style="margin:0;color:#344054;">
+                1. Finalisez votre onboarding<br/>
+                2. Créez votre workspace<br/>
+                3. Invitez votre équipe et lancez votre premier projet
+              </p>
+            </td>
+          </tr>
+        </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px 0;">
+          <tr>
+            <td width="50%" style="padding-right:6px;">
+              <div style="border:1px solid #eaecf0;border-radius:12px;padding:12px;background:#fff;">
+                <p style="margin:0 0 4px 0;font-size:11px;color:#667085;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Rapide</p>
+                <p style="margin:0;font-size:13px;color:#344054;">Onboarding guidé en quelques minutes.</p>
+              </div>
+            </td>
+            <td width="50%" style="padding-left:6px;">
+              <div style="border:1px solid #eaecf0;border-radius:12px;padding:12px;background:#fff;">
+                <p style="margin:0 0 4px 0;font-size:11px;color:#667085;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Collaboratif</p>
+                <p style="margin:0;font-size:13px;color:#344054;">Invitez votre équipe quand vous êtes prêt.</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:0;">Si cette inscription ne vient pas de vous, ignorez simplement cet e-mail.</p>
+      `,
+    }),
     type: 'automation',
     automationKey: 'welcome',
     variables: ['firstName', 'onboardingLink'],
@@ -76,18 +241,60 @@ const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
   {
     name: 'Facture / Nouvel abonnement',
     subject: 'Confirmation de votre abonnement {{planName}}',
-    body: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #eee; border-radius: 14px; background:#fff;">
-        <h1 style="color:#10b981; margin-top:0;">Paiement confirmé</h1>
-        <p>Merci pour votre confiance.</p>
-        <p>Plan: <strong>{{planName}}</strong></p>
-        <p>Montant: <strong>{{amount}}</strong></p>
-        <p><a href="{{{invoiceUrl}}}">Voir la facture</a></p>
-        <div style="margin: 28px 0;">
-          <a href="{{{dashboardUrl}}}" style="display:inline-block; background:#10b981; color:#fff; padding:12px 18px; border-radius:8px; text-decoration:none; font-weight:600;">Retour au dashboard</a>
-        </div>
-      </div>
-    `,
+    body: buildEmailLayout({
+      accent: '#10b981',
+      accentSoft: '#ecfdf3',
+      preheader: 'Paiement confirmé et abonnement activé sur Edwin.',
+      eyebrow: 'Paiement reçu',
+      title: 'Abonnement confirmé',
+      subtitle: 'Votre paiement a été validé et votre plan est maintenant actif.',
+      ctaLabel: 'Voir la facture',
+      ctaUrl: '{{{invoiceUrl}}}',
+      secondaryLabel: 'Retour au dashboard',
+      secondaryUrl: '{{{dashboardUrl}}}',
+      contentHtml: `
+        <p style="margin:0 0 12px 0;">Merci pour votre confiance. Voici le récapitulatif de votre abonnement :</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8f5ef;background:#f7fffb;border-radius:14px;">
+          <tr>
+            <td style="padding:16px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="color:#667085;font-size:13px;padding:0 0 10px 0;">Plan</td>
+                  <td align="right" style="color:#101828;font-size:14px;font-weight:700;padding:0 0 10px 0;">{{planName}}</td>
+                </tr>
+                <tr>
+                  <td style="color:#667085;font-size:13px;">Montant</td>
+                  <td align="right" style="color:#101828;font-size:18px;font-weight:800;">{{amount}}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:12px 0 0 0;">
+          <tr>
+            <td width="33%" style="padding-right:6px;">
+              <div style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;">
+                <p style="margin:0;color:#667085;font-size:11px;">Statut</p>
+                <p style="margin:4px 0 0 0;color:#10b981;font-size:13px;font-weight:700;">Confirmé</p>
+              </div>
+            </td>
+            <td width="33%" style="padding:0 3px;">
+              <div style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;">
+                <p style="margin:0;color:#667085;font-size:11px;">Accès</p>
+                <p style="margin:4px 0 0 0;color:#101828;font-size:13px;font-weight:700;">Activé</p>
+              </div>
+            </td>
+            <td width="33%" style="padding-left:6px;">
+              <div style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;">
+                <p style="margin:0;color:#667085;font-size:11px;">Facture</p>
+                <p style="margin:4px 0 0 0;color:#101828;font-size:13px;font-weight:700;">Disponible</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Conservez cet e-mail pour votre suivi. Vous pouvez retrouver vos informations depuis votre espace Edwin.</p>
+      `,
+    }),
     type: 'automation',
     automationKey: 'payment',
     variables: ['planName', 'amount', 'invoiceUrl', 'dashboardUrl'],
@@ -95,15 +302,19 @@ const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
   {
     name: 'Notification Action Workspace',
     subject: 'Edwin : Nouvelle activité dans {{workspaceName}}',
-    body: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #eee; border-radius: 14px; background:#fff;">
-        <h2 style="margin-top:0;">Nouvelle activité</h2>
-        <p><strong>{{actorName}}</strong> {{actionDesc}} dans <strong>{{workspaceName}}</strong>.</p>
-        <div style="margin: 28px 0;">
-          <a href="{{{dashboardUrl}}}" style="display:inline-block; background:#111827; color:#fff; padding:12px 18px; border-radius:8px; text-decoration:none; font-weight:600;">Voir l'activité</a>
-        </div>
-      </div>
-    `,
+    body: buildEmailLayout({
+      accent: '#111827',
+      accentSoft: '#f2f4f7',
+      preheader: 'Nouvelle activité dans votre workspace Edwin.',
+      eyebrow: 'Activité workspace',
+      title: 'Nouvelle activité détectée',
+      subtitle: 'Une action importante a été effectuée dans votre espace de travail.',
+      ctaLabel: 'Voir l’activité',
+      ctaUrl: '{{{dashboardUrl}}}',
+      contentHtml: `
+        <p style="margin:0;"> <strong>{{actorName}}</strong> {{actionDesc}} dans <strong>{{workspaceName}}</strong>.</p>
+      `,
+    }),
     type: 'automation',
     automationKey: 'workspace_action',
     variables: ['actorName', 'actionDesc', 'workspaceName', 'dashboardUrl'],
@@ -111,16 +322,43 @@ const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
   {
     name: 'Invitation Workspace',
     subject: 'Invitation à rejoindre {{workspaceName}} sur Edwin',
-    body: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #eee; border-radius: 14px; background:#fff;">
-        <h2 style="margin-top:0; color:#6366f1;">Vous avez été invité</h2>
-        <p><strong>{{inviterName}}</strong> vous invite à rejoindre <strong>{{workspaceName}}</strong>.</p>
-        <div style="margin: 28px 0;">
-          <a href="{{{joinUrl}}}" style="display:inline-block; background:#6366f1; color:#fff; padding:12px 18px; border-radius:8px; text-decoration:none; font-weight:600;">Accepter l'invitation</a>
-        </div>
-        <p style="color:#777; font-size:13px;">Le lien expire dans 7 jours.</p>
-      </div>
-    `,
+    body: buildEmailLayout({
+      accent: '#6366f1',
+      accentSoft: '#eef2ff',
+      preheader: 'Vous avez reçu une invitation à rejoindre un workspace Edwin.',
+      eyebrow: 'Invitation',
+      title: 'Vous avez été invité',
+      subtitle: '<strong>{{inviterName}}</strong> vous invite à rejoindre <strong>{{workspaceName}}</strong> sur Edwin.',
+      ctaLabel: 'Accepter l’invitation',
+      ctaUrl: '{{{joinUrl}}}',
+      secondaryLabel: 'Ouvrir Edwin',
+      secondaryUrl: '{{{appUrl}}}',
+      contentHtml: `
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7ff;background:#f8faff;border-radius:14px;margin:4px 0 12px 0;">
+          <tr>
+            <td style="padding:14px 16px;">
+              <p style="margin:0 0 6px 0;color:#667085;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Workspace</p>
+              <p style="margin:0;color:#101828;font-size:16px;font-weight:700;">{{workspaceName}}</p>
+            </td>
+          </tr>
+        </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px 0;">
+          <tr>
+            <td style="border:1px solid #eaecf0;border-radius:12px;padding:12px;background:#fff;">
+              <p style="margin:0 0 8px 0;font-size:12px;color:#101828;font-weight:700;">Ce que vous pourrez faire après acceptation</p>
+              <p style="margin:0;color:#475467;font-size:13px;line-height:1.6;">
+                • Accéder au workspace et aux projets autorisés<br/>
+                • Collaborer avec votre équipe<br/>
+                • Recevoir les mises à jour liées au travail
+              </p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:0 0 8px 0;">Le lien d’invitation expire dans <strong>7 jours</strong>.</p>
+        <p style="margin:0;color:#667085;font-size:13px;">Si le bouton ne fonctionne pas, copiez-collez ce lien dans votre navigateur :</p>
+        <p style="margin:8px 0 0 0;word-break:break-all;color:#6366f1;font-size:12px;">{{{joinUrl}}}</p>
+      `,
+    }),
     type: 'automation',
     automationKey: 'invitation',
     variables: ['inviterName', 'workspaceName', 'joinUrl'],
@@ -128,15 +366,24 @@ const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
   {
     name: 'Ajout à un workspace',
     subject: 'Vous avez été ajouté à {{workspaceName}}',
-    body: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #eee; border-radius: 14px; background:#fff;">
-        <h2 style="margin-top:0;">Bienvenue dans {{workspaceName}}</h2>
-        <p><strong>{{inviterName}}</strong> vous a ajouté au workspace <strong>{{workspaceName}}</strong>.</p>
-        <div style="margin: 28px 0;">
-          <a href="{{{dashboardUrl}}}" style="display:inline-block; background:#6366f1; color:#fff; padding:12px 18px; border-radius:8px; text-decoration:none; font-weight:600;">Ouvrir le dashboard</a>
-        </div>
-      </div>
-    `,
+    body: buildEmailLayout({
+      accent: '#8b5cf6',
+      accentSoft: '#f5f3ff',
+      preheader: 'Vous avez été ajouté à un workspace Edwin.',
+      eyebrow: 'Workspace',
+      title: 'Bienvenue dans {{workspaceName}}',
+      subtitle: '<strong>{{inviterName}}</strong> vous a ajouté à ce workspace.',
+      ctaLabel: 'Ouvrir le dashboard',
+      ctaUrl: '{{{dashboardUrl}}}',
+      contentHtml: `
+        <p style="margin:0 0 12px 0;">Votre accès est maintenant actif. Vous pouvez commencer à collaborer immédiatement.</p>
+        <ul style="margin:0;padding-left:18px;color:#344054;">
+          <li>Consultez vos projets</li>
+          <li>Vérifiez vos accès</li>
+          <li>Commencez à collaborer avec l’équipe</li>
+        </ul>
+      `,
+    }),
     type: 'automation',
     automationKey: 'workspace_welcome',
     variables: ['inviterName', 'workspaceName', 'dashboardUrl'],
@@ -213,11 +460,32 @@ export function renderTemplate(template: string, variables: RenderVariables = {}
   return rendered;
 }
 
-export async function seedDefaultEmailTemplates(): Promise<void> {
+export async function seedDefaultEmailTemplates(options?: { forceUpdate?: boolean }): Promise<void> {
   await connectDB();
+  const forceUpdate = options?.forceUpdate === true;
 
   for (const seed of DEFAULT_EMAIL_TEMPLATES) {
     if (!seed.automationKey) continue;
+
+    if (forceUpdate) {
+      await EmailTemplate.findOneAndUpdate(
+        { automationKey: seed.automationKey },
+        {
+          $set: {
+            name: seed.name,
+            subject: seed.subject,
+            body: seed.body,
+            type: seed.type,
+            variables: seed.variables,
+          },
+          $setOnInsert: {
+            automationKey: seed.automationKey,
+          },
+        },
+        { upsert: true, new: true }
+      );
+      continue;
+    }
 
     await EmailTemplate.findOneAndUpdate(
       { automationKey: seed.automationKey },

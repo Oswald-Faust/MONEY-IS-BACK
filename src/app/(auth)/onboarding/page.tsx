@@ -14,10 +14,6 @@ import {
   Zap,
   Palette,
   Image as ImageIcon,
-  Plus,
-  X,
-  Link as LinkIcon,
-  Copy,
   Upload,
   Heart,
   ShoppingBag,
@@ -30,7 +26,7 @@ import { useRouter } from 'next/navigation';
 
 // --- Types ---
 
-type Step = 1 | 2 | 3 | 4 | 5;
+type Step = 1 | 2 | 3 | 4;
 
 interface OnboardingData {
   workspaceName: string;
@@ -95,9 +91,6 @@ export default function OnboardingPage() {
   const [personalizationMode, setPersonalizationMode] = useState<'color' | 'image'>('color');
   const [isUploadingIcon, setIsUploadingIcon] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // Local state for Step 4 (Invitations)
-  const [emailInput, setEmailInput] = useState('');
-
   const [data, setData] = useState<OnboardingData>({
     workspaceName: '',
     useCase: 'other',
@@ -105,8 +98,6 @@ export default function OnboardingPage() {
     icon: 'Briefcase',
     invitedEmails: []
   });
-
-  const [inviteLink] = useState(() => `https://moneyisback.com/invite/ws-${Math.random().toString(36).substr(2, 6)}`);
 
   useEffect(() => {
      // Check if user already has workspaces (e.g. invited user)
@@ -130,27 +121,11 @@ export default function OnboardingPage() {
      checkWorkspaces();
   }, [token, router]);
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 5) as Step);
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 4) as Step);
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1) as Step);
 
   const updateData = (key: keyof OnboardingData, value: string | string[] | undefined) => {
     setData((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleAddEmail = () => {
-    if (emailInput && emailInput.includes('@') && !data.invitedEmails.includes(emailInput)) {
-      updateData('invitedEmails', [...data.invitedEmails, emailInput]);
-      setEmailInput('');
-    }
-  };
-
-  const removeEmail = (email: string) => {
-    updateData('invitedEmails', data.invitedEmails.filter(e => e !== email));
-  };
-
-  const copyInviteLink = () => {
-    navigator.clipboard.writeText(inviteLink);
-    toast.success('Lien copié dans le presse-papier !');
   };
 
   const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -327,7 +302,7 @@ export default function OnboardingPage() {
           
           {/* Progress */}
           <div className="flex justify-center mb-8">
-            <StepIndicator currentStep={step} totalSteps={5} />
+            <StepIndicator currentStep={step} totalSteps={4} />
           </div>
 
           {/* Form Content */}
@@ -369,7 +344,7 @@ export default function OnboardingPage() {
                 
                 <div className="flex gap-3 text-xs text-text-dim justify-center mt-4">
                   <span className="flex items-center gap-1"><Check className="w-3 h-3 text-green-500"/> Espaces illimités</span>
-                  <span className="flex items-center gap-1"><Check className="w-3 h-3 text-green-500"/> Invitez votre équipe</span>
+                  <span className="flex items-center gap-1"><Check className="w-3 h-3 text-green-500"/> Configuration rapide</span>
                 </div>
               </motion.div>
             )}
@@ -579,80 +554,9 @@ export default function OnboardingPage() {
               </motion.div>
             )}
 
-            {/* STEP 4: Invitations */}
+            {/* STEP 4: Final Review */}
             {step === 4 && (
-              <motion.div key="step4" className="space-y-6">
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-2">Invitez votre équipe</h2>
-                  <p className="text-text-dim text-sm">Le travail est meilleur ensemble. Ajoutez vos amis dès maintenant.</p>
-                </div>
-
-                {/* Copy Link Section */}
-                <div className="bg-indigo-50/50 dark:bg-gradient-to-r dark:from-indigo-900/40 dark:to-purple-900/40 border border-indigo-200 dark:border-indigo-500/30 rounded-2xl p-5 mb-8 shadow-sm dark:shadow-none">
-                  <div className="flex items-center justify-between mb-3">
-                     <span className="text-sm font-bold text-indigo-600 dark:text-indigo-300 flex items-center gap-2">
-                       <LinkIcon className="w-4 h-4" /> Lien d&apos;invitation unique
-                     </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <code className="flex-1 bg-white dark:bg-black/30 border border-indigo-100 dark:border-transparent rounded-xl px-4 py-2.5 text-xs text-indigo-900/70 dark:text-indigo-100/70 font-mono overflow-hidden whitespace-nowrap text-ellipsis">
-                      {inviteLink || 'Génération du lien...'}
-                    </code>
-                    <button 
-                      onClick={copyInviteLink}
-                      className="bg-indigo-600 text-white dark:bg-indigo-500/20 dark:text-indigo-300 p-2.5 rounded-xl hover:bg-indigo-700 dark:hover:bg-indigo-500/40 transition-all shadow-sm active:scale-95"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Email Input */}
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <input
-                      type="email"
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleAddEmail()}
-                      placeholder="exemple@email.com"
-                      className="flex-1 bg-input-bg border border-input-border text-text-main rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none"
-                    />
-                    <button 
-                      onClick={handleAddEmail}
-                      disabled={!emailInput || !emailInput.includes('@')}
-                      className="bg-bg-secondary text-text-main border border-glass-border px-4 rounded-xl font-medium hover:bg-glass-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* List of invited */}
-                  {data.invitedEmails.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {data.invitedEmails.map((email) => (
-                        <span key={email} className="inline-flex items-center gap-2 bg-bg-tertiary px-3 py-1.5 rounded-full text-sm border border-glass-border animate-in fade-in zoom-in duration-200">
-                          {email}
-                          <button onClick={() => removeEmail(email)} className="hover:text-red-400 transition-colors">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {data.invitedEmails.length === 0 && (
-                    <div className="text-center py-8 text-gray-600 italic">
-                      Aucune invitation pour le moment
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-
-            {/* STEP 5: Final Review */}
-            {step === 5 && (
-              <motion.div key="step5" className="space-y-6 text-center">
+              <motion.div key="step4" className="space-y-6 text-center">
                  <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-emerald-500/20 relative">
                     <Rocket className="w-12 h-12 text-white" />
                     <motion.div 
@@ -713,7 +617,7 @@ export default function OnboardingPage() {
               Retour
             </button>
 
-            {step < 5 ? (
+            {step < 4 ? (
               <button
                 onClick={nextStep}
                 disabled={step === 1 && !data.workspaceName}
@@ -724,7 +628,7 @@ export default function OnboardingPage() {
                   flex items-center gap-2
                 "
               >
-                {step === 4 ? 'Ignorer / Continuer' : 'Continuer'}
+                Continuer
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (

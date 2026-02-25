@@ -23,6 +23,10 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const workspaceId = searchParams.get('workspace');
 
+    const canAccessProject = (project: { owner: any; members: Array<{ user: any }> }) =>
+      project.owner.toString() === auth.userId ||
+      project.members.some((m: any) => m.user.toString() === auth.userId);
+
     if (id) {
       const objective = await Objective.findById(id)
         .populate('project', 'name color')
@@ -32,6 +36,17 @@ export async function GET(request: NextRequest) {
 
       if (!objective) {
         return NextResponse.json({ success: false, error: 'Objectif non trouvé' }, { status: 404 });
+      }
+
+      if (objective.project) {
+        const rawProjectId =
+          typeof objective.project === 'object' && objective.project && '_id' in (objective.project as any)
+            ? (objective.project as any)._id
+            : objective.project;
+        const objectiveProject = await Project.findById(rawProjectId).select('owner members');
+        if (!objectiveProject || !canAccessProject(objectiveProject)) {
+          return NextResponse.json({ success: false, error: 'Accès refusé' }, { status: 403 });
+        }
       }
 
       const objectiveWithProject = {
@@ -50,9 +65,19 @@ export async function GET(request: NextRequest) {
     
     // Filter by project or workspace
     if (projectId) {
+      const project = await Project.findById(projectId).select('owner members');
+      if (!project) {
+        return NextResponse.json({ success: false, error: 'Projet non trouvé' }, { status: 404 });
+      }
+      if (!canAccessProject(project)) {
+        return NextResponse.json({ success: false, error: 'Accès refusé' }, { status: 403 });
+      }
       query.project = projectId;
     } else if (workspaceId) {
-       const projects = await Project.find({ workspace: workspaceId }).select('_id');
+       const projects = await Project.find({
+         workspace: workspaceId,
+         $or: [{ owner: auth.userId }, { 'members.user': auth.userId }],
+       }).select('_id');
        const projectIds = projects.map(p => p._id);
        query.project = { $in: projectIds };
     } else {

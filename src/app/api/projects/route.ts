@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Project from '@/models/Project';
 import User from '@/models/User';
 import GlobalSettings from '@/models/GlobalSettings';
+import Workspace from '@/models/Workspace';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -22,7 +23,30 @@ export async function GET(request: NextRequest) {
        return NextResponse.json({ success: false, error: 'Workspace ID requis' }, { status: 400 });
     }
 
-    const query: any = { workspace: workspaceId };
+    const workspace = await Workspace.findById(workspaceId).select('owner members');
+    if (!workspace) {
+      return NextResponse.json({ success: false, error: 'Workspace non trouvé' }, { status: 404 });
+    }
+
+    const isWorkspaceMember =
+      workspace.owner.toString() === auth.userId ||
+      workspace.members.some((m: any) => m.user.toString() === auth.userId);
+
+    if (!isWorkspaceMember && auth.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Accès refusé' }, { status: 403 });
+    }
+
+    const query: any = {
+      workspace: workspaceId,
+      ...(auth.role === 'admin'
+        ? {}
+        : {
+            $or: [
+              { owner: auth.userId },
+              { 'members.user': auth.userId },
+            ],
+          }),
+    };
     if (status !== 'all') query.status = status;
 
     const projects = await Project.find(query)
@@ -230,4 +254,3 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
-

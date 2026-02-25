@@ -251,6 +251,71 @@ export async function PUT(request: NextRequest) {
     }
 }
 
+// PATCH /api/workspaces/members - Resend a pending invitation email
+export async function PATCH(request: NextRequest) {
+    try {
+        await connectDB();
+        const auth = await verifyAuth(request);
+        if (!auth.success) return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
+
+        const body = await request.json();
+        const { workspaceId, invitationId } = body;
+
+        if (!workspaceId || !invitationId) {
+            return NextResponse.json({ success: false, error: 'Workspace ID et Invitation ID requis' }, { status: 400 });
+        }
+
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) return NextResponse.json({ success: false, error: 'Workspace non trouvé' }, { status: 404 });
+
+        const isOwner = workspace.owner.toString() === auth.userId;
+        const requesterMember = workspace.members.find(m => m.user.toString() === auth.userId);
+        const isAdmin = isOwner || (requesterMember && requesterMember.role === 'admin');
+
+        if (!isAdmin) {
+            return NextResponse.json({ success: false, error: 'Permission refusée' }, { status: 403 });
+        }
+
+        const invitation = await Invitation.findOne({
+            _id: invitationId,
+            workspace: workspaceId,
+            status: 'pending',
+        });
+
+        if (!invitation) {
+            return NextResponse.json({ success: false, error: 'Invitation introuvable ou non valide' }, { status: 404 });
+        }
+
+        if (invitation.expiresAt && new Date() > invitation.expiresAt) {
+            invitation.status = 'expired';
+            await invitation.save();
+            return NextResponse.json({ success: false, error: 'Invitation expirée' }, { status: 400 });
+        }
+
+        const inviter = await User.findById(auth.userId);
+        const inviterName = inviter ? `${inviter.firstName} ${inviter.lastName}` : 'Un membre';
+
+        const emailResult = await sendInvitationEmail(invitation.email, invitation.token, workspace.name, inviterName);
+
+        if (!emailResult.success) {
+            return NextResponse.json({
+                success: false,
+                error: 'Échec lors de l’envoi de l’e-mail',
+                emailStatus: emailResult.status,
+            }, { status: 502 });
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'Invitation renvoyée',
+            emailStatus: emailResult.status,
+        });
+    } catch (error: any) {
+        console.error('Resend invitation error:', error);
+        return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
+    }
+}
+
 // DELETE /api/workspaces/members - Remove a member or cancel invitation
 export async function DELETE(request: NextRequest) {
     try {

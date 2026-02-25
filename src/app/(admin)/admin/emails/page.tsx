@@ -147,6 +147,51 @@ function statusBadgeClass(status: string) {
   return 'text-text-dim bg-glass-bg border-glass-border';
 }
 
+function escapeTemplateHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderTemplatePreview(template: string, variables: Record<string, string>): string {
+  let rendered = template.replace(/{{{\s*([a-zA-Z0-9_.-]+)\s*}}}/g, (_, key: string) => variables[key] ?? '');
+  rendered = rendered.replace(/{{\s*([a-zA-Z0-9_.-]+)\s*}}/g, (_, key: string) => escapeTemplateHtml(variables[key] ?? ''));
+  return rendered;
+}
+
+function previewVariablesForTemplate(tpl: Template | null): Record<string, string> {
+  const base: Record<string, string> = {
+    firstName: 'Faust',
+    lastName: 'Oswald',
+    fullName: 'Faust Oswald',
+    actorName: 'Faust Oswald',
+    inviterName: 'Faust Oswald',
+    workspaceName: 'FAUST WORKSPACE',
+    planName: 'Pro',
+    amount: '29,00 € / mois',
+    onboardingLink: 'https://edwinhub.com/onboarding',
+    dashboardUrl: 'https://edwinhub.com/dashboard',
+    invoiceUrl: 'https://edwinhub.com/billing/invoice/inv_123',
+    joinUrl: 'https://edwinhub.com/join/abc123token',
+    appUrl: 'https://edwinhub.com',
+    actionDesc: 'a ajouté un nouveau membre',
+    email: 'contact@edwinhub.com',
+  };
+
+  if (!tpl?.variables?.length) return base;
+  return tpl.variables.reduce<Record<string, string>>((acc, key) => {
+    acc[key] = acc[key] ?? `[${key}]`;
+    return acc;
+  }, { ...base });
+}
+
+function buildEmailPreviewDoc(html: string): string {
+  return `<!doctype html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><style>html,body{margin:0;padding:0;background:#eef2ff;}body{min-height:100vh;}</style></head><body>${html}</body></html>`;
+}
+
 export default function EmailsAdminPage() {
   const { token } = useAuthStore();
 
@@ -375,6 +420,31 @@ export default function EmailsAdminPage() {
     }
   };
 
+  const resetDefaultTemplates = async () => {
+    if (!token) return;
+    if (!confirm('Réinitialiser les templates automations par défaut avec le nouveau design ? Les personnalisations sur ces templates seront écrasées.')) return;
+
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/admin/emails/templates', {
+        method: 'POST',
+        headers: authHeaders(true),
+        body: JSON.stringify({ action: 'resetDefaults' }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || 'Impossible de réinitialiser les templates');
+        return;
+      }
+      toast.success('Templates par défaut mis à jour');
+      if (Array.isArray(data.templates)) setTemplates(data.templates);
+    } catch {
+      toast.error('Erreur réseau');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const openCampaignModal = (campaign?: Campaign) => {
     if (!campaign) {
       setEditingCampaign(emptyCampaignForm());
@@ -529,6 +599,10 @@ export default function EmailsAdminPage() {
     { id: 'templates', label: 'Templates', icon: LayoutTemplate },
     { id: 'settings', label: 'Paramètres SMTP', icon: Settings },
   ] as const;
+
+  const templatePreviewVars = previewVariablesForTemplate(editingTemplate);
+  const renderedTemplateSubject = editingTemplate ? renderTemplatePreview(editingTemplate.subject || '', templatePreviewVars) : '';
+  const renderedTemplateBody = editingTemplate ? renderTemplatePreview(editingTemplate.body || '', templatePreviewVars) : '';
 
   return (
     <div className="space-y-6">
@@ -743,6 +817,13 @@ export default function EmailsAdminPage() {
                     className="px-3 py-2 rounded-xl border border-glass-border text-text-dim hover:bg-glass-hover transition-colors"
                   >
                     <RefreshCw className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => void resetDefaultTemplates()}
+                    disabled={isLoading}
+                    className="px-4 py-2 rounded-xl border border-indigo-500/20 text-indigo-300 hover:bg-indigo-500/10 transition-colors text-sm disabled:opacity-50"
+                  >
+                    Réinitialiser les défauts
                   </button>
                   <button
                     onClick={() => openTemplateModal()}
@@ -1091,7 +1172,7 @@ export default function EmailsAdminPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-3xl bg-bg-secondary rounded-3xl border border-glass-border shadow-2xl overflow-hidden"
+              className="relative w-full max-w-6xl bg-bg-secondary rounded-3xl border border-glass-border shadow-2xl overflow-hidden"
             >
               <div className="p-6 border-b border-glass-border flex items-center justify-between bg-glass-bg">
                 <h3 className="font-bold text-lg text-text-main">
@@ -1159,19 +1240,61 @@ export default function EmailsAdminPage() {
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-text-dim uppercase">Corps (HTML)</label>
-                  <textarea
-                    rows={10}
-                    required
-                    value={editingTemplate?.body || ''}
-                    onChange={(e) => setEditingTemplate((t) => (t ? { ...t, body: e.target.value } : null))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-bg-primary border border-glass-border text-text-main focus:outline-none focus:border-indigo-500 font-mono text-sm"
-                    placeholder="<p>Bonjour {{firstName}}...</p>"
-                  />
-                  <p className="text-xs text-text-dim">
-                    Variables supportées: <code>{'{{variable}}'}</code> (échappé) et <code>{'{{{variable}}}'}</code> (non échappé, ex: URL).
-                  </p>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-text-dim uppercase">Corps (HTML)</label>
+                    <textarea
+                      rows={16}
+                      required
+                      value={editingTemplate?.body || ''}
+                      onChange={(e) => setEditingTemplate((t) => (t ? { ...t, body: e.target.value } : null))}
+                      className="w-full px-4 py-2.5 rounded-xl bg-bg-primary border border-glass-border text-text-main focus:outline-none focus:border-indigo-500 font-mono text-sm"
+                      placeholder="<p>Bonjour {{firstName}}...</p>"
+                    />
+                    <p className="text-xs text-text-dim">
+                      Variables supportées: <code>{'{{variable}}'}</code> (échappé) et <code>{'{{{variable}}}'}</code> (non échappé, ex: URL).
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="rounded-2xl border border-glass-border bg-bg-primary p-4">
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <h4 className="font-semibold text-text-main flex items-center gap-2">
+                          <Eye className="w-4 h-4 text-indigo-400" />
+                          Aperçu du template
+                        </h4>
+                        <span className="text-[10px] uppercase tracking-wider text-text-dim">Live preview</span>
+                      </div>
+
+                      <div className="rounded-xl border border-glass-border bg-bg-secondary p-3 mb-3">
+                        <p className="text-[10px] uppercase tracking-wider text-text-dim mb-1">Sujet rendu</p>
+                        <p className="text-sm font-medium text-text-main break-words">{renderedTemplateSubject || '—'}</p>
+                      </div>
+
+                      <div className="rounded-xl border border-glass-border overflow-hidden bg-white">
+                        <div className="px-3 py-2 bg-[#f8fafc] border-b border-[#e2e8f0] text-[11px] text-[#475467]">
+                          Aperçu e-mail (simulation client)
+                        </div>
+                        <iframe
+                          title="Aperçu du template e-mail"
+                          srcDoc={buildEmailPreviewDoc(renderedTemplateBody)}
+                          className="w-full h-[480px] bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-glass-border bg-bg-primary p-4">
+                      <p className="text-[10px] uppercase tracking-wider text-text-dim mb-2">Variables d’aperçu</p>
+                      <div className="text-xs font-mono text-text-dim max-h-28 overflow-auto space-y-1">
+                        {Object.entries(templatePreviewVars).map(([key, val]) => (
+                          <div key={key} className="flex items-start gap-2">
+                            <span className="text-indigo-400 shrink-0">{key}</span>
+                            <span className="truncate">{val}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3">

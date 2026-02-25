@@ -28,6 +28,12 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     await dbConnect();
 
+    if (data?.action === 'resetDefaults') {
+      await seedDefaultEmailTemplates({ forceUpdate: true });
+      const templates = await EmailTemplate.find().sort({ updatedAt: -1 });
+      return NextResponse.json({ success: true, templates });
+    }
+
     const normalized = {
       ...data,
       name: String(data.name || '').trim(),
