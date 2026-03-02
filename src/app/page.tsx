@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Script from 'next/script';
 import React, { useState, useEffect, type ElementType } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTranslation } from '@/lib/i18n';
@@ -26,6 +27,17 @@ import { useTranslation } from '@/lib/i18n';
 
 import { LandingNavbar } from '@/components/layout/LandingNavbar';
 import { LandingFooter } from '@/components/layout/LandingFooter';
+
+declare global {
+    interface Window {
+        Supademo?: {
+            open: (demoId: string) => void;
+        };
+    }
+}
+
+const SUPADEMO_ID = 'cmm9600rp5zkedtfhf982xup2';
+const SUPADEMO_URL = `https://app.supademo.com/demo/${SUPADEMO_ID}?utm_source=link`;
 
 const ReplaceAllSection = () => {
     const { t } = useTranslation();
@@ -124,8 +136,19 @@ const Hero = () => {
         { id: 'analytics', icon: BarChart3, label: 'Analyses' }
     ];
 
+    const handleOpenSupademoTour = () => {
+        if (typeof window !== 'undefined' && window.Supademo?.open) {
+            window.Supademo.open(SUPADEMO_ID);
+            return;
+        }
+
+        window.open(SUPADEMO_URL, '_blank', 'noopener,noreferrer');
+    };
+
     return (
         <section className="relative min-h-[100vh] flex flex-col items-center justify-center pt-32 px-6 overflow-hidden">
+            <Script src="https://script.supademo.com/supademo.js" strategy="afterInteractive" />
+
             {/* Background Effects */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[500px] bg-[#00FFB2] opacity-[0.03] blur-[150px] rounded-full pointer-events-none" />
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay pointer-events-none"></div>
@@ -173,7 +196,10 @@ const Hero = () => {
                     >
                         {t.common.getStartedFree}
                     </Link>
-                    <button className="px-10 py-4 rounded-full border border-glass-border text-text-main font-medium text-sm hover:bg-glass-hover transition-colors flex items-center gap-2 group">
+                    <button
+                        onClick={handleOpenSupademoTour}
+                        className="px-10 py-4 rounded-full border border-glass-border text-text-main font-medium text-sm hover:bg-glass-hover transition-colors flex items-center gap-2 group"
+                    >
                         <span className="w-8 h-8 rounded-full bg-glass-bg flex items-center justify-center group-hover:bg-glass-hover transition-colors">
                             <span className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-text-main border-b-[5px] border-b-transparent ml-0.5" />
                         </span>
