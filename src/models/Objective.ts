@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import type { TaskPriority } from './Task';
 
 export interface IObjective extends Document {
   _id: mongoose.Types.ObjectId;
@@ -15,6 +16,11 @@ export interface IObjective extends Document {
     id: string;
     title: string;
     completed: boolean;
+    priority: TaskPriority;
+    dueDate?: Date;
+    assignee?: mongoose.Types.ObjectId;
+    assignees: mongoose.Types.ObjectId[];
+    task?: mongoose.Types.ObjectId;
   }[];
   status: 'not_started' | 'in_progress' | 'completed' | 'cancelled';
   priority: 'low' | 'medium' | 'high';
@@ -78,6 +84,26 @@ const ObjectiveSchema = new Schema<IObjective>(
       completed: {
         type: Boolean,
         default: false,
+      },
+      priority: {
+        type: String,
+        enum: ['important', 'less_important', 'waiting'],
+        default: 'less_important',
+      },
+      dueDate: {
+        type: Date,
+      },
+      assignee: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      assignees: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      }],
+      task: {
+        type: Schema.Types.ObjectId,
+        ref: 'Task',
       },
     }],
     status: {

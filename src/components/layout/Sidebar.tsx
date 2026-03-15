@@ -98,6 +98,7 @@ export default function Sidebar() {
     { icon: Calendar, label: t.sidebar.calendar, href: '/calendar', view: 'calendar' as const },
     { icon: RotateCcw, label: t.sidebar.routines, href: '/routines', view: 'routines' as const },
     { icon: MessageCircle, label: t.sidebar.messaging, href: '/messages', view: 'messages' as const },
+    { icon: Sparkles, label: t.sidebar.ai, href: '/ai', view: 'ai' as const },
   ];
 
   const secondaryNavItems = [
@@ -106,7 +107,7 @@ export default function Sidebar() {
     { icon: Key, label: t.sidebar.secureIds, href: '/secure-ids', view: 'ids' as const },
     { icon: HardDrive, label: t.sidebar.drive, href: '/drive', view: 'drive' as const },
     { icon: UserPlus, label: t.sidebar.invite, href: '/invite', view: 'invite' as const },
-    { icon: Sparkles, label: t.sidebar.upgrade, href: '/upgrade', view: 'upgrade' as const },
+    { icon: Rocket, label: t.sidebar.upgrade, href: '/upgrade', view: 'upgrade' as const },
   ];
 
   React.useEffect(() => {
@@ -515,7 +516,7 @@ export default function Sidebar() {
                   className="flex-1 min-w-0"
                 >
                   <p className="text-sm font-medium text-text-main truncate group-hover:text-indigo-400 transition-colors">
-                    {user ? `${user.firstName} ${user.lastName}` : 'Mathias MERCIER'}
+                    {user ? `${user.firstName} ${user.lastName}` : 'John DOE'}
                   </p>
                   <p className="text-xs text-text-dim truncate opacity-70">
                     {user?.email || 'admin@moneyisback.com'}

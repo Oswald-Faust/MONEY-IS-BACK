@@ -31,7 +31,8 @@ export default function CalendarPage() {
     tasks, 
     setTasks, 
     objectives, 
-    setObjectives 
+    setObjectives,
+    currentWorkspace,
   } = useAppStore();
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -57,13 +58,13 @@ export default function CalendarPage() {
   // Fetch data
   useEffect(() => {
     const fetchData = async () => {
-      if (!token) return;
+      if (!token || !currentWorkspace) return;
       
       try {
         setIsLoading(true);
         
         // Fetch tasks
-        const tasksRes = await fetch('/api/tasks', {
+        const tasksRes = await fetch(`/api/tasks?workspace=${currentWorkspace._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const tasksData = await tasksRes.json();
@@ -72,7 +73,7 @@ export default function CalendarPage() {
         }
 
         // Fetch objectives
-        const objectivesRes = await fetch('/api/objectives', {
+        const objectivesRes = await fetch(`/api/objectives?workspace=${currentWorkspace._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const objectivesData = await objectivesRes.json();
@@ -88,7 +89,7 @@ export default function CalendarPage() {
     };
 
     fetchData();
-  }, [token, setTasks, setObjectives]);
+  }, [token, currentWorkspace, setTasks, setObjectives]);
 
   // Get events for a specific date
   const getEventsForDate = (date: Date): CalendarEvent[] => {

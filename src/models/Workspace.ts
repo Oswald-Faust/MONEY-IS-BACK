@@ -18,6 +18,14 @@ export interface IWorkspace extends Document {
     image?: string;
     theme: 'dark' | 'light' | 'system';
   };
+  aiProfile?: {
+    businessSummary?: string;
+    primaryGoals?: string[];
+    teamSummary?: string;
+    preferredTone?: 'coach' | 'direct' | 'friendly' | 'executive';
+    onboardingCompleted?: boolean;
+    whatsappEnabled?: boolean;
+  };
   useCase: 'personal' | 'work' | 'school' | 'agency' | 'startup' | 'other';
   stripeCustomerId?: string;
   subscriptionId?: string;
@@ -85,6 +93,36 @@ const WorkspaceSchema = new Schema<IWorkspace>(
         type: String,
         enum: ['dark', 'light', 'system'],
         default: 'dark',
+      },
+    },
+    aiProfile: {
+      businessSummary: {
+        type: String,
+        trim: true,
+        maxlength: [500, 'Le résumé business ne peut pas dépasser 500 caractères'],
+      },
+      primaryGoals: [{
+        type: String,
+        trim: true,
+        maxlength: [140, 'Un objectif IA ne peut pas dépasser 140 caractères'],
+      }],
+      teamSummary: {
+        type: String,
+        trim: true,
+        maxlength: [300, 'Le résumé équipe ne peut pas dépasser 300 caractères'],
+      },
+      preferredTone: {
+        type: String,
+        enum: ['coach', 'direct', 'friendly', 'executive'],
+        default: 'coach',
+      },
+      onboardingCompleted: {
+        type: Boolean,
+        default: false,
+      },
+      whatsappEnabled: {
+        type: Boolean,
+        default: false,
       },
     },
     useCase: {

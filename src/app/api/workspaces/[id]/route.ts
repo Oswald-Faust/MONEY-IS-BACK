@@ -3,6 +3,11 @@ import connectDB from '@/lib/mongodb';
 import Workspace from '@/models/Workspace';
 import jwt from 'jsonwebtoken';
 
+type WorkspaceMemberRecord = {
+  user: { toString(): string };
+  role: 'admin' | 'editor' | 'visitor';
+};
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -22,7 +27,7 @@ export async function PATCH(
     const userId = decoded.userId;
 
     const body = await request.json();
-    const { name, description, settings, useCase } = body;
+    const { name, description, settings, useCase, aiProfile } = body;
 
     // Find workspace and check permissions
     const workspace = await Workspace.findById(id);
@@ -34,7 +39,7 @@ export async function PATCH(
     // Check if user is owner or admin member
     const isOwner = workspace.owner.toString() === userId;
     const isAdminMember = workspace.members.some(
-      (m: any) => m.user.toString() === userId && m.role === 'admin'
+      (member: WorkspaceMemberRecord) => member.user.toString() === userId && member.role === 'admin'
     );
 
     if (!isOwner && !isAdminMember) {
@@ -50,6 +55,13 @@ export async function PATCH(
       workspace.settings = {
         ...workspace.settings,
         ...settings
+      };
+    }
+
+    if (aiProfile) {
+      workspace.aiProfile = {
+        ...workspace.aiProfile,
+        ...aiProfile,
       };
     }
 

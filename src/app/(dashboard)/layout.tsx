@@ -16,10 +16,12 @@ import {
   CreateWorkspaceModal
 } from '@/components/modals';
 import GlobalSearch from '@/components/search/GlobalSearch';
+import FloatingAssistant from '@/components/ai/FloatingAssistant';
 import React from 'react';
 import { Menu } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { Workspace } from '@/types';
+import Image from 'next/image';
 
 
 export default function DashboardLayout({
@@ -171,8 +173,8 @@ export default function DashboardLayout({
                 <Menu className="w-6 h-6" />
               </button>
               <div className="ml-4 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">MB</span>
+                <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center relative bg-white">
+                  <Image src="/icone.jpeg" alt="Edwin Logo" fill className="object-cover" />
                 </div>
                 <span className="font-semibold text-text-main text-sm">Edwin</span>
               </div>
@@ -217,6 +219,7 @@ export default function DashboardLayout({
           isOpen={isObjectiveModalOpen} 
           onClose={() => setObjectiveModalOpen(false)} 
           defaultProjectId={objectiveProjectId}
+          workspaceId={currentWorkspace?._id}
         />
         <CreateFolderModal 
           isOpen={isCreateFolderModalOpen} 
@@ -233,6 +236,7 @@ export default function DashboardLayout({
         <CreateUserModal />
         <CreateWorkspaceModal />
         <GlobalSearch />
+        <FloatingAssistant />
       </div>
     </AuthGuard>
   );

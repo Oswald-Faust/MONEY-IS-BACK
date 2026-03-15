@@ -17,7 +17,12 @@ export async function GET(request: NextRequest) {
     const projectId = searchParams.get('project');
     const activeOnly = searchParams.get('active');
 
-    const query: any = {};
+    const query: any = {
+      $or: [
+        { creator: auth.userId },
+        { assignee: auth.userId },
+      ],
+    };
     if (projectId) query.project = projectId;
     if (activeOnly === 'true') query.isActive = true;
 

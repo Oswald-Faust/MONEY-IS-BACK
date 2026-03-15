@@ -2,14 +2,19 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export type TaskPriority = 'important' | 'less_important' | 'waiting';
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
+export type TaskSource = 'manual' | 'objective_checkpoint';
 
 export interface ITask extends Document {
   _id: mongoose.Types.ObjectId;
   title: string;
   description?: string;
-  project: mongoose.Types.ObjectId;
+  workspace: mongoose.Types.ObjectId;
+  project?: mongoose.Types.ObjectId;
   projectName?: string;
   projectColor?: string;
+  objective?: mongoose.Types.ObjectId;
+  objectiveCheckpointId?: string;
+  source: TaskSource;
   assignees: mongoose.Types.ObjectId[];
   assignee?: mongoose.Types.ObjectId; // Deprecated, kept for backward compatibility
   creator: mongoose.Types.ObjectId;
@@ -57,16 +62,33 @@ const TaskSchema = new Schema<ITask>(
       trim: true,
       maxlength: [2000, 'La description ne peut pas dépasser 2000 caractères'],
     },
+    workspace: {
+      type: Schema.Types.ObjectId,
+      ref: 'Workspace',
+      required: true,
+    },
     project: {
       type: Schema.Types.ObjectId,
       ref: 'Project',
-      required: true,
     },
     projectName: {
       type: String,
     },
     projectColor: {
       type: String,
+    },
+    objective: {
+      type: Schema.Types.ObjectId,
+      ref: 'Objective',
+    },
+    objectiveCheckpointId: {
+      type: String,
+      trim: true,
+    },
+    source: {
+      type: String,
+      enum: ['manual', 'objective_checkpoint'],
+      default: 'manual',
     },
     assignee: {
       type: Schema.Types.ObjectId,
@@ -182,10 +204,12 @@ const TaskSchema = new Schema<ITask>(
 );
 
 // Indexes for better performance
+TaskSchema.index({ workspace: 1, status: 1, priority: 1 });
 TaskSchema.index({ project: 1, status: 1, priority: 1 });
 TaskSchema.index({ assignee: 1, status: 1 });
 TaskSchema.index({ dueDate: 1 });
 TaskSchema.index({ priority: 1, order: 1 });
+TaskSchema.index({ objective: 1, objectiveCheckpointId: 1 });
 
 const Task: Model<ITask> = mongoose.models.Task || mongoose.model<ITask>('Task', TaskSchema);
 

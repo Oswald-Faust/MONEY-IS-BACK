@@ -25,53 +25,71 @@ import Avatar from '@/components/ui/Avatar';
 import UserHoverCard from '@/components/ui/UserHoverCard';
 import { EditTaskModal } from '@/components/modals';
 import { useAppStore } from '@/store';
+import type { Task as AppTask, Attachment as AppAttachment, Comment as AppComment } from '@/types';
+
+interface UserPreview {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+  profileColor?: string;
+}
+
+interface ProjectPreview {
+  _id: string;
+  name: string;
+  color: string;
+}
+
+interface ObjectivePreview {
+  _id: string;
+  title: string;
+}
+
+interface AttachmentPreview {
+  id?: string;
+  name?: string;
+  url?: string;
+  type?: string;
+  size?: number;
+  uploadedAt?: string;
+}
 
 interface Task {
   _id: string;
   title: string;
-  description: string;
-  status: 'todo' | 'in_progress' | 'done';
+  description?: string;
+  status: 'todo' | 'in_progress' | 'review' | 'done';
   priority: 'important' | 'less_important' | 'waiting';
-  project?: {
-    _id: string;
-    name: string;
-    color: string;
-  };
-  assignee?: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    avatar?: string;
-  };
-  creator: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    avatar?: string;
-  };
+  workspace?: string;
+  project?: string | ProjectPreview | null;
+  objective?: string | ObjectivePreview;
+  objectiveTitle?: string;
+  source?: 'manual' | 'objective_checkpoint';
+  assignee?: string | UserPreview;
+  creator: string | UserPreview;
   dueDate?: string;
   createdAt: string;
   updatedAt: string;
   tags: string[];
   subtasks?: { id: string, title: string, completed: boolean }[];
-  attachments?: any[];
+  attachments?: AttachmentPreview[];
   order?: number;
   comments?: {
     id: string;
-    user: {
-      _id: string;
-      firstName: string;
-      lastName: string;
-      avatar?: string;
-    };
+    user: string | UserPreview;
     content: string;
     createdAt: string;
   }[];
+  estimatedTime?: number;
 }
+
+type TaskComment = NonNullable<Task['comments']>[number];
 
 const statusConfig = {
   todo: { label: 'À faire', color: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/20', icon: Circle },
   in_progress: { label: 'En cours', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', icon: Clock },
+  review: { label: 'En revue', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', icon: Clock },
   done: { label: 'Terminé', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', icon: CheckCircle2 },
 };
 
@@ -80,6 +98,62 @@ const priorityConfig = {
   less_important: { label: 'Moins important', color: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' },
   waiting: { label: 'En attente', color: 'text-slate-500 dark:text-slate-400 bg-slate-500/10 border-slate-500/20' },
 };
+
+function getUserPreview(user?: string | UserPreview | null): UserPreview | null {
+  return user && typeof user === 'object' ? user : null;
+}
+
+function toAttachmentRecord(attachment: AttachmentPreview, index: number, fallbackDate: string): AppAttachment {
+  return {
+    id: attachment.id || `attachment-${index}`,
+    name: attachment.name || `Document ${index + 1}`,
+    url: attachment.url || '',
+    type: attachment.type || '',
+    size: attachment.size || 0,
+    uploadedAt: attachment.uploadedAt || fallbackDate,
+  };
+}
+
+function toCommentRecord(comment: TaskComment, index: number): AppComment {
+  return {
+    id: comment.id || `comment-${index}`,
+    user: typeof comment.user === 'object' ? comment.user._id : comment.user,
+    content: comment.content,
+    createdAt: comment.createdAt,
+  };
+}
+
+function toEditTask(task: Task): AppTask {
+  const creator = getUserPreview(task.creator);
+  const assignee = getUserPreview(task.assignee);
+
+  return {
+    _id: task._id,
+    title: task.title,
+    description: task.description,
+    workspace: task.workspace,
+    project: typeof task.project === 'object' ? task.project._id : task.project,
+    objective: typeof task.objective === 'object' ? task.objective._id : task.objective,
+    objectiveTitle: task.objectiveTitle,
+    source: task.source,
+    assignee: typeof task.assignee === 'string' ? task.assignee : assignee?._id,
+    assignees: assignee ? [assignee._id] : undefined,
+    creator: typeof task.creator === 'string' ? task.creator : creator?._id || '',
+    priority: task.priority,
+    status: task.status,
+    dueDate: task.dueDate,
+    tags: task.tags || [],
+    subtasks: task.subtasks || [],
+    attachments: (task.attachments || []).map((attachment, index) =>
+      toAttachmentRecord(attachment, index, task.updatedAt || task.createdAt)
+    ),
+    comments: (task.comments || []).map((comment, index) => toCommentRecord(comment, index)),
+    order: task.order || 0,
+    createdAt: task.createdAt,
+    updatedAt: task.updatedAt,
+    estimatedTime: task.estimatedTime,
+  };
+}
 
 export default function TaskDetailPage() {
   const { id } = useParams();
@@ -90,6 +164,10 @@ export default function TaskDetailPage() {
   const { deleteTask, updateTask: updateStoreTask } = useAppStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const creator = getUserPreview(task?.creator);
+  const assignee = getUserPreview(task?.assignee);
+  const project = task?.project && typeof task.project === 'object' ? task.project : null;
+  const objectiveId = typeof task?.objective === 'object' ? task.objective._id : task?.objective;
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -140,7 +218,7 @@ export default function TaskDetailPage() {
     }
   };
 
-  const handleUpdateTask = (updatedTask: any) => {
+  const handleUpdateTask = (updatedTask: AppTask) => {
     setTask(updatedTask);
     updateStoreTask(updatedTask._id, updatedTask);
   };
@@ -232,17 +310,24 @@ export default function TaskDetailPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                {task.project && (
-                  <Link href={`/projects/${task.project._id}`}>
+                {project && (
+                  <Link href={`/projects/${project._id}`}>
                     <span 
                       className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
                       style={{ 
-                        backgroundColor: `${task.project.color}10`,
-                        color: task.project.color,
-                        borderColor: `${task.project.color}20` 
+                        backgroundColor: `${project.color}10`,
+                        color: project.color,
+                        borderColor: `${project.color}20` 
                       }}
                     >
-                      {task.project.name}
+                      {project.name}
+                    </span>
+                  </Link>
+                )}
+                {task.objectiveTitle && objectiveId && (
+                  <Link href={`/objectives/${objectiveId}`}>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                      Liée à {task.objectiveTitle}
                     </span>
                   </Link>
                 )}
@@ -283,13 +368,16 @@ export default function TaskDetailPage() {
                     </button>
                     <button
                       onClick={() => {
-                        handleDeleteTask();
+                        if (task.source !== 'objective_checkpoint') {
+                          handleDeleteTask();
+                        }
                         setIsMenuOpen(false);
                       }}
+                      disabled={task.source === 'objective_checkpoint'}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
-                      Supprimer
+                      {task.source === 'objective_checkpoint' ? 'Suppression via objectif' : 'Supprimer'}
                     </button>
                   </div>
                 </>
@@ -298,17 +386,17 @@ export default function TaskDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-6 text-sm text-dim">
-            {task.creator && typeof task.creator === 'object' && 'firstName' in task.creator ? (
-              <UserHoverCard user={task.creator as any}>
+            {creator ? (
+              <UserHoverCard user={creator}>
                 <div className="flex items-center gap-2 group/creator cursor-pointer">
                   <Avatar 
-                    src={task.creator.avatar} 
-                    fallback={task.creator.firstName} 
-                    color={(task.creator as any).profileColor}
+                    src={creator.avatar} 
+                    fallback={creator.firstName} 
+                    color={creator.profileColor}
                     size="xs"
                   />
                   <span className="group-hover/creator:text-accent-primary transition-colors">
-                    Créé par {task.creator.firstName} {task.creator.lastName}
+                    Créé par {creator.firstName} {creator.lastName}
                   </span>
                 </div>
               </UserHoverCard>
@@ -321,17 +409,17 @@ export default function TaskDetailPage() {
                 <span>Créé par Utilisateur inconnu</span>
               </div>
             )}
-            {task.assignee && (
-              <UserHoverCard user={task.assignee as any}>
+            {assignee && (
+              <UserHoverCard user={assignee}>
                 <div className="flex items-center gap-2 group/assignee cursor-pointer">
                   <Avatar 
-                    src={task.assignee.avatar} 
-                    fallback={task.assignee.firstName} 
-                    color={(task.assignee as any).profileColor}
+                    src={assignee.avatar} 
+                    fallback={assignee.firstName} 
+                    color={assignee.profileColor}
                     size="xs"
                   />
                   <span className="group-hover/assignee:text-accent-primary transition-colors">
-                    Assigné à {task.assignee.firstName} {task.assignee.lastName}
+                    Assigné à {assignee.firstName} {assignee.lastName}
                   </span>
                 </div>
               </UserHoverCard>
@@ -413,23 +501,30 @@ export default function TaskDetailPage() {
                      <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                            {/* Avatar user */}
-                           {comment.user ? (
-                             <UserHoverCard user={comment.user}>
+                           {getUserPreview(comment.user) ? (
+                             <UserHoverCard user={getUserPreview(comment.user)!}>
                                <div className="flex items-center gap-3 group/user cursor-pointer">
+                                 {(() => {
+                                   const commentUser = getUserPreview(comment.user)!;
+                                   return (
+                                     <>
                                  <Avatar 
-                                   src={comment.user?.avatar} 
-                                   fallback={comment.user?.firstName || '?'} 
-                                   color={(comment.user as any)?.profileColor}
+                                   src={commentUser.avatar} 
+                                   fallback={commentUser.firstName || '?'} 
+                                   color={commentUser.profileColor}
                                    size="sm"
                                  />
                                  <div>
                                    <p className="text-sm font-medium text-text-main group-hover/user:text-accent-primary transition-colors">
-                                     {`${comment.user.firstName} ${comment.user.lastName}`}
+                                     {`${commentUser.firstName} ${commentUser.lastName}`}
                                    </p>
                                    <p className="text-xs text-text-muted">
                                      {format(new Date(comment.createdAt), 'd MMMM yyyy à HH:mm', { locale: fr })}
                                    </p>
                                  </div>
+                                     </>
+                                   );
+                                 })()}
                                </div>
                              </UserHoverCard>
                            ) : (
@@ -448,7 +543,7 @@ export default function TaskDetailPage() {
                            )}
                         </div>
                         {/* Delete button (if current user is author) */}
-                        {currentUser && currentUser._id === comment.user?._id && (
+	                        {currentUser && getUserPreview(comment.user)?._id === currentUser._id && (
                            <button
                              onClick={() => deleteComment(comment.id)}
                              className="p-1.5 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
@@ -499,13 +594,28 @@ export default function TaskDetailPage() {
               Modifier la tâche
             </button>
             <button 
-              onClick={handleDeleteTask}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-colors text-sm font-medium border border-transparent hover:border-red-500/20"
+              onClick={() => {
+                if (task.source !== 'objective_checkpoint') {
+                  handleDeleteTask();
+                }
+              }}
+              disabled={task.source === 'objective_checkpoint'}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-colors text-sm font-medium border border-transparent hover:border-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Trash2 className="w-4 h-4" />
-              Supprimer
+              {task.source === 'objective_checkpoint' ? 'Supprimer depuis l\'objectif' : 'Supprimer'}
             </button>
           </div>
+
+          {task.source === 'objective_checkpoint' && (
+            <div className="glass-card p-5 space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-indigo-400">Synchronisation active</p>
+              <p className="text-sm text-text-muted">
+                Cette tâche est générée par un checkpoint d&apos;objectif. Le titre, la priorité, l&apos;échéance,
+                les assignés et le statut restent synchronisés.
+              </p>
+            </div>
+          )}
 
           {/* Attachments */}
           <div className="glass-card p-6 space-y-4">
@@ -536,7 +646,7 @@ export default function TaskDetailPage() {
       <EditTaskModal 
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        task={task as any}
+        task={task ? toEditTask(task) : null}
         onUpdate={handleUpdateTask}
       />
     </div>

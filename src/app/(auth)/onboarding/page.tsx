@@ -26,11 +26,15 @@ import { useRouter } from 'next/navigation';
 
 // --- Types ---
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5;
 
 interface OnboardingData {
   workspaceName: string;
   useCase: string;
+  businessSummary: string;
+  mainGoals: string;
+  teamSummary: string;
+  preferredTone: string;
   themeColor: string;
   icon: string;
   image?: string;
@@ -94,6 +98,10 @@ export default function OnboardingPage() {
   const [data, setData] = useState<OnboardingData>({
     workspaceName: '',
     useCase: 'other',
+    businessSummary: '',
+    mainGoals: '',
+    teamSummary: '',
+    preferredTone: 'coach',
     themeColor: '#6366f1',
     icon: 'Briefcase',
     invitedEmails: []
@@ -121,7 +129,7 @@ export default function OnboardingPage() {
      checkWorkspaces();
   }, [token, router]);
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 4) as Step);
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 5) as Step);
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1) as Step);
 
   const updateData = (key: keyof OnboardingData, value: string | string[] | undefined) => {
@@ -189,6 +197,16 @@ export default function OnboardingPage() {
           name: data.workspaceName,
           description: `Espace de travail pour ${data.useCase}`,
           useCase: data.useCase,
+          aiProfile: {
+            businessSummary: data.businessSummary,
+            primaryGoals: data.mainGoals
+              .split('\n')
+              .map((goal) => goal.trim())
+              .filter(Boolean),
+            teamSummary: data.teamSummary,
+            preferredTone: data.preferredTone,
+            onboardingCompleted: true,
+          },
           theme: 'dark',
           defaultProjectColor: data.themeColor,
           image: data.image,
@@ -302,7 +320,7 @@ export default function OnboardingPage() {
           
           {/* Progress */}
           <div className="flex justify-center mb-8">
-            <StepIndicator currentStep={step} totalSteps={4} />
+            <StepIndicator currentStep={step} totalSteps={5} />
           </div>
 
           {/* Form Content */}
@@ -396,8 +414,78 @@ export default function OnboardingPage() {
               </motion.div>
             )}
 
-            {/* STEP 3: Personalization */}
+            {/* STEP 3: AI Profile */}
             {step === 3 && (
+              <motion.div key="step3-ai" className="space-y-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-bold mb-2">Préparons votre IA</h2>
+                  <p className="text-text-dim text-sm">Ces informations aideront Edwin AI à mieux vous accompagner dès le premier jour.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs text-text-muted uppercase tracking-wider font-semibold block">Activité / contexte business</label>
+                  <textarea
+                    value={data.businessSummary}
+                    onChange={(e) => updateData('businessSummary', e.target.value)}
+                    placeholder="Ex: Nous vendons des formations en ligne et nous préparons une beta privée pour un nouveau programme."
+                    rows={3}
+                    className="w-full bg-input-bg border border-input-border text-text-main rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs text-text-muted uppercase tracking-wider font-semibold block">Objectifs prioritaires</label>
+                  <textarea
+                    value={data.mainGoals}
+                    onChange={(e) => updateData('mainGoals', e.target.value)}
+                    placeholder={'Un objectif par ligne\nEx: Lancer la beta en 30 jours\nStructurer la to-do globale\nClarifier les priorites equipe'}
+                    rows={4}
+                    className="w-full bg-input-bg border border-input-border text-text-main rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs text-text-muted uppercase tracking-wider font-semibold block">Equipe / organisation</label>
+                    <textarea
+                      value={data.teamSummary}
+                      onChange={(e) => updateData('teamSummary', e.target.value)}
+                      placeholder="Ex: 1 fondateur, 1 designer freelance, 1 commercial. Nous avons besoin de priorites simples et d un cadre clair."
+                      rows={3}
+                      className="w-full bg-input-bg border border-input-border text-text-main rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none resize-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs text-text-muted uppercase tracking-wider font-semibold block">Ton prefere</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: 'coach', label: 'Coach' },
+                        { id: 'direct', label: 'Direct' },
+                        { id: 'friendly', label: 'Friendly' },
+                        { id: 'executive', label: 'Executive' },
+                      ].map((tone) => (
+                        <button
+                          key={tone.id}
+                          type="button"
+                          onClick={() => updateData('preferredTone', tone.id)}
+                          className={`rounded-xl border px-3 py-3 text-sm font-semibold transition-all ${
+                            data.preferredTone === tone.id
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                              : 'border-glass-border bg-bg-tertiary text-text-muted hover:bg-glass-hover'
+                          }`}
+                        >
+                          {tone.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* STEP 4: Personalization */}
+            {step === 4 && (
               <motion.div key="step3" className="space-y-6">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold mb-2">Personnalisation</h2>
@@ -555,7 +643,7 @@ export default function OnboardingPage() {
             )}
 
             {/* STEP 4: Final Review */}
-            {step === 4 && (
+            {step === 5 && (
               <motion.div key="step4" className="space-y-6 text-center">
                  <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-emerald-500/20 relative">
                     <Rocket className="w-12 h-12 text-white" />
@@ -587,6 +675,12 @@ export default function OnboardingPage() {
                         <span className="text-text-muted">Usage</span>
                         <span className="font-medium text-text-main capitalize">{data.useCase}</span>
                       </div>
+                      <div className="flex items-center justify-between gap-4 text-sm">
+                        <span className="text-text-muted">IA</span>
+                        <span className="font-medium text-text-main text-right line-clamp-2">
+                          {data.mainGoals.split('\n').filter(Boolean).length || 0} objectifs prioritaires
+                        </span>
+                      </div>
                        <div className="flex items-center justify-between text-sm">
                         <span className="text-zinc-500">Plan</span>
                         <span className="font-medium text-emerald-400 capitalize">{new URLSearchParams(window.location.search).get('plan') || 'Starter'}</span>
@@ -617,7 +711,7 @@ export default function OnboardingPage() {
               Retour
             </button>
 
-            {step < 4 ? (
+            {step < 5 ? (
               <button
                 onClick={nextStep}
                 disabled={step === 1 && !data.workspaceName}

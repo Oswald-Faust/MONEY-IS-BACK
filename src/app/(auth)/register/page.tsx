@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
@@ -125,9 +126,9 @@ export default function RegisterPage() {
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4 shadow-lg shadow-indigo-500/20"
+            className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg shadow-indigo-500/20 overflow-hidden bg-white mx-auto"
           >
-            <span className="text-2xl font-bold text-white">MB</span>
+            <Image src="/icone.jpeg" alt="Edwin Logo" fill className="object-cover" />
           </motion.div>
           <h1 className="text-2xl font-bold text-text-main mb-2">Créer un compte</h1>
           <p className="text-text-dim">Rejoignez Edwin</p>
@@ -154,7 +155,7 @@ export default function RegisterPage() {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="Mathias"
+                    placeholder="John"
                     required
                     className="
                       w-full pl-12 pr-4 py-3 text-sm
@@ -201,7 +202,7 @@ export default function RegisterPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="mathias@exemple.com"
+                  placeholder="john.doe@exemple.com"
                   required
                   className="
                     w-full pl-12 pr-4 py-3 text-sm

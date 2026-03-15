@@ -1,67 +1,73 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, FolderKanban } from 'lucide-react';
+import { FolderKanban, Plus, Search, Sparkles } from 'lucide-react';
 import ProjectCard from '@/components/ui/ProjectCard';
 import CreateProjectModal from '@/components/modals/CreateProjectModal';
 import EditTaskModal from '@/components/modals/EditTaskModal';
 import type { Project, Task } from '@/types';
 import { useSearchParams } from 'next/navigation';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import { useTranslation } from '@/lib/i18n';
-
 import toast from 'react-hot-toast';
-import { useAuthStore } from '@/store';
+
+type ProjectStatusFilter = 'all' | 'active' | 'archived' | 'paused';
 
 export default function ProjectsPage() {
-  const { projects, setProjects, setProjectModalOpen, isProjectModalOpen, setCurrentProject, deleteProject, currentWorkspace } = useAppStore();
+  const {
+    projects,
+    setProjects,
+    setProjectModalOpen,
+    isProjectModalOpen,
+    setCurrentProject,
+    deleteProject,
+    currentWorkspace,
+  } = useAppStore();
   const { token } = useAuthStore();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived' | 'paused'>('all');
+  const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const searchParams = useSearchParams();
 
-  // Handle URL params for direct task access
   useEffect(() => {
     const taskId = searchParams.get('taskId');
     if (taskId && token) {
-        // Fetch task details
-        fetch(`/api/tasks?id=${taskId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+      fetch(`/api/tasks?id=${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            setEditingTask(data.data);
+          }
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                setEditingTask(data.data);
-            }
-        })
-        .catch(err => console.error(err));
+        .catch((error) => console.error(error));
     }
   }, [searchParams, token]);
 
   const handleDeleteProject = async (id: string, name: string) => {
-    if (window.confirm(`${t.projectsPage.confirmDelete} ${name} ?`)) {
-      try {
-        const response = await fetch(`/api/projects?id=${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+    if (!window.confirm(`${t.projectsPage.confirmDelete} ${name} ?`)) return;
 
-        const data = await response.json();
-        if (data.success) {
-          deleteProject(id);
-          toast.success(t.projectsPage.toasts.deleted);
-        } else {
-          toast.error(data.error || t.projectsPage.toasts.deleteError);
-        }
-      } catch {
-        toast.error(t.projectsPage.toasts.connectionError);
+    try {
+      const response = await fetch(`/api/projects?id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        deleteProject(id);
+        toast.success(t.projectsPage.toasts.deleted);
+      } else {
+        toast.error(data.error || t.projectsPage.toasts.deleteError);
       }
+    } catch {
+      toast.error(t.projectsPage.toasts.connectionError);
     }
   };
 
@@ -70,7 +76,6 @@ export default function ProjectsPage() {
     setProjectModalOpen(true);
   };
 
-  // Charger les projets depuis l'API
   useEffect(() => {
     const fetchProjects = async () => {
       if (!currentWorkspace) return;
@@ -79,7 +84,7 @@ export default function ProjectsPage() {
         setIsLoading(true);
         const response = await fetch(`/api/projects?workspace=${currentWorkspace._id}`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -89,7 +94,6 @@ export default function ProjectsPage() {
           setProjects(data.data);
         } else {
           toast.error(data.error || t.projectsPage.toasts.loadError);
-          // Clean existing projects on error/mismatch
           setProjects([]);
         }
       } catch (error) {
@@ -105,105 +109,183 @@ export default function ProjectsPage() {
     }
   }, [token, currentWorkspace, setProjects, t.projectsPage.toasts.loadError, t.projectsPage.toasts.serverError]);
 
-  // Filter projects
   const filteredProjects = projects.filter((project) => {
-    const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          project.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
-  // Group by status
-  const activeProjects = filteredProjects.filter(p => p.status === 'active');
-  const archivedProjects = filteredProjects.filter(p => p.status === 'archived');
-  const pausedProjects = filteredProjects.filter(p => p.status === 'paused');
+  const activeProjects = filteredProjects.filter((project) => project.status === 'active');
+  const archivedProjects = filteredProjects.filter((project) => project.status === 'archived');
+  const pausedProjects = filteredProjects.filter((project) => project.status === 'paused');
+
+  const totalTasks = filteredProjects.reduce((sum, project) => sum + project.tasksCount, 0);
+  const totalCompletedTasks = filteredProjects.reduce(
+    (sum, project) => sum + project.completedTasksCount,
+    0
+  );
+  const completionRate = totalTasks > 0 ? Math.round((totalCompletedTasks / totalTasks) * 100) : 0;
+
+  const statusOptions: Array<{
+    value: ProjectStatusFilter;
+    label: string;
+    count: number;
+  }> = [
+    {
+      value: 'all',
+      label: t.projectsPage.filters.all,
+      count: filteredProjects.length,
+    },
+    {
+      value: 'active',
+      label: t.projectsPage.filters.active,
+      count: activeProjects.length,
+    },
+    {
+      value: 'paused',
+      label: t.projectsPage.filters.paused,
+      count: pausedProjects.length,
+    },
+    {
+      value: 'archived',
+      label: t.projectsPage.filters.archived,
+      count: archivedProjects.length,
+    },
+  ];
+
+  const projectSections = [
+    {
+      key: 'active',
+      title: t.projectsPage.sections.activeProjects,
+      description: t.projectsPage.sectionDescriptions.activeProjects,
+      items: activeProjects,
+    },
+    {
+      key: 'paused',
+      title: t.projectsPage.sections.pausedProjects,
+      description: t.projectsPage.sectionDescriptions.pausedProjects,
+      items: pausedProjects,
+    },
+    {
+      key: 'archived',
+      title: t.projectsPage.sections.archivedProjects,
+      description: t.projectsPage.sectionDescriptions.archivedProjects,
+      items: archivedProjects,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
+    <div className="space-y-8 pb-10">
+      <motion.section
+        initial={{ opacity: 0, y: -18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+        className="relative overflow-hidden rounded-[32px] border border-glass-border bg-bg-secondary/70 p-6 md:p-8 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.65)]"
       >
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
-            <FolderKanban className="w-8 h-8 text-accent-primary" />
-            {t.projectsPage.title}
-          </h1>
-          <p className="text-text-muted mt-1 font-medium">
-            {filteredProjects.length} {t.projectsPage.count}
-          </p>
-        </div>
-        
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            setCurrentProject(null);
-            setProjectModalOpen(true);
-          }}
-          className="
-            px-4 py-2.5 rounded-xl flex items-center gap-2
-            bg-accent-primary
-            text-white font-bold text-sm
-            hover:opacity-90
-            transition-all duration-200 shadow-lg shadow-accent-primary/20
-          "
-        >
-          <Plus className="w-5 h-5" />
-          {t.projectsPage.newProject}
-        </motion.button>
-      </motion.div>
+        <div className="absolute -left-16 top-0 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl" />
+        <div className="absolute right-0 top-10 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl" />
 
-      {/* Filters */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="flex flex-col md:flex-row gap-4"
-      >
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t.projectsPage.searchPlaceholder}
-            className="
-              w-full pl-12 pr-4 py-3 text-sm
-              bg-bg-tertiary border border-glass-border
-              rounded-xl text-text-main placeholder:text-text-muted
-              focus:border-accent-primary/50 focus:outline-none focus:ring-4 focus:ring-accent-primary/5
-              transition-all duration-200
-            "
-          />
-        </div>
+        <div className="relative space-y-8">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+            <div className="max-w-2xl space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-text-dim">
+                <Sparkles className="w-3.5 h-3.5 text-accent-primary" />
+                {t.projectsPage.workspaceLabel}
+              </div>
 
-        {/* Status Filter */}
-        <div className="flex gap-2">
-          {(['all', 'active', 'paused', 'archived'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`
-                px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 uppercase tracking-widest
-                ${statusFilter === status
-                  ? 'bg-accent-primary/10 text-accent-primary border border-accent-primary/20 shadow-sm'
-                  : 'bg-bg-tertiary text-text-muted border border-glass-border hover:bg-glass-hover hover:text-text-main'}
-              `}
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-text-main tracking-tight flex items-center gap-3">
+                  <FolderKanban className="w-8 h-8 text-accent-primary" />
+                  {t.projectsPage.title}
+                </h1>
+                <p className="mt-3 text-base md:text-lg text-text-dim leading-7">
+                  {t.projectsPage.subtitle}
+                </p>
+                {currentWorkspace && (
+                  <p className="mt-4 text-sm text-text-muted">
+                    {t.projectsPage.workspaceLabel}: <span className="text-text-main font-semibold">{currentWorkspace.name}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                setCurrentProject(null);
+                setProjectModalOpen(true);
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-primary px-5 py-3 text-sm font-bold text-white shadow-lg shadow-accent-primary/20 transition-all hover:opacity-90"
             >
-              {status === 'all' && t.projectsPage.filters.all}
-              {status === 'active' && t.projectsPage.filters.active}
-              {status === 'paused' && t.projectsPage.filters.paused}
-              {status === 'archived' && t.projectsPage.filters.archived}
-            </button>
-          ))}
-        </div>
-      </motion.div>
+              <Plus className="w-5 h-5" />
+              {t.projectsPage.newProject}
+            </motion.button>
+          </div>
 
-      {/* Projects Grid */}
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+            <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                {t.projectsPage.stats.active}
+              </p>
+              <p className="mt-3 text-3xl font-bold text-text-main">{activeProjects.length}</p>
+            </div>
+            <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                {t.projectsPage.stats.paused}
+              </p>
+              <p className="mt-3 text-3xl font-bold text-text-main">{pausedProjects.length}</p>
+            </div>
+            <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                {t.projectsPage.stats.totalTasks}
+              </p>
+              <p className="mt-3 text-3xl font-bold text-text-main">{totalTasks}</p>
+            </div>
+            <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                {t.projectsPage.stats.completion}
+              </p>
+              <p className="mt-3 text-3xl font-bold text-text-main">{completionRate}%</p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder={t.projectsPage.searchPlaceholder}
+                className="w-full rounded-2xl border border-glass-border bg-bg-tertiary pl-12 pr-4 py-3.5 text-sm text-text-main placeholder:text-text-muted focus:border-accent-primary/40 focus:outline-none focus:ring-4 focus:ring-accent-primary/5 transition-all duration-200"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setStatusFilter(option.value)}
+                  className={`rounded-2xl border px-4 py-3 text-left transition-all ${
+                    statusFilter === option.value
+                      ? 'border-accent-primary/30 bg-accent-primary/10 text-accent-primary shadow-sm'
+                      : 'border-glass-border bg-bg-tertiary text-text-muted hover:bg-glass-hover hover:text-text-main'
+                  }`}
+                >
+                  <div className="text-[11px] font-bold uppercase tracking-[0.16em]">
+                    {option.label}
+                  </div>
+                  <div className="mt-1 text-lg font-bold">{option.count}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-4">
@@ -211,134 +293,86 @@ export default function ProjectsPage() {
             <p className="text-dim">{t.projectsPage.loading}</p>
           </div>
         </div>
+      ) : filteredProjects.length === 0 ? (
+        <div className="glass-card rounded-[30px] border-dashed border-2 bg-bg-secondary/40 p-16 text-center">
+          <FolderKanban className="mx-auto mb-6 h-16 w-16 text-text-muted opacity-20" />
+          <h3 className="mb-2 text-2xl font-bold text-text-main">{t.projectsPage.empty.title}</h3>
+          <p className="mx-auto mb-8 max-w-md text-sm text-text-dim">
+            {searchQuery ? t.projectsPage.empty.tryAnotherSearch : t.projectsPage.empty.createFirst}
+          </p>
+          <button
+            onClick={() => {
+              setCurrentProject(null);
+              setProjectModalOpen(true);
+            }}
+            className="rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 px-5 py-3 text-sm font-semibold text-white"
+          >
+            {t.projectsPage.empty.createButton}
+          </button>
+        </div>
       ) : (
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-        {/* Active Projects */}
-        {activeProjects.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xs font-bold text-text-muted mb-6 uppercase tracking-[0.2em] ml-1">
-              {t.projectsPage.sections.activeProjects} ({activeProjects.length})
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {activeProjects.map((project, index) => (
-                <motion.div
-                  key={project._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <ProjectCard 
-                    project={project} 
-                    onEdit={handleEditProject}
-                    onDelete={(p) => handleDeleteProject(p._id, p.name)}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="space-y-10">
+          {projectSections.map((section, sectionIndex) =>
+            section.items.length > 0 ? (
+              <motion.section
+                key={section.key}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + sectionIndex * 0.05 }}
+                className="space-y-5"
+              >
+                <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-text-main">
+                      {section.title}{' '}
+                      <span className="text-text-muted">({section.items.length})</span>
+                    </h2>
+                    <p className="mt-1 text-sm text-text-dim">{section.description}</p>
+                  </div>
+                </div>
 
-        {/* Paused Projects */}
-        {pausedProjects.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
-              {t.projectsPage.sections.pausedProjects} ({pausedProjects.length})
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {pausedProjects.map((project, index) => (
-                <motion.div
-                  key={project._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <ProjectCard 
-                    project={project} 
-                    onEdit={handleEditProject}
-                    onDelete={(p) => handleDeleteProject(p._id, p.name)}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Archived Projects */}
-        {archivedProjects.length > 0 && (
-          <div>
-            <h2 className="text-sm font-medium text-dim mb-4 uppercase tracking-wider">
-              {t.projectsPage.sections.archivedProjects} ({archivedProjects.length})
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {archivedProjects.map((project, index) => (
-                <motion.div
-                  key={project._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <ProjectCard 
-                    project={project} 
-                    onEdit={handleEditProject}
-                    onDelete={(p) => handleDeleteProject(p._id, p.name)}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {filteredProjects.length === 0 && (
-          <div className="glass-card p-16 text-center border-dashed border-2 bg-bg-secondary/50">
-            <FolderKanban className="w-16 h-16 text-text-muted mx-auto mb-6 opacity-20" />
-            <h3 className="text-xl font-bold text-text-main mb-2">{t.projectsPage.empty.title}</h3>
-            <p className="text-text-dim text-sm mb-8 max-w-xs mx-auto">
-              {searchQuery
-                ? t.projectsPage.empty.tryAnotherSearch
-                : t.projectsPage.empty.createFirst}
-            </p>
-            <button
-              onClick={() => {
-                setCurrentProject(null);
-                setProjectModalOpen(true);
-              }}
-              className="
-                px-4 py-2 rounded-xl
-                bg-gradient-to-r from-indigo-600 to-purple-600
-                text-white font-medium text-sm
-              "
-            >
-              {t.projectsPage.empty.createButton}
-            </button>
-          </div>
-        )}
-      </motion.section>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  {section.items.map((project, index) => (
+                    <motion.div
+                      key={project._id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <ProjectCard
+                        project={project}
+                        variant="expanded"
+                        onEdit={handleEditProject}
+                        onDelete={(currentProject) =>
+                          handleDeleteProject(currentProject._id, currentProject.name)
+                        }
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.section>
+            ) : null
+          )}
+        </div>
       )}
 
-      {/* Create Project Modal */}
       <CreateProjectModal
         isOpen={isProjectModalOpen}
         onClose={() => setProjectModalOpen(false)}
         workspaceId={currentWorkspace?._id}
       />
 
-      {/* Edit Task Modal (from URL) */}
       <EditTaskModal
         isOpen={!!editingTask}
         onClose={() => {
           setEditingTask(null);
-          // Clear URL param
           const url = new URL(window.location.href);
           url.searchParams.delete('taskId');
           window.history.replaceState({}, '', url);
         }}
         task={editingTask}
         onUpdate={() => {
-             // Optional: update local state if needed, though simpler just to rely on modal
+          // No local update needed here.
         }}
       />
     </div>

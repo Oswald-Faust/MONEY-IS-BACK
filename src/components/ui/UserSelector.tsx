@@ -21,9 +21,18 @@ interface UserSelectorProps {
   className?: string;
   multiple?: boolean;
   projectId?: string;
+  workspaceId?: string;
 }
 
-export default function UserSelector({ value, onChange, label = "Assigné à", className = "", multiple = false, projectId }: UserSelectorProps) {
+export default function UserSelector({
+  value,
+  onChange,
+  label = "Assigné à",
+  className = "",
+  multiple = false,
+  projectId,
+  workspaceId,
+}: UserSelectorProps) {
   const { token } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +48,8 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
         let url = '/api/users';
         if (projectId) {
           url = `/api/projects/members?projectId=${projectId}`;
+        } else if (workspaceId) {
+          url = `/api/workspaces/members?workspaceId=${workspaceId}`;
         }
 
         const response = await fetch(url, {
@@ -48,7 +59,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
         });
         const data = await response.json();
         if (data.success) {
-          if (projectId) {
+          if (projectId || workspaceId) {
             // Transform project members to User structure
             const owner = data.data.owner ? {
               _id: data.data.owner._id,
@@ -89,7 +100,7 @@ export default function UserSelector({ value, onChange, label = "Assigné à", c
     };
 
     fetchUsers();
-  }, [token, projectId]);
+  }, [token, projectId, workspaceId]);
 
   // Helper to check if a user is selected
   const isSelected = (userId: string) => {

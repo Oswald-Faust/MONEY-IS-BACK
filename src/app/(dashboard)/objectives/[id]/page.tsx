@@ -12,7 +12,10 @@ import {
   Edit,
   TrendingUp,
   Circle,
-  Check
+  Check,
+  Calendar,
+  Flag,
+  Link2,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore, useAppStore } from '@/store';
@@ -21,18 +24,25 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import CreateObjectiveModal from '@/components/modals/CreateObjectiveModal';
+import type { Objective as AppObjective } from '@/types';
 
 interface Checkpoint {
-  _id: string;
+  id: string;
   title: string;
   completed: boolean;
+  priority?: 'important' | 'less_important' | 'waiting';
+  dueDate?: string;
+  assignee?: string | { _id: string; firstName: string; lastName: string; avatar?: string };
+  assignees?: Array<string | { _id: string; firstName: string; lastName: string; avatar?: string }>;
+  task?: string;
 }
 
 interface Objective {
   _id: string;
+  workspace?: string;
   title: string;
   description: string;
-  status: 'not_started' | 'in_progress' | 'completed';
+  status: 'not_started' | 'in_progress' | 'completed' | 'cancelled';
   priority: 'high' | 'medium' | 'low';
   progress: number;
   checkpoints: Checkpoint[];
@@ -56,6 +66,7 @@ const statusConfig = {
   not_started: { label: 'Pas commencé', color: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/20', icon: Circle },
   in_progress: { label: 'En cours', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', icon: Clock },
   completed: { label: 'Terminé', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', icon: CheckCircle2 },
+  cancelled: { label: 'Annulé', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', icon: Circle },
 };
 
 const priorityConfig = {
@@ -63,6 +74,45 @@ const priorityConfig = {
   medium: { label: 'Moyenne', color: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' },
   low: { label: 'Basse', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
 };
+
+const checkpointPriorityConfig = {
+  important: { label: 'Important', color: 'text-red-500 bg-red-500/10 border-red-500/20' },
+  less_important: { label: 'Normal', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20' },
+  waiting: { label: 'En attente', color: 'text-slate-400 bg-slate-500/10 border-slate-500/20' },
+};
+
+function toObjectiveModalData(objective: Objective): AppObjective {
+  return {
+    _id: objective._id,
+    title: objective.title,
+    description: objective.description,
+    workspace: objective.workspace,
+    project: objective.project?._id,
+    projectName: objective.project?.name,
+    projectColor: objective.project?.color,
+    creator: objective.creator._id,
+    assignee: typeof objective.assignee === 'object' ? objective.assignee._id : objective.assignee,
+    assignees: undefined,
+    targetDate: objective.targetDate,
+    progress: objective.progress,
+    checkpoints: objective.checkpoints.map((checkpoint) => ({
+      id: checkpoint.id,
+      title: checkpoint.title,
+      completed: checkpoint.completed,
+      priority: checkpoint.priority,
+      dueDate: checkpoint.dueDate,
+      assignee: typeof checkpoint.assignee === 'object' ? checkpoint.assignee._id : checkpoint.assignee,
+      assignees: checkpoint.assignees?.map((assignee) =>
+        typeof assignee === 'object' ? assignee._id : assignee
+      ),
+      task: checkpoint.task,
+    })),
+    status: objective.status,
+    priority: objective.priority,
+    createdAt: objective.createdAt,
+    updatedAt: objective.createdAt,
+  };
+}
 
 export default function ObjectiveDetailPage() {
   const { id } = useParams();
@@ -73,32 +123,32 @@ export default function ObjectiveDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchObjective = async () => {
-      if (!token || !id) return;
-      
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/api/objectives?id=${id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          setObjective(data.data);
-        } else {
-          toast.error(data.error || 'Objectif non trouvé');
-          router.push('/objectives');
-        }
-      } catch {
-        toast.error('Erreur lors du chargement de l\'objectif');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadObjective = React.useCallback(async () => {
+    if (!token || !id) return;
 
-    fetchObjective();
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/objectives?id=${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setObjective(data.data);
+      } else {
+        toast.error(data.error || 'Objectif non trouvé');
+        router.push('/objectives');
+      }
+    } catch {
+      toast.error('Erreur lors du chargement de l\'objectif');
+    } finally {
+      setIsLoading(false);
+    }
   }, [id, token, router]);
+
+  useEffect(() => {
+    loadObjective();
+  }, [loadObjective]);
 
   const handleDelete = async () => {
     if (!token || !objective) return;
@@ -122,6 +172,14 @@ export default function ObjectiveDetailPage() {
             toast.error('Erreur lors de la suppression');
         }
     }
+  };
+
+  const getCheckpointAssignees = (checkpoint: Checkpoint) => {
+    if (checkpoint.assignees && checkpoint.assignees.length > 0) {
+      return checkpoint.assignees;
+    }
+
+    return checkpoint.assignee ? [checkpoint.assignee] : [];
   };
 
   if (isLoading) {
@@ -246,25 +304,82 @@ export default function ObjectiveDetailPage() {
               {objective.checkpoints.length > 0 ? (
                 objective.checkpoints.map((checkpoint) => (
                   <div 
-                    key={checkpoint._id} 
+                    key={checkpoint.id} 
                     className={`
-                      flex items-center gap-4 p-4 rounded-xl border transition-all
+                      p-4 rounded-xl border transition-all space-y-3
                       ${checkpoint.completed 
                         ? 'bg-emerald-500/5 border-emerald-500/20' 
                         : 'bg-bg-tertiary border-glass-border'}
                     `}
                   >
-                    <div className={`
-                      w-6 h-6 rounded-full flex items-center justify-center border transition-all
-                      ${checkpoint.completed
-                        ? 'bg-emerald-500 border-emerald-500 text-white dark:text-black'
-                        : 'border-glass-border text-transparent'}
-                    `}>
-                      <Check className="w-3.5 h-3.5" />
+                    <div className="flex items-start gap-4">
+                      <div className={`
+                        w-6 h-6 rounded-full flex items-center justify-center border transition-all mt-0.5
+                        ${checkpoint.completed
+                          ? 'bg-emerald-500 border-emerald-500 text-white dark:text-black'
+                          : 'border-glass-border text-transparent'}
+                      `}>
+                        <Check className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-3">
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                          <span className={checkpoint.completed ? 'text-text-muted line-through font-medium' : 'text-text-main font-medium'}>
+                            {checkpoint.title}
+                          </span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {checkpoint.priority && (
+                              <span className={`px-2 py-1 rounded-lg border text-[11px] font-bold uppercase tracking-wider ${checkpointPriorityConfig[checkpoint.priority].color}`}>
+                                <span className="inline-flex items-center gap-1">
+                                  <Flag className="w-3 h-3" />
+                                  {checkpointPriorityConfig[checkpoint.priority].label}
+                                </span>
+                              </span>
+                            )}
+                            {checkpoint.task && (
+                              <Link
+                                href={`/tasks/${checkpoint.task}`}
+                                className="px-2 py-1 rounded-lg border border-glass-border text-[11px] font-bold uppercase tracking-wider text-text-muted hover:text-text-main hover:bg-glass-hover transition-colors inline-flex items-center gap-1"
+                              >
+                                <Link2 className="w-3 h-3" />
+                                Tache liee
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+
+                        {(checkpoint.dueDate || getCheckpointAssignees(checkpoint).length > 0) && (
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted">
+                            {checkpoint.dueDate && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-secondary border border-glass-border">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {format(new Date(checkpoint.dueDate), 'd MMM yyyy', { locale: fr })}
+                              </span>
+                            )}
+                            {getCheckpointAssignees(checkpoint).map((assignee, assigneeIndex) => {
+                              if (typeof assignee === 'string') {
+                                return (
+                                  <span
+                                    key={`${checkpoint.id}-assignee-${assigneeIndex}`}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-secondary border border-glass-border"
+                                  >
+                                    ID: {assignee.slice(0, 6)}
+                                  </span>
+                                );
+                              }
+
+                              return (
+                                <span
+                                  key={assignee._id}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-secondary border border-glass-border"
+                                >
+                                  {assignee.firstName} {assignee.lastName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <span className={checkpoint.completed ? 'text-text-muted line-through' : 'text-text-main'}>
-                      {checkpoint.title}
-                    </span>
                   </div>
                 ))
               ) : (
@@ -309,18 +424,10 @@ export default function ObjectiveDetailPage() {
         isOpen={isEditModalOpen} 
         onClose={() => {
             setIsEditModalOpen(false);
-            // Refresh data on close if needed, but optimally update via store or just reload page part
-            // For simplicity, we can reload the page data:
-            if (!isEditModalOpen) return; // Prevent loop
-             fetch(`/api/objectives?id=${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-              })
-              .then(res => res.json())
-              .then(data => {
-                  if (data.success) setObjective(data.data);
-              });
+            loadObjective();
         }} 
-        initialData={objective as any} 
+        initialData={toObjectiveModalData(objective)}
+        workspaceId={objective.workspace}
       />
     </div>
   );

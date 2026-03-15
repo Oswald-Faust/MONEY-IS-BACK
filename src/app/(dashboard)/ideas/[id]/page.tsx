@@ -16,12 +16,13 @@ import {
   Target
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import Image from 'next/image';
 import CreateIdeaModal from '@/components/modals/CreateIdeaModal';
 import CreateObjectiveModal from '@/components/modals/CreateObjectiveModal';
+import type { Idea as AppIdea, Attachment as AppAttachment } from '@/types';
 
 interface Comment {
   id: string;
@@ -67,10 +68,39 @@ const statusConfig = {
   archived: { label: 'Archivé', color: 'bg-red-500/10 text-red-400 border-red-500/20' },
 };
 
+function toIdeaModalData(idea: Idea): AppIdea {
+  return {
+    _id: idea._id,
+    title: idea.title,
+    content: idea.content,
+    project: idea.project?._id,
+    creator: idea.creator._id,
+    assignee: undefined,
+    assignees: undefined,
+    attachments: (idea.attachments || []).map(
+      (attachment): AppAttachment => ({
+        id: attachment.id,
+        name: attachment.name,
+        url: attachment.url,
+        type: '',
+        size: 0,
+        uploadedAt: idea.updatedAt,
+      })
+    ),
+    tags: idea.tags,
+    status: idea.status,
+    votes: idea.votes || [],
+    comments: [],
+    createdAt: idea.createdAt,
+    updatedAt: idea.updatedAt,
+  };
+}
+
 export default function IdeaDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuthStore();
+  const { currentWorkspace } = useAppStore();
   
   const [idea, setIdea] = useState<Idea | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -427,7 +457,7 @@ export default function IdeaDetailPage() {
             });
           }
         }}
-        initialData={idea as any}
+        initialData={toIdeaModalData(idea)}
       />
       )}
 
@@ -440,6 +470,7 @@ export default function IdeaDetailPage() {
              description: idea.content,
              project: idea.project,
           }}
+          workspaceId={currentWorkspace?._id}
         />
       )}
     </div>

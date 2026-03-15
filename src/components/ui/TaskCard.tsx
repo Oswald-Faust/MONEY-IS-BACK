@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import type { Task } from '@/types';
+import type { Task, User } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { CheckCircle, Clock, MoreHorizontal, Calendar, MessageSquare, Send } from 'lucide-react';
@@ -17,6 +17,9 @@ interface TaskCardProps {
 export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const assignees =
+    task.assignees?.filter((user): user is User => typeof user === 'object') ||
+    (typeof task.assignee === 'object' ? [task.assignee] : []);
 
   const priorityConfig = {
     important: {
@@ -111,6 +114,11 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
                     {task.projectName}
                   </span>
                 )}
+                {task.objectiveTitle && (
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400">
+                    {task.objectiveTitle}
+                  </span>
+                )}
             </div>
 
             {/* Title - Better typography */}
@@ -126,18 +134,9 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
             {/* Meta Info - Well spaced */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-dim">
               {/* Assignees Avatars */}
-              {((task.assignees?.length ?? 0) > 0 || task.assignee) && (
+              {assignees.length > 0 && (
                 <div className="flex -space-x-2 mr-2">
-                   {/* Normalizing assignees array */}
-                   {(() => {
-                      let users: any[] = [];
-                      if (task.assignees && task.assignees.length > 0) {
-                          users = task.assignees;
-                      } else if (task.assignee) {
-                          users = [task.assignee];
-                      }
-                      
-                      return users.slice(0, 3).map((u, i) => (
+                   {assignees.slice(0, 3).map((u, i) => (
                         <div key={i} className="w-6 h-6 rounded-full border-2 border-[#12121a] overflow-hidden" title={`${u.firstName} ${u.lastName}`}>
                             {u.avatar ? (
                                 <img src={u.avatar} alt={u.firstName} className="w-full h-full object-cover" />
@@ -147,12 +146,11 @@ export default function TaskCard({ task, onEdit, onComplete, onClick }: TaskCard
                                 </div>
                             )}
                         </div>
-                      )).concat(users.length > 3 ? [
+                      )).concat(assignees.length > 3 ? [
                         <div key="more" className="w-6 h-6 rounded-full border-2 border-[#12121a] bg-glass-hover flex items-center justify-center text-[8px] text-dim">
-                            +{users.length - 3}
+                            +{assignees.length - 3}
                         </div>
-                      ] : []);
-                   })()}
+                      ] : [])}
                 </div>
               )}
 

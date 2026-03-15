@@ -12,6 +12,8 @@ export { default as EmailTemplate } from './EmailTemplate';
 export { default as EmailConfig } from './EmailConfig';
 export { default as EmailCampaign } from './EmailCampaign';
 export { default as EmailSendLog } from './EmailSendLog';
+export { default as AIConversation } from './AIConversation';
+export { default as AIMessage } from './AIMessage';
 
 export type { IUser, UserRole } from './User';
 export type { IWorkspace } from './Workspace';
@@ -27,3 +29,5 @@ export type { IEmailTemplate } from './EmailTemplate';
 export type { IEmailConfig } from './EmailConfig';
 export type { IEmailCampaign } from './EmailCampaign';
 export type { IEmailSendLog } from './EmailSendLog';
+export type { IAIConversation } from './AIConversation';
+export type { IAIMessage } from './AIMessage';

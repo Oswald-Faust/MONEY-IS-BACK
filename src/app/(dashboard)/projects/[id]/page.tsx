@@ -47,7 +47,7 @@ export default function ProjectDetailPage() {
       
       try {
         // Fetch tasks
-        const tasksRes = await fetch('/api/tasks', {
+        const tasksRes = await fetch(`/api/tasks?project=${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const tasksData = await tasksRes.json();
@@ -56,7 +56,7 @@ export default function ProjectDetailPage() {
         }
 
         // Fetch objectives
-        const objectivesRes = await fetch('/api/objectives', {
+        const objectivesRes = await fetch(`/api/objectives?project=${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const objectivesData = await objectivesRes.json();
@@ -69,7 +69,7 @@ export default function ProjectDetailPage() {
     };
 
     fetchData();
-  }, [token, setTasks, setObjectives]);
+  }, [id, token, setTasks, setObjectives]);
 
   const project = useMemo(() => projects.find(p => p._id === id), [projects, id]);
   const projectTasks = useMemo(() => tasks.filter(t => isProjectMatch(t.project, id as string)), [tasks, id]);
@@ -98,7 +98,7 @@ export default function ProjectDetailPage() {
     
     // Check if owner (handle both string and populated object)
     if (!project.owner) return false;
-    const ownerId = typeof project.owner === 'string' ? project.owner : (project.owner as any)._id;
+    const ownerId = typeof project.owner === 'string' ? project.owner : project.owner._id;
     if (ownerId === user._id) return true;
 
     // Check if admin member

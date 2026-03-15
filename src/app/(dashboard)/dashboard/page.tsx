@@ -61,7 +61,7 @@ export default function DashboardPage() {
 
       const data = await response.json();
       if (data.success) {
-        updateTask(taskId, { status: newStatus });
+        updateTask(taskId, data.data);
         toast.success(newStatus === 'done' ? t.mockup.taskCompleted : 'Tâche rétablie');
       }
     } catch {
@@ -137,7 +137,7 @@ export default function DashboardPage() {
               <Sparkles className="w-6 h-6" />
             </div>
             <h1 className="text-3xl font-bold text-text-main tracking-tight">
-              {t.dashboard.welcome} {user?.firstName || 'Mathias'}
+              {t.dashboard.welcome} {user?.firstName || 'John'}
             </h1>
           </div>
           <p className="text-text-dim text-lg">
@@ -255,7 +255,7 @@ export default function DashboardPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {projects.slice(0, 4).map((project) => (
               <ProjectCard 
                 key={project._id} 

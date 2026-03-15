@@ -67,7 +67,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
       return;
     }
 
-    if (!formData.project) {
+    if (!formData.project && task?.source !== 'objective_checkpoint' && !task?.workspace) {
       toast.error('Veuillez sélectionner un projet');
       return;
     }
@@ -89,7 +89,8 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
-          project: formData.project,
+          project: task?.source === 'objective_checkpoint' ? undefined : formData.project || undefined,
+          workspace: task?.workspace,
           priority: formData.priority,
           dueDate: formData.dueDate || undefined,
           assignees: formData.assignees,
@@ -189,34 +190,40 @@ export default function EditTaskModal({ isOpen, onClose, task, onUpdate }: EditT
                   />
                 </div>
 
-                {/* Project Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
-                    <FolderKanban className="w-4 h-4" />
-                    Projet *
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {projects.map((project) => (
-                        <button
-                          key={project._id}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, project: project._id })}
-                          className={`
-                            flex items-center gap-2 p-3 rounded-xl border transition-all duration-200
-                            ${formData.project === project._id
-                              ? 'bg-glass-hover border-indigo-500/30'
-                              : 'bg-glass-bg border-glass-border hover:bg-glass-hover'}
-                          `}
-                        >
-                          <div
-                            className="w-3 h-3 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: project.color }}
-                          />
-                          <span className="text-sm text-main truncate">{project.name}</span>
-                        </button>
-                    ))}
+                {task?.source === 'objective_checkpoint' ? (
+                  <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-sm text-text-main">
+                    Cette tâche est synchronisée avec un checkpoint d&apos;objectif.
+                    {task.objectiveTitle ? ` Objectif source : ${task.objectiveTitle}.` : ''}
                   </div>
-                </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-text-muted mb-2 flex items-center gap-2">
+                      <FolderKanban className="w-4 h-4" />
+                      Projet *
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {projects.map((project) => (
+                          <button
+                            key={project._id}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, project: project._id })}
+                            className={`
+                              flex items-center gap-2 p-3 rounded-xl border transition-all duration-200
+                              ${formData.project === project._id
+                                ? 'bg-glass-hover border-indigo-500/30'
+                                : 'bg-glass-bg border-glass-border hover:bg-glass-hover'}
+                            `}
+                          >
+                            <div
+                              className="w-3 h-3 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: project.color }}
+                            />
+                            <span className="text-sm text-main truncate">{project.name}</span>
+                          </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Priority */}
                 <div>

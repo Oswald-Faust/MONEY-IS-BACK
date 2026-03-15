@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   },
   description: "Gérez votre équipe, vos tâches, vos objectifs et bien plus sur une seule plateforme unifiée. L'OS de votre réussite.",
   keywords: ["gestion de projet", "saas", "productivity", "tâches", "collaboration", "Edwin", "workspace", "tout-en-un"],
-  authors: [{ name: "Mathias MERCIER" }],
-  creator: "Mathias MERCIER",
+  authors: [{ name: "John DOE" }],
+  creator: "John DOE",
   publisher: "Edwin Inc.",
   robots: {
     index: true,

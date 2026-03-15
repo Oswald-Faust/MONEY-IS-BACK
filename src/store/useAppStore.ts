@@ -65,9 +65,11 @@ interface AppState {
   // UI State
   sidebarCollapsed: boolean;
   isMobileMenuOpen: boolean;
+  isAiAssistantOpen: boolean;
   toggleSidebar: () => void;
   setMobileMenuOpen: (open: boolean) => void;
-  activeView: 'dashboard' | 'calendar' | 'tasks' | 'projects' | 'routines' | 'objectives' | 'ideas' | 'ids' | 'drive';
+  setAiAssistantOpen: (open: boolean) => void;
+  activeView: 'dashboard' | 'calendar' | 'tasks' | 'projects' | 'routines' | 'objectives' | 'ideas' | 'ids' | 'drive' | 'ai';
   setActiveView: (view: AppState['activeView']) => void;
   
   // Modals
@@ -196,8 +198,10 @@ export const useAppStore = create<AppState>()(
       // UI State
       sidebarCollapsed: false,
       isMobileMenuOpen: false,
+      isAiAssistantOpen: false,
       toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
       setMobileMenuOpen: (open) => set({ isMobileMenuOpen: open }),
+      setAiAssistantOpen: (open) => set({ isAiAssistantOpen: open }),
       activeView: 'dashboard',
       setActiveView: (view) => set({ activeView: view }),
       

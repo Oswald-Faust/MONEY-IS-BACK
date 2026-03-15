@@ -18,7 +18,7 @@ export default function ObjectivesPage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState<'all' | 'high' | 'medium' | 'low'>('all');
-  const [editingObjective, setEditingObjective] = useState<any>(null);
+  const [editingObjective, setEditingObjective] = useState<React.ComponentProps<typeof CreateObjectiveModal>['initialData']>(null);
 
   const { token } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
@@ -108,7 +108,7 @@ export default function ObjectivesPage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-text-main flex items-center gap-3">
               {!projectId && <Target className="w-8 h-8 text-indigo-400" />}
-              {selectedProject ? `Objectifs - ${selectedProject.name}` : 'Objectifs Globaux'}
+              {selectedProject ? `Objectifs - ${selectedProject.name}` : 'Objectifs'}
             </h1>
             <p className="text-text-dim mt-1">
               {filteredObjectives.length} objectifs {selectedProject ? 'pour ce projet' : 'au total'}

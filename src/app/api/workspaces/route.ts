@@ -5,6 +5,19 @@ import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 import { PLAN_LIMITS } from '@/lib/limits';
 
+type SubscriptionPlan = 'starter' | 'pro' | 'team' | 'business' | 'enterprise';
+type SubscriptionInterval = 'month' | 'year';
+
+function normalizeSubscriptionPlan(value: unknown): SubscriptionPlan | undefined {
+  return ['starter', 'pro', 'team', 'business', 'enterprise'].includes(String(value))
+    ? (value as SubscriptionPlan)
+    : undefined;
+}
+
+function normalizeSubscriptionInterval(value: unknown): SubscriptionInterval | undefined {
+  return value === 'month' || value === 'year' ? value : undefined;
+}
+
 // GET /api/workspaces - Récupérer les workspaces de l'utilisateur
 export async function GET(request: NextRequest) {
   try {
@@ -50,8 +63,9 @@ export async function GET(request: NextRequest) {
             ws.subscriptionId = subId;
             customerId = session.customer as string;
             ws.stripeCustomerId = customerId;
-            if (session.metadata.planId) {
-              ws.subscriptionPlan = session.metadata.planId as any;
+            const syncedPlan = normalizeSubscriptionPlan(session.metadata.planId);
+            if (syncedPlan) {
+              ws.subscriptionPlan = syncedPlan;
             }
           }
         } catch (err) {
@@ -83,16 +97,21 @@ export async function GET(request: NextRequest) {
             limit: 1,
           });
           if (subscriptions.data.length > 0) {
-            const activeSub = subscriptions.data[0] as any;
+            const activeSub = subscriptions.data[0];
             subId = activeSub.id;
             ws.subscriptionId = subId;
             ws.subscriptionStatus = activeSub.status;
-            if (activeSub.current_period_end) {
-              ws.subscriptionEnd = new Date(activeSub.current_period_end * 1000);
+            const activeSubPeriodEnd = 'current_period_end' in activeSub ? activeSub.current_period_end : undefined;
+            if (typeof activeSubPeriodEnd === 'number') {
+              ws.subscriptionEnd = new Date(activeSubPeriodEnd * 1000);
             }
-            ws.subscriptionInterval = activeSub.items.data[0].plan.interval as any;
-            if (activeSub.metadata?.planId) {
-              ws.subscriptionPlan = activeSub.metadata.planId;
+            const activeSubInterval = normalizeSubscriptionInterval(activeSub.items.data[0]?.plan?.interval);
+            if (activeSubInterval) {
+              ws.subscriptionInterval = activeSubInterval;
+            }
+            const syncedPlan = normalizeSubscriptionPlan(activeSub.metadata?.planId);
+            if (syncedPlan) {
+              ws.subscriptionPlan = syncedPlan;
             }
           }
         } catch (err) {
@@ -103,16 +122,22 @@ export async function GET(request: NextRequest) {
       // If we have a subId, ensure we have the latest info
       if (subId) {
         try {
-          const subscription = await stripe.subscriptions.retrieve(subId) as any;
+          const subscription = await stripe.subscriptions.retrieve(subId);
           if (subscription) {
             ws.subscriptionStatus = subscription.status;
-            if (subscription.current_period_end) {
-              ws.subscriptionEnd = new Date(subscription.current_period_end * 1000);
+            const subscriptionPeriodEnd =
+              'current_period_end' in subscription ? subscription.current_period_end : undefined;
+            if (typeof subscriptionPeriodEnd === 'number') {
+              ws.subscriptionEnd = new Date(subscriptionPeriodEnd * 1000);
             }
-            ws.subscriptionInterval = subscription.items.data[0].plan.interval;
+            const subscriptionInterval = normalizeSubscriptionInterval(subscription.items.data[0]?.plan?.interval);
+            if (subscriptionInterval) {
+              ws.subscriptionInterval = subscriptionInterval;
+            }
             // Force sync plan from metadata if available
-            if (subscription.metadata?.planId) {
-              ws.subscriptionPlan = subscription.metadata.planId;
+            const syncedPlan = normalizeSubscriptionPlan(subscription.metadata?.planId);
+            if (syncedPlan) {
+              ws.subscriptionPlan = syncedPlan;
             }
             await ws.save();
           }
@@ -160,7 +185,7 @@ export async function POST(request: NextRequest) {
     const userId = decoded.userId;
 
     const body = await request.json();
-    const { name, description, useCase, theme, icon, image, defaultProjectColor, invitedEmails } = body;
+    const { name, description, useCase, theme, icon, image, defaultProjectColor, invitedEmails, aiProfile } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -213,7 +238,15 @@ export async function POST(request: NextRequest) {
         icon: icon || 'Briefcase',
         theme: theme || 'dark',
         image: image || undefined,
-      }
+      },
+      aiProfile: aiProfile ? {
+        businessSummary: aiProfile.businessSummary || '',
+        primaryGoals: Array.isArray(aiProfile.primaryGoals) ? aiProfile.primaryGoals : [],
+        teamSummary: aiProfile.teamSummary || '',
+        preferredTone: aiProfile.preferredTone || 'coach',
+        onboardingCompleted: Boolean(aiProfile.onboardingCompleted),
+        whatsappEnabled: Boolean(aiProfile.whatsappEnabled),
+      } : undefined,
     });
 
     // Mettre à jour l'utilisateur pour ajouter le workspace

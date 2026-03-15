@@ -4,83 +4,198 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Edwin** (branded as "Money Is Back") is a SaaS productivity hub — workspaces, projects, tasks, routines, objectives, ideas, a file drive, a messaging system, and a secure credential vault. Target audience is French-speaking (primary) with English support. Pricing is in euros.
+**Edwin** (branded as "Money Is Back") is a French-first SaaS productivity hub: workspaces, projects, tasks, routines, objectives, ideas, file drive, messaging system, and secure credential vault. Pricing in euros.
 
-The `busted-data/` sibling directory is a reference snapshot of an earlier state — not the active codebase.
+The `busted-data/` sibling directory is a reference snapshot — not the active codebase.
 
 ## Development Commands
 
 ```bash
-npm run dev      # Start dev server at http://localhost:3000
+npm run dev      # Dev server at http://localhost:3000
 npm run build    # Production build
 npm run lint     # ESLint
 
-node scripts/create-admin.mjs  # Create admin@moneyisback.com in MongoDB
+node scripts/create-admin.mjs  # Create admin@moneyisback.com / AdminPassword123! in MongoDB
 ```
 
-No test framework is configured.
+No test framework configured.
 
-## Architecture
+## Stack
 
-### Stack
 - **Next.js 16** (App Router) + **React 19** + **TypeScript 5** (strict)
-- **Tailwind CSS v4** (via `@tailwindcss/postcss`, not the classic config file)
-- **MongoDB + Mongoose 9** — cached connection in `src/lib/mongodb.ts`
-- **Zustand 5** with `persist` middleware for all client state
-- **Stripe** — subscriptions, checkout sessions, webhooks
+- **Tailwind CSS v4** via `@tailwindcss/postcss` — no `tailwind.config.js`, uses `@theme` directive in CSS
+- **MongoDB + Mongoose 9** — cached connection at `src/lib/mongodb.ts` via global variable
+- **Zustand 5** with `persist` middleware — two stores, both in localStorage
+- **Stripe** — ad-hoc pricing (no Stripe Products), checkout sessions, webhooks
 - **Vercel Blob** — Drive file storage
-- Custom JWT auth (NOT next-auth despite the package being installed)
+- **Custom JWT auth** — `next-auth` is installed but NOT used
+- **Nodemailer** — SMTP email with configurable templates (Hostinger SMTP default)
+- **Framer Motion** — animations on landing page
+- **lucide-react** — icons throughout the app
 
-### Route Groups
+## Route Groups
 
-| Group | Path | Purpose |
+| Group | Paths | Notes |
 |---|---|---|
-| `(auth)` | `/login`, `/register`, `/onboarding`, `/join/[token]` | Unauthenticated pages |
-| `(dashboard)` | `/dashboard`, `/tasks/[id]`, `/projects/[id]`, `/drive`, `/secure-ids`, `/settings`, etc. | Main app, wrapped in `AuthGuard` |
-| `(admin)` | `/admin/**` | Admin panel |
-| `(public)` | `/`, `/pricing`, `/about`, `/blog`, etc. | Landing & marketing pages |
+| `(auth)` | `/login`, `/register`, `/onboarding`, `/join/[token]`, `/auth/google/*` | Unauthenticated |
+| `(dashboard)` | `/dashboard`, `/projects/[id]`, `/tasks`, `/objectives/[id]`, `/ideas`, `/routines`, `/calendar`, `/messages`, `/drive`, `/secure-ids`, `/invite`, `/upgrade`, `/settings` | Wrapped in `AuthGuard` |
+| `(admin)` | `/admin/dashboard`, `/admin/users/[id]`, `/admin/workspaces/[id]`, `/admin/subscriptions`, `/admin/logs`, `/admin/access` | role === 'admin' only |
+| `(public)` | `/`, `/pricing`, `/about`, `/blog`, `/docs`, `/contact`, `/partners`, `/careers`, `/help`, `/community`, `/status`, `/api-docs` | Landing & marketing |
 
-### Authentication Pattern
-- Middleware (`src/middleware.ts`) is **intentionally disabled** — it passes all requests through.
-- Protection is handled client-side by the `AuthGuard` component in the `(dashboard)` layout.
-- JWT tokens are stored in Zustand (`useAuthStore`, persisted to `localStorage` as `auth-storage`).
-- All API routes verify `Authorization: Bearer <token>` via `src/lib/auth.ts` → `verifyAuth()`.
+Landing page components are under `src/app/test-3/components/`.
 
-### State Management
+## Authentication
+
+- `src/middleware.ts` is **intentionally disabled** (passes all through)
+- Client-side protection via `AuthGuard` component in the `(dashboard)` layout
+- JWT stored in Zustand `useAuthStore` → persisted to localStorage as `auth-storage`
+- API routes verify `Authorization: Bearer <token>` via `src/lib/auth.ts` → `verifyAuth()`
+- JWT payload: `{ userId, email, role }`, 7-day expiry, signed with `JWT_SECRET`
+- Auth cookie `auth-token` also set (non-httpOnly)
+- Google OAuth available via `/api/auth/google/start` → `/api/auth/google/callback`
+
+## State Management
+
 Two Zustand stores, both persisted:
-- `useAuthStore` → `auth-storage` (user, token, isAuthenticated)
-- `useAppStore` → `project-hub-storage` (workspaces, projects, tasks, routines, objectives, drive files, modal state, etc.)
 
-### Data Models (`src/models/`)
-Key relationships: `User` → `Workspace` → `Project` → `Task`. Notable models:
-- **SecureId** — AES-256-CBC encrypted credential vault (`src/lib/encryption.ts`)
-- **SystemLog** — admin audit log
-- **GlobalSettings** — admin-controlled feature flags
+**`useAuthStore`** (`auth-storage`):
+- `user`, `token`, `isAuthenticated`, `isLoading`
+- Methods: `setAuth()`, `logout()`, `updateUser()`, `setLoading()`
 
-### Subscription Plans (`src/lib/limits.ts`)
-`starter` (free) → `pro` → `team` → `enterprise`. Limits enforced on project count, workspace count, members, and storage.
+**`useAppStore`** (`project-hub-storage`):
+- All domain data: `workspaces`, `currentWorkspace`, `projects`, `currentProject`, `tasks`, `routines`, `objectives`, `ideas`, `driveFiles`, `driveFolders`
+- UI state: `sidebarCollapsed`, `isMobileMenuOpen`, `activeView`
+- Modal booleans: `isProjectModalOpen`, `isTaskModalOpen`, `isRoutineModalOpen`, `isObjectiveModalOpen`, `isIdeaModalOpen`, `isWorkspaceModalOpen`, `isUploadModalOpen`, `isCreateFolderModalOpen`, `isSearchModalOpen`, `isCreateUserModalOpen` + their related IDs
+- Methods: full CRUD for each entity (set, add, update, delete)
+- Modal state is NOT persisted (only domain data + UI prefs are)
 
-### i18n
-Custom React context in `src/lib/i18n/`. Translations in `src/lib/i18n/translations/en.ts` and `fr.ts`. Comments and variable names in the codebase are often in French.
+## Data Models (`src/models/`)
+
+Relationship chain: `User` → `Workspace` → `Project` → `Task`
+
+All models use `mongoose.models` caching pattern to prevent re-registration.
+
+| Model | Key Fields |
+|---|---|
+| `User` | firstName, lastName, email, password (bcrypt), authProvider (password\|google), googleId, avatar, profileColor, role (user\|admin\|moderator\|support), workspaces[], preferences{theme,language,notifications}, driveAccess |
+| `Workspace` | name, owner, members[{user, role}], useCase, stripeCustomerId, subscriptionId, subscriptionPlan (starter\|pro\|team\|business\|enterprise), subscriptionStatus, subscriptionInterval, subscriptionEnd |
+| `Project` | name, color, icon, workspace, owner, members[{user, role}], securePassword (bcrypt optional), status (active\|archived\|paused), settings.isPublic |
+| `Task` | title, project, projectName, projectColor, assignees[], creator, priority (important\|less_important\|waiting), status (todo\|in_progress\|review\|done), dueDate, subtasks[], attachments[], comments[], order |
+| `Routine` | title, project, creator, assignee, days{mon-sun booleans}, time (HH:MM), duration, isActive, completedDates[] |
+| `Objective` | title, project, workspace, creator, assignees[], targetDate, progress (0-100), checkpoints[], status (not_started\|in_progress\|completed\|cancelled), priority (low\|medium\|high) |
+| `Idea` | title, content, project, workspace, creator, assignees[], tags[], status (raw\|standby\|in_progress\|implemented\|archived), votes[], comments[] |
+| `SecureId` | title, link, username, password (AES-256-CBC, select:false), notes, category, project, owner, sharedWith[] |
+| `DriveFile` | name, type (MIME), size, url (Vercel Blob), project, folderId, owner |
+| `DriveFolder` | name, project, parentId (hierarchical), owner |
+| `Message` | sender, recipient, conversation, content, attachments[{type: task\|objective\|file\|folder, id, name}], read, readBy[], deletedForSender, deletedForRecipient |
+| `Conversation` | name, type: group, workspace, creator, members[{user, role: admin\|member}], lastMessage |
+| `Invitation` | email, workspace, role, token (unique), inviter, status (pending\|accepted\|expired), expiresAt, projectIds[] |
+| `GlobalSettings` | permissions{createProject, deleteProject, inviteMembers, driveAccess, allowedFileTypes[]} |
+| `SystemLog` | user, action, details, status (info\|warning\|error\|success), ip |
+| `EmailTemplate` | name, subject, body (HTML), type, automationKey (welcome\|payment\|invitation…), variables[] |
+| `EmailConfig` | smtp{host, port, secure, user, pass, from}, automations{onRegister, onPayment, onInvitation…} |
+| `EmailCampaign` | name, subject, body, status (draft\|sending\|sent\|failed), audience{type, customEmails}, stats{total, sent, failed} |
+| `EmailSendLog` | to, subject, status, category, templateId, campaignId, userId, errorMessage, sentAt |
+
+### Security
+
+- **Passwords:** bcrypt salt 12 — user passwords + optional project `securePassword`
+- **SecureId vault:** AES-256-CBC via `src/lib/encryption.ts`, key from `ENCRYPTION_KEY` (32-byte hex), stored as `iv:encryptedText`
+- **Access roles:** workspace/project members are admin|editor|visitor
+- **File upload:** 50MB max, type whitelist configurable in `GlobalSettings`
+
+## API Routes (`src/app/api/`)
+
+All routes return `{ success, data/error }`. Auth via `Authorization: Bearer <token>`.
+
+**Auth:** `/auth/login` (POST), `/auth/register` (POST), `/auth/me` (GET), `/auth/change-password` (POST), `/auth/verify-password` (POST), `/auth/google/start`, `/auth/google/callback`
+
+**CRUD** (GET+POST on collection, GET+PUT+DELETE on `/[id]`): `/workspaces`, `/projects`, `/tasks`, `/routines`, `/objectives`, `/ideas`, `/secure-ids`, `/drive/files`, `/drive/folders`, `/messages`, `/conversations`
+
+**Members:** `POST /workspaces/members`, `POST /projects/members`, `GET/POST /conversations/[id]/members`
+
+**Messaging:** `GET/POST /messages` (direct), `GET /messages/contacts`, `POST /messages/read`, `GET/POST /conversations/[id]/messages`
+
+**Drive:** `POST /upload` — multipart form, stores to Vercel Blob, checks `GlobalSettings.permissions.driveAccess`
+
+**Stripe:** `POST /stripe/checkout` (creates session, ad-hoc pricing), `POST /stripe/webhook`
+
+**Admin only:** `/admin/stats`, `/admin/users`, `/admin/workspaces`, `/admin/subscriptions`, `/admin/logs`, `/admin/settings`, `/admin/projects/access`, `/admin/emails/*` (campaigns, templates, logs, analytics, test, settings)
+
+**Other:** `GET /search` (global cross-resource), `POST /contact`, `POST /debug/seed-users`
+
+## Subscription Plans (`src/lib/limits.ts`)
+
+| Plan | maxProjects | maxWorkspaces | maxMembers | storageGB | maxIds |
+|---|---|---|---|---|---|
+| starter (free) | 1 | 1 | 3 | 2 | 5 |
+| pro | ∞ | 1 | 5 | ∞ | ∞ |
+| team | ∞ | 4 | 10 | ∞ | ∞ |
+| business | alias team | | | | |
+| enterprise | ∞ | ∞ | ∞ | ∞ | ∞ |
+
+**Pricing (ad-hoc Stripe, euros):**
+- Pro: €9.99/mois ou €89.90/an
+- Team: €29.99/mois ou €249.90/an
+
+**Webhook events handled:** `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
 
 ## Design System
-- Dark-first, with light mode via `next-themes`.
-- CSS custom properties defined in `src/app/globals.css`: `--bg-primary/secondary/tertiary`, `--text-main/dim/muted`, `--glass-bg/border`, `--accent-primary` (`#6366f1` indigo).
-- Landing page accent: `#00FFB2` (cyan-green neon).
-- Glass morphism aesthetic; `Inter` font.
-- Path alias: `@/*` → `./src/*`.
+
+**Dark-first** with `next-themes` light mode toggle.
+
+**CSS variables** (`src/app/globals.css`):
+- `--bg-primary/secondary/tertiary` — backgrounds
+- `--text-main/dim/muted` — text hierarchy
+- `--glass-bg / --glass-border` — glass morphism (very subtle in dark mode)
+- `--accent-primary: #6366f1` (indigo) — accent app
+- `--color-neon-cyan: #00FFB2` — landing page accent uniquement
+- `--sidebar-w: 280px / --sidebar-coll: 80px`
+
+**Font:** Inter (Google Fonts). **Path alias:** `@/*` → `./src/*`. **Icons:** lucide-react exclusively.
+
+## i18n
+
+Custom React context at `src/lib/i18n/`. Default locale: **fr** (French). Stored in `mib-locale` localStorage key.
+
+```tsx
+const { locale, setLocale, t } = useTranslation();
+// t.common.login, t.dashboard.*, t.pricing.*, etc.
+```
+
+Translation files: `src/lib/i18n/translations/fr.ts` and `en.ts`. Comments and variable names in the codebase are often in French.
+
+## Email System (`src/lib/mail.ts`)
+
+- Nodemailer SMTP (configurable via `EmailConfig` model, default Hostinger port 465)
+- Templates stored in MongoDB (`EmailTemplate`), rendered with variable interpolation
+- All sends logged to `EmailSendLog`
+- Automation triggers: `onRegister`, `onPayment`, `onWorkspaceAction`, `onInvitation`, `onWorkspaceWelcome`
+- Campaign audience types: `all_users`, `admins`, `notifications_enabled`, `recent_users`, `custom_emails`
+
+## Key Utility Files
+
+| File | Purpose |
+|---|---|
+| `src/lib/mongodb.ts` | Cached Mongoose connection (global variable pattern) |
+| `src/lib/auth.ts` | `verifyAuth(req)` → `{ userId, email, role }` |
+| `src/lib/encryption.ts` | AES-256-CBC encrypt/decrypt for SecureId vault |
+| `src/lib/limits.ts` | `PLAN_LIMITS` object + `PlanName` type |
+| `src/lib/stripe.ts` | Initialized Stripe instance |
+| `src/lib/mail.ts` | Email sending + template rendering + logging |
+| `src/lib/i18n/` | React i18n context + fr/en translation files |
 
 ## Required Environment Variables
 
 ```
 MONGODB_URI
 JWT_SECRET
-ENCRYPTION_KEY          # 32-byte hex, for SecureId AES-256-CBC
-BLOB_READ_WRITE_TOKEN   # Vercel Blob
+ENCRYPTION_KEY              # 32-byte hex for AES-256-CBC
+BLOB_READ_WRITE_TOKEN       # Vercel Blob
 NEXT_PUBLIC_APP_URL
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
-STRIPE_PRICE_PRO_MONTHLY / YEARLY
+STRIPE_PRICE_PRO_MONTHLY / YEARLY      # référencés mais pricing ad-hoc utilisé
 STRIPE_PRICE_BUSINESS_MONTHLY / YEARLY
 ```

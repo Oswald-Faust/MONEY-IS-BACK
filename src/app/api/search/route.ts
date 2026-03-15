@@ -23,6 +23,9 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
+    const workspaceProjects = await Project.find({ workspace: workspaceId }).select('_id').lean();
+    const workspaceProjectIds = workspaceProjects.map((project: any) => project._id);
+
     // Escape special characters for regex
     const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const searchRegex = new RegExp(escapedQuery, 'i');
@@ -40,9 +43,19 @@ export async function GET(req: NextRequest) {
 
       // Tasks
       Task.find({
-        $or: [
-          { title: searchRegex },
-          { description: searchRegex }
+        $and: [
+          {
+            $or: [
+              { title: searchRegex },
+              { description: searchRegex }
+            ]
+          },
+          {
+            $or: [
+              { workspace: workspaceId },
+              { project: { $in: workspaceProjectIds } }
+            ]
+          }
         ]
       })
       .populate('project', 'name color')
@@ -90,7 +103,7 @@ export async function GET(req: NextRequest) {
         subtitle: (t.project as any)?.name ? `Dans ${(t.project as any).name}` : 'Tâche',
         color: (t.project as any)?.color || '#6366f1',
         icon: 'check-square',
-        href: `/projects/${t.project._id}?taskId=${t._id}`,
+        href: (t.project as any)?._id ? `/projects/${(t.project as any)._id}?taskId=${t._id}` : `/tasks/${t._id}`,
         status: t.status,
         priority: t.priority
       });
@@ -104,7 +117,7 @@ export async function GET(req: NextRequest) {
         subtitle: 'Objectif',
         color: '#10b981', // Emerald
         icon: 'target',
-        href: '/objectives'
+        href: `/objectives/${o._id}`
       });
     });
 

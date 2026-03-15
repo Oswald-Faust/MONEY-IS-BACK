@@ -42,7 +42,7 @@ export default function TasksPage() {
 
       const data = await response.json();
       if (data.success) {
-        updateTask(taskId, { status: newStatus });
+        updateTask(taskId, data.data);
         toast.success(newStatus === 'done' ? t.tasksPage.toasts.completed : t.tasksPage.toasts.restored);
       }
     } catch {

@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Target, CheckCircle2, Circle, MoreHorizontal, Send } from 'lucide-react';
-import type { Objective } from '@/types';
+import type { Objective, User } from '@/types';
 import { useAppStore, useAuthStore } from '@/store';
 import { useRouter } from 'next/navigation';
 
@@ -15,6 +15,9 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
   const { updateObjective } = useAppStore();
   const { token } = useAuthStore();
   const router = useRouter();
+  const assignees =
+    objective.assignees?.filter((user): user is User => typeof user === 'object') ||
+    (typeof objective.assignee === 'object' ? [objective.assignee] : []);
 
   const toggleCheckpoint = async (checkpointId: string) => {
     if (!token) return;
@@ -34,7 +37,7 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
     });
 
     try {
-      await fetch(`/api/objectives?id=${objective._id}`, {
+      const response = await fetch(`/api/objectives?id=${objective._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -45,6 +48,10 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
           progress
         }),
       });
+      const data = await response.json();
+      if (data.success) {
+        updateObjective(objective._id, data.data);
+      }
     } catch {
       // Revert on error (optional, but good practice)
       console.error('Failed to update objective');
@@ -130,18 +137,9 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
       <div className="space-y-3 pt-4 border-t border-glass-border">
          <div className="flex items-center justify-between">
             {/* Assignees Avatars */}
-            {((objective.assignees?.length ?? 0) > 0 || objective.assignee) && (
+            {assignees.length > 0 && (
                 <div className="flex -space-x-2 mr-2">
-                   {/* Normalizing assignees array */}
-                   {(() => {
-                      let users: any[] = [];
-                      if (objective.assignees && objective.assignees.length > 0) {
-                          users = objective.assignees;
-                      } else if (objective.assignee) {
-                          users = [objective.assignee];
-                      }
-                      
-                      return users.slice(0, 3).map((u, i) => (
+                   {assignees.slice(0, 3).map((u, i) => (
                         <div key={i} className="w-6 h-6 rounded-full border-2 border-[#12121a] overflow-hidden" title={`${u.firstName} ${u.lastName}`}>
                             {u.avatar ? (
                                 <img src={u.avatar} alt={u.firstName} className="w-full h-full object-cover" />
@@ -151,12 +149,11 @@ export default function ObjectiveCard({ objective }: ObjectiveCardProps) {
                                 </div>
                             )}
                         </div>
-                      )).concat(users.length > 3 ? [
+                      )).concat(assignees.length > 3 ? [
                         <div key="more" className="w-6 h-6 rounded-full border-2 border-[#12121a] bg-glass-hover flex items-center justify-center text-[8px] text-dim">
-                            +{users.length - 3}
+                            +{assignees.length - 3}
                         </div>
-                      ] : []);
-                   })()}
+                      ] : [])}
                 </div>
             )}
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider ml-auto">

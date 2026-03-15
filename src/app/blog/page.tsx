@@ -6,12 +6,9 @@ import { LandingFooter } from '@/components/layout/LandingFooter';
 import { 
   Search, 
   ArrowRight,
-  ChevronRight,
-  Clock,
-  User
+  Clock
 } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 const posts = [
   {
@@ -97,12 +94,12 @@ export default function BlogPage() {
                    Le manifeste pour un travail sans distractions
                  </h2>
                  <p className="text-zinc-400 text-lg mb-10 font-light leading-relaxed">
-                   Pourquoi nous croyons que l'attention est la ressource la plus précieuse du 21e siècle et comment nous avons conçu Edwin pour la protéger.
+                   Pourquoi nous croyons que l&apos;attention est la ressource la plus précieuse du 21e siècle et comment nous avons conçu Edwin pour la protéger.
                  </p>
                  <div className="flex items-center gap-4">
                    <div className="w-12 h-12 rounded-full bg-zinc-800" />
                    <div>
-                     <p className="font-medium">Mathias Mercier</p>
+                     <p className="font-medium">John Doe</p>
                      <p className="text-sm text-zinc-500">Founder & CEO</p>
                    </div>
                  </div>

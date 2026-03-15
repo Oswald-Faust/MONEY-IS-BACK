@@ -23,7 +23,7 @@ export interface Project {
   color: string;
   icon?: string;
   workspace: string;
-  owner: string;
+  owner: string | User;
   members: ProjectMember[];
   securePassword?: string;
   status: 'active' | 'archived' | 'paused';
@@ -41,14 +41,20 @@ export interface ProjectMember {
 
 export type TaskPriority = 'important' | 'less_important' | 'waiting';
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
+export type TaskSource = 'manual' | 'objective_checkpoint';
 
 export interface Task {
   _id: string;
   title: string;
   description?: string;
-  project: string;
+  workspace?: string;
+  project?: string | Project | null;
   projectName?: string;
   projectColor?: string;
+  objective?: string | { _id: string; title: string };
+  objectiveTitle?: string;
+  objectiveCheckpointId?: string;
+  source?: TaskSource;
   assignee?: string | User;
   assignees?: (string | User)[];
   creator: string | User;
@@ -136,8 +142,18 @@ export interface Workspace {
   subscriptionInterval?: 'month' | 'year';
   subscriptionEnd?: string;
   stripeCustomerId?: string;
+  aiProfile?: WorkspaceAIProfile;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface WorkspaceAIProfile {
+  businessSummary?: string;
+  primaryGoals?: string[];
+  teamSummary?: string;
+  preferredTone?: 'coach' | 'direct' | 'friendly' | 'executive';
+  onboardingCompleted?: boolean;
+  whatsappEnabled?: boolean;
 }
 
 export interface WorkspaceMember {
@@ -150,10 +166,11 @@ export interface Objective {
   _id: string;
   title: string;
   description?: string;
-  project?: string;
+  workspace?: string;
+  project?: string | Project | null;
   projectName?: string;
   projectColor?: string;
-  creator: string;
+  creator: string | User;
   assignee?: string | User;
   assignees?: (string | User)[];
   targetDate?: string;
@@ -169,6 +186,11 @@ export interface ObjectiveCheckpoint {
   id: string;
   title: string;
   completed: boolean;
+  priority?: TaskPriority;
+  dueDate?: string;
+  assignee?: string | User;
+  assignees?: (string | User)[];
+  task?: string;
 }
 
 export interface KeyResult {
@@ -302,4 +324,62 @@ export interface Conversation {
   unreadCount?: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AIConversation {
+  _id: string;
+  title: string;
+  workspace: string;
+  creator: string;
+  source: 'panel' | 'page' | 'onboarding' | 'whatsapp';
+  archived?: boolean;
+  lastMessage?: {
+    role: 'user' | 'assistant';
+    content: string;
+    createdAt: string;
+    provider?: 'openai' | 'gemini';
+  };
+  context?: {
+    route?: string;
+    project?: string;
+    objective?: string;
+    task?: string;
+    idea?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AIChatMessage {
+  _id: string;
+  conversation: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  provider?: 'openai' | 'gemini';
+  model?: string;
+  status?: 'completed' | 'error';
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AISuggestedActionKind =
+  | 'open_objective_generator'
+  | 'open_task_modal'
+  | 'open_objectives'
+  | 'open_tasks'
+  | 'open_projects'
+  | 'open_project';
+
+export interface AISuggestedAction {
+  label: string;
+  kind: AISuggestedActionKind;
+  projectId?: string;
+}
+
+export interface AIExecutedAction {
+  kind: 'create_project';
+  status: 'created' | 'already_exists' | 'failed';
+  project?: Project;
+  error?: string;
 }

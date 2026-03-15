@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Project from '@/models/Project';
-import User from '@/models/User';
-import GlobalSettings from '@/models/GlobalSettings';
 import Workspace from '@/models/Workspace';
 import { verifyAuth } from '@/lib/auth';
+import { createProjectForWorkspace } from '@/lib/projects/create-project';
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,13 +33,17 @@ export async function GET(request: NextRequest) {
 
     const isWorkspaceMember =
       workspace.owner.toString() === auth.userId ||
-      workspace.members.some((m: any) => m.user.toString() === auth.userId);
+      workspace.members.some((member) => member.user.toString() === auth.userId);
 
     if (!isWorkspaceMember && auth.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Accès refusé' }, { status: 403 });
     }
 
-    const query: any = {
+    const query: {
+      workspace: string;
+      status?: string;
+      $or?: Array<{ owner: string } | { 'members.user': string }>;
+    } = {
       workspace: workspaceId,
       ...(auth.role === 'admin'
         ? {}
@@ -58,10 +65,13 @@ export async function GET(request: NextRequest) {
       success: true,
       data: projects,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Get projects error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur lors de la récupération des projets' },
+      {
+        success: false,
+        error: getErrorMessage(error, 'Erreur lors de la récupération des projets'),
+      },
       { status: 500 }
     );
   }
@@ -79,17 +89,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, description, color, icon, workspace } = body;
 
-    // Check Global Permissions
-    if (auth.role !== 'admin') {
-      const settings = await GlobalSettings.findOne();
-      if (settings && settings.permissions.createProject === false) {
-        return NextResponse.json(
-          { success: false, error: 'La création de projet est temporairement désactivée pour les utilisateurs standard.' },
-          { status: 403 }
-        );
-      }
-    }
-
     if (!name || !workspace) {
       return NextResponse.json(
         { success: false, error: 'Nom et workspace requis' },
@@ -97,51 +96,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check Plan Limits
-    const Workspace = (await import('@/models/Workspace')).default;
-    const { PLAN_LIMITS } = await import('@/lib/limits');
-    
-    const ws = await Workspace.findById(workspace);
-    if (!ws) {
-      return NextResponse.json({ success: false, error: 'Workspace non trouvé' }, { status: 404 });
-    }
-
-    const projectCount = await Project.countDocuments({ workspace });
-    const limit = PLAN_LIMITS[ws.subscriptionPlan as keyof typeof PLAN_LIMITS]?.maxProjects || 0;
-
-    if (projectCount >= limit) {
-      return NextResponse.json({ 
-        success: false, 
-        error: `Limite de projets atteinte pour le plan ${ws.subscriptionPlan}. Veuillez passer au plan supérieur.` 
-      }, { status: 403 });
-    }
-
-    const project = await Project.create({
+    const { project } = await createProjectForWorkspace({
+      userId: auth.userId,
+      role: auth.role,
+      workspaceId: workspace,
       name,
       description,
-      color: color || '#6366f1',
-      icon: icon || 'folder',
-      workspace,
-      owner: auth.userId,
-      members: [{ user: auth.userId, role: 'admin', joinedAt: new Date() }],
-      status: 'active',
-      securePassword: body.securePassword || undefined,
-      tasksCount: 0,
-      completedTasksCount: 0,
+      color,
+      icon,
+      securePassword: body.securePassword,
     });
-
-    await project.populate('owner', 'firstName lastName avatar');
 
     return NextResponse.json({
       success: true,
       data: project,
       message: 'Projet créé avec succès',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Create project error:', error);
+    const message = getErrorMessage(error, 'Erreur lors de la création du projet');
+    const status =
+      message === 'Nom du projet requis'
+        ? 400
+        : message === 'Workspace non trouvé'
+        ? 404
+        : message === 'Accès refusé' ||
+            message.includes('désactivée') ||
+            message.includes('Limite de projets atteinte')
+          ? 403
+          : 500;
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur lors de la création du projet' },
-      { status: 500 }
+      { success: false, error: message },
+      { status }
     );
   }
 }
@@ -175,11 +161,11 @@ export async function PATCH(request: NextRequest) {
     const ws = await Workspace.findById(project.workspace);
     
     const isWorkspaceAdmin = ws?.members.some(
-      (m: any) => m.user.toString() === auth.userId && m.role === 'admin'
+      (member) => member.user.toString() === auth.userId && member.role === 'admin'
     ) || ws?.owner.toString() === auth.userId;
 
     const isProjectAdmin = project.members.some(
-      (m: any) => m.user.toString() === auth.userId && m.role === 'admin'
+      (member) => member.user.toString() === auth.userId && member.role === 'admin'
     ) || project.owner.toString() === auth.userId;
 
     if (!isWorkspaceAdmin && !isProjectAdmin) {
@@ -205,10 +191,13 @@ export async function PATCH(request: NextRequest) {
       data: project,
       message: 'Projet mis à jour avec succès',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Update project error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur lors de la mise à jour du projet' },
+      {
+        success: false,
+        error: getErrorMessage(error, 'Erreur lors de la mise à jour du projet'),
+      },
       { status: 500 }
     );
   }
@@ -246,10 +235,10 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Projet supprimé avec succès',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Delete project error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur lors de la suppression' },
+      { success: false, error: getErrorMessage(error, 'Erreur lors de la suppression') },
       { status: 500 }
     );
   }

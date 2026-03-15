@@ -283,7 +283,7 @@ const Hero = () => {
                                          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                                  <div className="space-y-1">
-                                                     <h2 className="text-2xl font-bold text-white">Salut, Mathias 👋</h2>
+                                                     <h2 className="text-2xl font-bold text-white">Salut, John 👋</h2>
                                                      <p className="text-sm text-zinc-500">Voici ce qui se passe dans vos projets aujourd&apos;hui.</p>
                                                  </div>
                                                  <div className="flex items-center gap-3">
@@ -510,7 +510,7 @@ const Hero = () => {
                                                  </div>
                                                  <div className="divide-y divide-white/5">
                                                      {[
-                                                         { name: "Mathias R.", role: "Admin", status: "En ligne", avatar: 1 },
+                                                         { name: "John D.", role: "Admin", status: "En ligne", avatar: 1 },
                                                          { name: "Sophie V.", role: "Design", status: "Occupée", avatar: 2 },
                                                          { name: "Kevin L.", role: "Dev", status: "Absent", avatar: 3 },
                                                          { name: "Clara M.", role: "Marketing", status: "En ligne", avatar: 4 }
