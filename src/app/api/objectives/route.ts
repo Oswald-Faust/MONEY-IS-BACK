@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
-import Objective from '@/models/Objective';
+import Objective, { type IObjective } from '@/models/Objective';
 import Project from '@/models/Project';
 import Workspace from '@/models/Workspace';
 import { verifyAuth } from '@/lib/auth';
@@ -15,11 +15,19 @@ import {
 
 type ObjectiveResponseDocument = {
   toObject(): Record<string, unknown>;
-  project?: {
-    name?: string;
-    color?: string;
-  } | null;
+  project?: unknown;
 };
+
+function getObjectiveProjectPreview(project: unknown) {
+  if (!project || typeof project !== 'object') {
+    return null;
+  }
+
+  return {
+    name: 'name' in project && typeof project.name === 'string' ? project.name : undefined,
+    color: 'color' in project && typeof project.color === 'string' ? project.color : undefined,
+  };
+}
 
 function canAccessProject(project: { owner: { toString(): string }; members: Array<{ user: { toString(): string } }> }, userId: string) {
   return (
@@ -39,11 +47,43 @@ function canAccessWorkspace(
 }
 
 function formatObjectiveResponse(objective: ObjectiveResponseDocument) {
+  const projectPreview = getObjectiveProjectPreview(objective.project);
+
   return {
     ...objective.toObject(),
-    projectName: objective.project?.name,
-    projectColor: objective.project?.color,
+    projectName: projectPreview?.name,
+    projectColor: projectPreview?.color,
   };
+}
+
+function normalizeAssigneeIds(values: unknown[]) {
+  return Array.from(
+    new Set(
+      values
+        .flatMap((value) => {
+          if (typeof value === 'string' && value.trim()) {
+            return [value.trim()];
+          }
+
+          if (value instanceof mongoose.Types.ObjectId) {
+            return [value.toString()];
+          }
+
+          return [];
+        })
+    )
+  );
+}
+
+function toObjectiveCheckpointDocuments(
+  checkpoints: ReturnType<typeof normalizeObjectiveCheckpoints>
+): IObjective['checkpoints'] {
+  return checkpoints.map((checkpoint) => ({
+    ...checkpoint,
+    assignee: checkpoint.assignee ? new mongoose.Types.ObjectId(checkpoint.assignee) : undefined,
+    assignees: checkpoint.assignees.map((assigneeId) => new mongoose.Types.ObjectId(assigneeId)),
+    task: checkpoint.task ? new mongoose.Types.ObjectId(checkpoint.task) : undefined,
+  })) as IObjective['checkpoints'];
 }
 
 async function populateObjective(id: string) {
@@ -271,8 +311,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const finalAssignees = Array.from(
-      new Set((assignees && assignees.length > 0 ? assignees : assignee ? [assignee] : []).filter(Boolean))
+    const finalAssignees = normalizeAssigneeIds(
+      Array.isArray(assignees) && assignees.length > 0 ? assignees : assignee ? [assignee] : []
     );
 
     const normalizedCheckpoints = normalizeObjectiveCheckpoints(checkpoints, finalAssignees);
@@ -390,7 +430,9 @@ export async function PATCH(request: NextRequest) {
             ? [body.assignee]
             : []
           : currentObjectiveAssignees;
-    const nextObjectiveAssignees = Array.from(new Set(requestedObjectiveAssignees.filter(Boolean)));
+    const nextObjectiveAssignees = normalizeAssigneeIds(
+      Array.isArray(requestedObjectiveAssignees) ? requestedObjectiveAssignees : []
+    );
 
     if (body.title !== undefined) objective.title = body.title.trim();
     if (body.description !== undefined) objective.description = body.description;
@@ -407,7 +449,9 @@ export async function PATCH(request: NextRequest) {
       : undefined;
 
     if (body.checkpoints !== undefined) {
-      objective.checkpoints = normalizeObjectiveCheckpoints(body.checkpoints, nextObjectiveAssignees) as typeof objective.checkpoints;
+      objective.checkpoints = toObjectiveCheckpointDocuments(
+        normalizeObjectiveCheckpoints(body.checkpoints, nextObjectiveAssignees)
+      );
     }
 
     await objective.save();

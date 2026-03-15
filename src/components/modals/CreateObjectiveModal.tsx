@@ -73,18 +73,25 @@ function createEmptyCheckpoint(): ObjectiveCheckpointForm {
   };
 }
 
-function normalizeAssignees(value: AssigneeLike[] | AssigneeLike) {
+function normalizeAssignees(value: AssigneeLike[] | AssigneeLike): string[] {
   if (!value) return [];
   if (Array.isArray(value)) {
     return value
       .map((user) => (typeof user === 'object' ? user?._id : user))
-      .filter(Boolean);
+      .filter((userId): userId is string => typeof userId === 'string' && userId.length > 0);
   }
 
-  return [typeof value === 'object' ? value?._id : value].filter(Boolean);
+  return [typeof value === 'object' ? value?._id : value].filter(
+    (userId): userId is string => typeof userId === 'string' && userId.length > 0
+  );
 }
 
 function normalizeCheckpoint(checkpoint: ObjectiveCheckpointLike): ObjectiveCheckpointForm {
+  const linkedTaskId =
+    checkpoint.task && typeof checkpoint.task === 'object'
+      ? checkpoint.task._id || undefined
+      : checkpoint.task || undefined;
+
   return {
     id: checkpoint.id || checkpoint._id || createEmptyCheckpoint().id,
     title: checkpoint.title || '',
@@ -92,7 +99,7 @@ function normalizeCheckpoint(checkpoint: ObjectiveCheckpointLike): ObjectiveChec
     priority: checkpoint.priority || 'less_important',
     dueDate: checkpoint.dueDate ? new Date(checkpoint.dueDate).toISOString().split('T')[0] : '',
     assignees: normalizeAssignees(checkpoint.assignees && checkpoint.assignees.length > 0 ? checkpoint.assignees : checkpoint.assignee),
-    task: typeof checkpoint.task === 'object' ? checkpoint.task?._id : checkpoint.task,
+    task: linkedTaskId,
   };
 }
 

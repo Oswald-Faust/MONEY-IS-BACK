@@ -126,14 +126,18 @@ function toCommentRecord(comment: TaskComment, index: number): AppComment {
 function toEditTask(task: Task): AppTask {
   const creator = getUserPreview(task.creator);
   const assignee = getUserPreview(task.assignee);
+  const projectId =
+    task.project && typeof task.project === 'object' ? task.project._id : task.project;
+  const objectiveId =
+    task.objective && typeof task.objective === 'object' ? task.objective._id : task.objective;
 
   return {
     _id: task._id,
     title: task.title,
     description: task.description,
     workspace: task.workspace,
-    project: typeof task.project === 'object' ? task.project._id : task.project,
-    objective: typeof task.objective === 'object' ? task.objective._id : task.objective,
+    project: projectId,
+    objective: objectiveId,
     objectiveTitle: task.objectiveTitle,
     source: task.source,
     assignee: typeof task.assignee === 'string' ? task.assignee : assignee?._id,

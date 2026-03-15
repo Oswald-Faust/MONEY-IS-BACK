@@ -15,15 +15,10 @@ import {
 
 type TaskResponseDocument = {
   toObject(): Record<string, unknown>;
-  project?: {
-    name?: string;
-    color?: string;
-  } | null;
+  project?: unknown;
   projectName?: string;
   projectColor?: string;
-  objective?: {
-    title?: string;
-  } | null;
+  objective?: unknown;
 };
 
 function canAccessProject(project: { owner: { toString(): string }; members: Array<{ user: { toString(): string } }> }, userId: string) {
@@ -44,12 +39,50 @@ function canAccessWorkspace(
 }
 
 function formatTaskResponse(task: TaskResponseDocument) {
+  const projectPreview =
+    task.project && typeof task.project === 'object'
+      ? {
+          name: 'name' in task.project && typeof task.project.name === 'string' ? task.project.name : undefined,
+          color:
+            'color' in task.project && typeof task.project.color === 'string'
+              ? task.project.color
+              : undefined,
+        }
+      : null;
+  const objectivePreview =
+    task.objective && typeof task.objective === 'object'
+      ? {
+          title:
+            'title' in task.objective && typeof task.objective.title === 'string'
+              ? task.objective.title
+              : undefined,
+        }
+      : null;
+
   return {
     ...task.toObject(),
-    projectName: task.project?.name || task.projectName,
-    projectColor: task.project?.color || task.projectColor,
-    objectiveTitle: task.objective?.title,
+    projectName: projectPreview?.name || task.projectName,
+    projectColor: projectPreview?.color || task.projectColor,
+    objectiveTitle: objectivePreview?.title,
   };
+}
+
+function normalizeAssigneeIds(values: unknown[]) {
+  return Array.from(
+    new Set(
+      values.flatMap((value) => {
+        if (typeof value === 'string' && value.trim()) {
+          return [value.trim()];
+        }
+
+        if (value instanceof mongoose.Types.ObjectId) {
+          return [value.toString()];
+        }
+
+        return [];
+      })
+    )
+  );
 }
 
 async function populateTask(id: string) {
@@ -280,8 +313,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const finalAssignees = Array.from(
-      new Set((assignees && assignees.length > 0 ? assignees : assignee ? [assignee] : []).filter(Boolean))
+    const finalAssignees = normalizeAssigneeIds(
+      Array.isArray(assignees) && assignees.length > 0 ? assignees : assignee ? [assignee] : []
     );
 
     const task = await Task.create({
@@ -312,20 +345,27 @@ export async function POST(request: NextRequest) {
 
     if (normalizedProjectId) {
       const workspace = await Workspace.findById(workspaceId).populate('owner');
-      if (
+      const ownerEmail =
         workspace &&
         workspace.owner &&
         typeof workspace.owner === 'object' &&
         'email' in workspace.owner &&
-        workspace.owner.email &&
+        typeof workspace.owner.email === 'string'
+          ? workspace.owner.email
+          : null;
+      if (
+        workspace &&
+        workspace.owner &&
+        typeof workspace.owner === 'object' &&
+        ownerEmail &&
         workspace.owner._id.toString() !== auth.userId
       ) {
-        const owner = workspace.owner as { _id: mongoose.Types.ObjectId; email?: string };
+        const owner = workspace.owner as { _id: mongoose.Types.ObjectId };
         const creator = await User.findById(auth.userId);
         const actorName = creator ? `${creator.firstName} ${creator.lastName}` : 'Un membre';
 
         sendActionNotification(
-          owner.email,
+          ownerEmail,
           actorName,
           `vient de créer la tâche "${title}"`,
           workspace.name
@@ -412,16 +452,12 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (Object.prototype.hasOwnProperty.call(body, 'assignees') || Object.prototype.hasOwnProperty.call(body, 'assignee')) {
-      const finalAssignees = Array.from(
-        new Set(
-          (
-            body.assignees !== undefined
-              ? body.assignees
-              : body.assignee
-                ? [body.assignee]
-                : []
-          ).filter(Boolean)
-        )
+      const finalAssignees = normalizeAssigneeIds(
+        Array.isArray(body.assignees)
+          ? body.assignees
+          : body.assignee
+            ? [body.assignee]
+            : []
       );
 
       task.assignees = finalAssignees.map((assigneeId) => new mongoose.Types.ObjectId(String(assigneeId)));

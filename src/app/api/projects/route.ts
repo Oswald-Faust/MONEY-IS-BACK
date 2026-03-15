@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     await connectDB();
     
     const auth = await verifyAuth(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
     }
 
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const auth = await verifyAuth(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
     }
 
@@ -137,7 +137,7 @@ export async function PATCH(request: NextRequest) {
     await connectDB();
     
     const auth = await verifyAuth(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
     }
 
@@ -208,7 +208,7 @@ export async function DELETE(request: NextRequest) {
     await connectDB();
     
     const auth = await verifyAuth(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
     }
 

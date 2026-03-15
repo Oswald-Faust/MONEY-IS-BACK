@@ -56,7 +56,7 @@ export async function buildAIContext({
           $or: [{ workspace: workspaceId }, { project: { $exists: false }, workspace: workspaceId }],
         }
   )
-    .select('title status priority dueDate objectiveTitle')
+    .select('title status priority dueDate')
     .sort({ updatedAt: -1 })
     .limit(5)
     .lean();
@@ -168,7 +168,6 @@ export async function buildAIContext({
       status: item.status,
       priority: item.priority,
       dueDate: item.dueDate,
-      objectiveTitle: item.objectiveTitle,
     })),
     recentObjectives: recentObjectives.map((item) => ({
       title: item.title,

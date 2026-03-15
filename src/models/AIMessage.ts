@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 
-export interface IAIMessage extends Document {
+export interface IAIMessage {
   _id: mongoose.Types.ObjectId;
   conversation: mongoose.Types.ObjectId;
   role: 'user' | 'assistant' | 'system';
