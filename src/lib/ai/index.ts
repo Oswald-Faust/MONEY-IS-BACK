@@ -233,6 +233,29 @@ async function runAI({
   }
 }
 
+export async function generateStructuredAI<T>({
+  system,
+  prompt,
+  temperature = 0.4,
+}: {
+  system: string;
+  prompt: string;
+  temperature?: number;
+}): Promise<{ data: T; provider: AIProvider; model: string }> {
+  const result = await runAI({
+    system,
+    prompt,
+    jsonMode: true,
+    temperature,
+  });
+
+  return {
+    data: extractJson(result.text) as T,
+    provider: result.provider,
+    model: result.model,
+  };
+}
+
 export async function generateObjectiveDraft({
   workspaceId,
   projectId,

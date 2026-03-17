@@ -25,6 +25,9 @@ export interface IWorkspace extends Document {
     preferredTone?: 'coach' | 'direct' | 'friendly' | 'executive';
     onboardingCompleted?: boolean;
     whatsappEnabled?: boolean;
+    whatsappAutoReply?: boolean;
+    whatsappLeadQualif?: boolean;
+    whatsappScheduling?: boolean;
   };
   useCase: 'personal' | 'work' | 'school' | 'agency' | 'startup' | 'other';
   stripeCustomerId?: string;
@@ -121,6 +124,18 @@ const WorkspaceSchema = new Schema<IWorkspace>(
         default: false,
       },
       whatsappEnabled: {
+        type: Boolean,
+        default: false,
+      },
+      whatsappAutoReply: {
+        type: Boolean,
+        default: true,
+      },
+      whatsappLeadQualif: {
+        type: Boolean,
+        default: true,
+      },
+      whatsappScheduling: {
         type: Boolean,
         default: false,
       },

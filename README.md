@@ -64,3 +64,85 @@ Flux utilisé:
 - `GET /api/auth/google/session`
 
 Les pages `/login` et `/register` proposent le bouton `Continuer avec Google`.
+
+## WhatsApp AI Assistant
+
+Le backend WhatsApp supporte maintenant:
+
+- la vérification du webhook Meta
+- la réception de messages texte et vocaux
+- la transcription audio avec OpenAI
+- la création d'idées, tâches et objectifs Edwin via un assistant conversationnel
+- une route de simulation pour tester sans brancher Meta immédiatement
+
+Variables d'environnement utiles:
+
+```bash
+WHATSAPP_VERIFY_TOKEN=...
+WHATSAPP_ACCESS_TOKEN=...
+WHATSAPP_PHONE_NUMBER_ID=...
+WHATSAPP_GRAPH_API_VERSION=v23.0
+OPENAI_API_KEY=...
+OPENAI_TRANSCRIPTION_MODEL=gpt-4o-mini-transcribe
+
+# Optionnel pour un premier test rapide sans lier manuellement un numéro
+WHATSAPP_DEFAULT_WORKSPACE_ID=...
+WHATSAPP_DEFAULT_USER_ID=...
+```
+
+### Lier un numéro WhatsApp à un workspace
+
+Route authentifiée:
+
+```bash
+POST /api/ai/whatsapp/links
+Authorization: Bearer <jwt>
+Content-Type: application/json
+
+{
+  "workspaceId": "<workspace-id>",
+  "phone": "+22900000000",
+  "waUserId": "22900000000",
+  "label": "Mon téléphone"
+}
+```
+
+### Tester sans Meta
+
+Route authentifiée:
+
+```bash
+POST /api/ai/whatsapp/test
+Authorization: Bearer <jwt>
+Content-Type: application/json
+
+{
+  "workspaceId": "<workspace-id>",
+  "phone": "+22900000000",
+  "text": "Crée une tâche pour relancer le client vendredi et assigne-la à Sarah",
+  "source": "test"
+}
+```
+
+La réponse retourne:
+
+- le texte de réponse de l'assistant
+- l'entité créée si l'action est complète
+- ou les champs encore manquants si une clarification est nécessaire
+
+### Webhook Meta
+
+Le webhook réel est sur:
+
+```bash
+GET  /api/ai/whatsapp/webhook
+POST /api/ai/whatsapp/webhook
+```
+
+Le flux réel:
+
+1. Meta envoie le message au webhook.
+2. Edwin récupère le texte ou transcrit le vocal.
+3. L'assistant demande les précisions manquantes si besoin.
+4. Edwin crée ensuite la tâche, l'objectif ou l'idée.
+5. La confirmation repart vers WhatsApp.

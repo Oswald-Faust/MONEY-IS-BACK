@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   Rocket,
   Command,
+  Bot
 } from 'lucide-react';
 
 import Image from 'next/image';
@@ -483,6 +484,46 @@ export default function Sidebar() {
                   </Link>
                 );
               })}
+
+              <Link href="/whatsapp-ai">
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`
+                    mt-2 mb-2 flex items-center gap-3 px-3 py-2.5 rounded-xl
+                    bg-gradient-to-r from-emerald-500/10 to-teal-500/10
+                    border border-emerald-500/20 hover:from-emerald-500/20 hover:to-teal-500/20
+                    transition-all duration-300 cursor-pointer group shadow-lg shadow-emerald-500/5
+                    ${pathname === '/whatsapp-ai' ? 'ring-1 ring-emerald-500/50 from-emerald-500/20 to-teal-500/20' : ''}
+                  `}
+                >
+                  <Bot className={`w-5 h-5 flex-shrink-0 text-emerald-400 group-hover:scale-110 transition-transform ${pathname === '/whatsapp-ai' ? 'animate-pulse' : ''}`} />
+                  <div className="flex-1 min-w-0 flex items-center justify-between">
+                    <AnimatePresence mode="wait">
+                      {(!sidebarCollapsed || isMobile) && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: 'auto' }}
+                          exit={{ opacity: 0, width: 0 }}
+                          className="text-sm font-semibold text-emerald-400 whitespace-nowrap"
+                        >
+                          WhatsApp & IA
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                    <AnimatePresence mode="wait">
+                      {(!sidebarCollapsed || isMobile) && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0 }}
+                          className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse ml-2"
+                        />
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              </Link>
             </div>
           </div>
       </nav>

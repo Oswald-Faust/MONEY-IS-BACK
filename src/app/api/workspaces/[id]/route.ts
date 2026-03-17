@@ -52,17 +52,13 @@ export async function PATCH(
     if (useCase) workspace.useCase = useCase;
     
     if (settings) {
-      workspace.settings = {
-        ...workspace.settings,
-        ...settings
-      };
+      const currentSettings = workspace.get('settings') || {};
+      workspace.settings = { ...currentSettings, ...settings };
     }
 
     if (aiProfile) {
-      workspace.aiProfile = {
-        ...workspace.aiProfile,
-        ...aiProfile,
-      };
+      const currentAiProfile = workspace.get('aiProfile') || {};
+      workspace.aiProfile = { ...currentAiProfile, ...aiProfile };
     }
 
     await workspace.save();

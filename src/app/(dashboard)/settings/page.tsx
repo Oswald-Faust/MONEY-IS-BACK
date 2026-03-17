@@ -15,7 +15,8 @@ import {
   RotateCcw,
   Users,
   ShieldCheck,
-  Briefcase
+  Briefcase,
+  MessageCircleMore
 } from 'lucide-react';
 import { useAuthStore, useAppStore } from '@/store';
 import toast from 'react-hot-toast';
@@ -24,6 +25,7 @@ import AccessControl from '@/components/admin/AccessControl';
 import Avatar from '@/components/ui/Avatar';
 import WorkspaceMembers from '@/components/settings/WorkspaceMembers';
 import WorkspaceSettings from '@/components/settings/WorkspaceSettings';
+import WhatsAppSettings from '@/components/settings/WhatsAppSettings';
 
 type SidebarItem = {
   id: string;
@@ -38,6 +40,7 @@ const sidebarItems: SidebarItem[] = [
   { id: 'security', label: 'Sécurité & Accès', icon: Shield },
   { id: 'workspace', label: 'Espace de travail', icon: Briefcase, workspaceOnly: true },
   { id: 'members', label: 'Personnes', icon: Users, workspaceOnly: true },
+  { id: 'whatsapp', label: 'WhatsApp & IA', icon: MessageCircleMore, workspaceOnly: true },
   { id: 'access', label: 'Accès & Vérifications', icon: ShieldCheck, adminOnly: true },
   { id: 'users', label: 'Gestion des utilisateurs', icon: Users, adminOnly: true },
 ];
@@ -76,6 +79,7 @@ export default function SettingsPage() {
     newPassword: '',
     confirmPassword: ''
   });
+  const shouldShowFooterActions = activeTab === 'profile' || activeTab === 'security';
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -463,37 +467,43 @@ export default function SettingsPage() {
               <WorkspaceSettings />
             )}
 
+            {activeTab === 'whatsapp' && currentWorkspace && (
+              <WhatsAppSettings />
+            )}
+
             {/* Footer Actions */}
-            <div className="pt-8 border-t border-glass-border flex items-center justify-between mt-8">
-                <button className="text-sm font-bold text-red-500 hover:text-red-400 flex items-center gap-2 transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                    Supprimer le compte
-                </button>
-                <div className="flex gap-4">
-                    <button className="px-6 py-2.5 rounded-xl border border-glass-border text-main text-sm font-bold hover:bg-glass-hover transition-all">
-                        Annuler
-                    </button>
-                    <button 
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="btn-primary flex items-center gap-2 min-w-[140px] justify-center"
-                    >
-                        {isSaving ? (
-                            <motion.div
-                                animate={{ rotate: 360 }}
-                                transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                            >
-                                <RotateCcw className="w-4 h-4" />
-                            </motion.div>
-                        ) : (
-                            <>
-                                <Check className="w-4 h-4" />
-                                Enregistrer
-                            </>
-                        )}
-                    </button>
-                </div>
-            </div>
+            {shouldShowFooterActions && (
+              <div className="pt-8 border-t border-glass-border flex items-center justify-between mt-8">
+                  <button className="text-sm font-bold text-red-500 hover:text-red-400 flex items-center gap-2 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                      Supprimer le compte
+                  </button>
+                  <div className="flex gap-4">
+                      <button className="px-6 py-2.5 rounded-xl border border-glass-border text-main text-sm font-bold hover:bg-glass-hover transition-all">
+                          Annuler
+                      </button>
+                      <button 
+                          onClick={handleSave}
+                          disabled={isSaving}
+                          className="btn-primary flex items-center gap-2 min-w-[140px] justify-center"
+                      >
+                          {isSaving ? (
+                              <motion.div
+                                  animate={{ rotate: 360 }}
+                                  transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                              >
+                                  <RotateCcw className="w-4 h-4" />
+                              </motion.div>
+                          ) : (
+                              <>
+                                  <Check className="w-4 h-4" />
+                                  Enregistrer
+                              </>
+                          )}
+                      </button>
+                  </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

@@ -154,6 +154,9 @@ export interface WorkspaceAIProfile {
   preferredTone?: 'coach' | 'direct' | 'friendly' | 'executive';
   onboardingCompleted?: boolean;
   whatsappEnabled?: boolean;
+  whatsappAutoReply?: boolean;
+  whatsappLeadQualif?: boolean;
+  whatsappScheduling?: boolean;
 }
 
 export interface WorkspaceMember {
