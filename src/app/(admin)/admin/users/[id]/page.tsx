@@ -3,20 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Mail, 
-  Calendar, 
-  Building2, 
-  FolderKanban, 
-  CheckCircle2, 
-  Activity, 
-  Shield, 
+import {
+  ArrowLeft,
+  Mail,
+  Calendar,
+  Building2,
+  FolderKanban,
+  CheckCircle2,
+  Activity,
+  Shield,
   Clock,
   Zap,
   Crown,
   HelpCircle,
-  Briefcase
+  Briefcase,
+  ChevronDown,
+  UserX,
+  ShieldCheck,
+  UserCheck,
 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import Image from 'next/image';
@@ -44,6 +48,8 @@ export default function UserDetailPage() {
   const { token } = useAuthStore();
   const [data, setData] = useState<UserDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const [isRoleChanging, setIsRoleChanging] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -67,6 +73,29 @@ export default function UserDetailPage() {
 
     if (token && id) fetchUserDetails();
   }, [id, token]);
+
+  const changeRole = async (newRole: string) => {
+    if (!data) return;
+    const label = newRole === 'admin' ? 'administrateur' : newRole === 'user' ? 'utilisateur' : newRole;
+    if (!confirm(`Changer le rôle de ${data.user.firstName} en "${label}" ?`)) return;
+    setIsRoleChanging(true);
+    setActionsOpen(false);
+    try {
+      const res = await fetch(`/api/admin/users?id=${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ role: newRole }),
+      });
+      const result = await res.json();
+      if (!result.success) { toast.error(result.error || 'Erreur'); return; }
+      toast.success(`Rôle mis à jour → ${label}`);
+      setData(prev => prev ? { ...prev, user: { ...prev.user, role: newRole } } : prev);
+    } catch {
+      toast.error('Erreur serveur');
+    } finally {
+      setIsRoleChanging(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -114,13 +143,94 @@ export default function UserDetailPage() {
             <p className="text-dim text-sm">Informations détaillées et activité</p>
           </div>
         </div>
-        <div className="flex gap-3">
-          <button className="px-4 py-2 bg-bg-secondary border border-glass-border rounded-xl text-sm font-bold text-dim hover:text-main hover:bg-bg-tertiary transition-all">
-            Désactiver
-          </button>
-          <button className="px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20">
+        <div className="relative">
+          <button
+            onClick={() => setActionsOpen(o => !o)}
+            disabled={isRoleChanging}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+          >
+            {isRoleChanging
+              ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              : <Shield className="w-4 h-4" />}
             Actions Admin
+            <ChevronDown className={`w-4 h-4 transition-transform ${actionsOpen ? 'rotate-180' : ''}`} />
           </button>
+
+          {actionsOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setActionsOpen(false)} />
+              <div className="absolute right-0 top-full mt-2 w-56 bg-bg-primary border border-glass-border rounded-2xl shadow-2xl z-20 overflow-hidden">
+                <div className="p-2 space-y-1">
+                  <p className="px-3 py-1.5 text-[10px] text-text-dim uppercase tracking-widest font-bold">Changer le rôle</p>
+
+                  {data?.user.role !== 'admin' && (
+                    <button onClick={() => changeRole('admin')}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 text-left transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                        <ShieldCheck className="w-4 h-4 text-red-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-text-main group-hover:text-red-400 transition-colors">Promouvoir Admin</p>
+                        <p className="text-[10px] text-text-dim">Accès complet au panel</p>
+                      </div>
+                    </button>
+                  )}
+
+                  {data?.user.role !== 'moderator' && (
+                    <button onClick={() => changeRole('moderator')}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-orange-500/10 text-left transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                        <Crown className="w-4 h-4 text-orange-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-text-main group-hover:text-orange-400 transition-colors">Modérateur</p>
+                        <p className="text-[10px] text-text-dim">Accès modération</p>
+                      </div>
+                    </button>
+                  )}
+
+                  {data?.user.role !== 'support' && (
+                    <button onClick={() => changeRole('support')}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-500/10 text-left transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                        <HelpCircle className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-text-main group-hover:text-blue-400 transition-colors">Support</p>
+                        <p className="text-[10px] text-text-dim">Accès support client</p>
+                      </div>
+                    </button>
+                  )}
+
+                  {data?.user.role !== 'user' && (
+                    <button onClick={() => changeRole('user')}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-glass-hover text-left transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-glass-bg border border-glass-border flex items-center justify-center">
+                        <UserCheck className="w-4 h-4 text-text-dim" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-text-main transition-colors">Utilisateur</p>
+                        <p className="text-[10px] text-text-dim">Rétrograder en user</p>
+                      </div>
+                    </button>
+                  )}
+
+                  <div className="border-t border-glass-border mt-1 pt-1">
+                    <button onClick={() => { setActionsOpen(false); if (confirm(`Désactiver le compte de ${data?.user.firstName} ?`)) toast('Fonctionnalité à implémenter'); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 text-left transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-red-500/5 border border-red-500/10 flex items-center justify-center">
+                        <UserX className="w-4 h-4 text-red-500/60" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-red-500/70 group-hover:text-red-400 transition-colors">Désactiver le compte</p>
+                        <p className="text-[10px] text-text-dim">Bloquer l&apos;accès</p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

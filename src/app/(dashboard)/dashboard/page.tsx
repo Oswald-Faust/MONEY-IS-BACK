@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -21,6 +21,7 @@ import TaskCard from '@/components/ui/TaskCard';
 import RoutineCalendar from '@/components/ui/RoutineCalendar';
 import TeamSection from '@/components/dashboard/TeamSection';
 import { useAppStore, useAuthStore } from '@/store';
+import type { RoutineDays } from '@/types';
 import { useTranslation } from '@/lib/i18n';
 
 export default function DashboardPage() {
@@ -121,8 +122,50 @@ export default function DashboardPage() {
     { label: t.dashboard.stats.activeProjects, value: projects.length, icon: FolderKanban, color: '#6366f1' },
     { label: t.dashboard.stats.tasksInProgress, value: tasks.filter(t => t.status !== 'done').length, icon: Clock, color: '#f97316' },
     { label: t.dashboard.stats.completedTasks, value: tasks.filter(t => t.status === 'done').length, icon: CheckCircle, color: '#22c55e' },
-    { label: t.dashboard.stats.productivity, value: '78%', icon: TrendingUp, color: '#8b5cf6' },
+    { label: t.dashboard.stats.productivity, value: `${productivity}%`, icon: TrendingUp, color: '#8b5cf6' },
   ];
+
+  // Calcul dynamique de la productivité
+  const productivity = useMemo(() => {
+    const totalTasks = tasks.length;
+    const doneTasks = tasks.filter(t => t.status === 'done').length;
+    const importantTasksList = tasks.filter(t => t.priority === 'important');
+    const doneImportant = importantTasksList.filter(t => t.status === 'done').length;
+
+    const now = new Date();
+    const overdueTasks = tasks.filter(
+      t => t.status !== 'done' && t.dueDate && new Date(t.dueDate) < now
+    ).length;
+
+    const dayKeys: (keyof RoutineDays)[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todayKey = dayKeys[now.getDay()];
+    const todayStr = now.toISOString().split('T')[0];
+    const todayRoutines = routines.filter(r => r.isActive && r.days?.[todayKey]);
+    const doneRoutinesToday = todayRoutines.filter(
+      r => r.completedDates?.some((d: string) => d.startsWith(todayStr))
+    ).length;
+
+    let score = 0;
+    let totalWeight = 0;
+
+    if (totalTasks > 0) {
+      score += (doneTasks / totalTasks) * 50;
+      totalWeight += 50;
+    }
+    if (importantTasksList.length > 0) {
+      score += (doneImportant / importantTasksList.length) * 30;
+      totalWeight += 30;
+    }
+    if (todayRoutines.length > 0) {
+      score += (doneRoutinesToday / todayRoutines.length) * 20;
+      totalWeight += 20;
+    }
+
+    if (totalWeight === 0) return 0;
+    const normalizedScore = (score / totalWeight) * 100;
+    const overduePenalty = totalTasks > 0 ? Math.min(20, (overdueTasks / totalTasks) * 30) : 0;
+    return Math.max(0, Math.min(100, Math.round(normalizedScore - overduePenalty)));
+  }, [tasks, routines]);
 
   const importantTasks = tasks.filter(t => t.priority === 'important');
   const otherTasks = tasks.filter(t => t.priority !== 'important');

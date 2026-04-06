@@ -24,9 +24,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Workspace non trouvé' }, { status: 404 });
     }
 
-    // Check if user is owner
-    if (workspace.owner.toString() !== auth.userId) {
-       return NextResponse.json({ error: 'Seul le propriétaire peut gérer l\'abonnement' }, { status: 403 });
+    // Check if user is owner or admin member
+    const isOwner = workspace.owner.toString() === auth.userId;
+    const isAdmin = workspace.members?.some(
+      (m: { user: { toString(): string }; role: string }) =>
+        m.user.toString() === auth.userId && m.role === 'admin'
+    );
+    if (!isOwner && !isAdmin) {
+       return NextResponse.json({ error: 'Seul le propriétaire ou un admin peut gérer l\'abonnement' }, { status: 403 });
     }
 
     // Define price configuration ad-hoc (no need to create in Stripe Dashboard)
