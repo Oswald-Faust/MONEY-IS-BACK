@@ -118,13 +118,6 @@ export default function DashboardPage() {
     }
   }, [token, currentWorkspace, setProjects, setTasks, setRoutines]);
 
-  const stats = [
-    { label: t.dashboard.stats.activeProjects, value: projects.length, icon: FolderKanban, color: '#6366f1' },
-    { label: t.dashboard.stats.tasksInProgress, value: tasks.filter(t => t.status !== 'done').length, icon: Clock, color: '#f97316' },
-    { label: t.dashboard.stats.completedTasks, value: tasks.filter(t => t.status === 'done').length, icon: CheckCircle, color: '#22c55e' },
-    { label: t.dashboard.stats.productivity, value: `${productivity}%`, icon: TrendingUp, color: '#8b5cf6' },
-  ];
-
   // Calcul dynamique de la productivité
   const productivity = useMemo(() => {
     const totalTasks = tasks.length;
@@ -166,6 +159,13 @@ export default function DashboardPage() {
     const overduePenalty = totalTasks > 0 ? Math.min(20, (overdueTasks / totalTasks) * 30) : 0;
     return Math.max(0, Math.min(100, Math.round(normalizedScore - overduePenalty)));
   }, [tasks, routines]);
+
+  const stats = [
+    { label: t.dashboard.stats.activeProjects, value: projects.length, icon: FolderKanban, color: '#6366f1' },
+    { label: t.dashboard.stats.tasksInProgress, value: tasks.filter(t => t.status !== 'done').length, icon: Clock, color: '#f97316' },
+    { label: t.dashboard.stats.completedTasks, value: tasks.filter(t => t.status === 'done').length, icon: CheckCircle, color: '#22c55e' },
+    { label: t.dashboard.stats.productivity, value: `${productivity}%`, icon: TrendingUp, color: '#8b5cf6' },
+  ];
 
   const importantTasks = tasks.filter(t => t.priority === 'important');
   const otherTasks = tasks.filter(t => t.priority !== 'important');
