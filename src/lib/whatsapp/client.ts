@@ -34,6 +34,10 @@ export function isWhatsAppConfigured() {
   );
 }
 
+export function isWhatsAppInitTemplateConfigured() {
+  return Boolean(process.env.WHATSAPP_INIT_TEMPLATE_NAME);
+}
+
 export async function sendWhatsAppTextMessage({
   to,
   body,
@@ -63,6 +67,84 @@ export async function sendWhatsAppTextMessage({
   });
 
   return parseGraphResponse(response);
+}
+
+export async function sendWhatsAppTemplateMessage({
+  to,
+  name,
+  languageCode = 'fr',
+  bodyParams = [],
+}: {
+  to: string;
+  name: string;
+  languageCode?: string;
+  bodyParams?: string[];
+}) {
+  const accessToken = getRequiredEnv('WHATSAPP_ACCESS_TOKEN');
+  const phoneNumberId = getRequiredEnv('WHATSAPP_PHONE_NUMBER_ID');
+
+  const components =
+    bodyParams.length > 0
+      ? [
+          {
+            type: 'body',
+            parameters: bodyParams.map((value) => ({
+              type: 'text',
+              text: value,
+            })),
+          },
+        ]
+      : undefined;
+
+  const response = await fetch(`${getGraphApiBase()}/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: toWhatsAppRecipient(to),
+      type: 'template',
+      template: {
+        name,
+        language: {
+          code: languageCode,
+        },
+        components,
+      },
+    }),
+  });
+
+  return parseGraphResponse(response);
+}
+
+export async function sendWhatsAppInitializationMessage({
+  to,
+  workspaceName,
+  verificationCode,
+}: {
+  to: string;
+  workspaceName: string;
+  verificationCode: string;
+}) {
+  const templateName = process.env.WHATSAPP_INIT_TEMPLATE_NAME;
+  const templateLanguage = process.env.WHATSAPP_INIT_TEMPLATE_LANGUAGE || 'fr';
+
+  if (templateName) {
+    return sendWhatsAppTemplateMessage({
+      to,
+      name: templateName,
+      languageCode: templateLanguage,
+      bodyParams: [workspaceName, verificationCode],
+    });
+  }
+
+  return sendWhatsAppTextMessage({
+    to,
+    body: `Bonjour, c'est Edwin.\n\nPour connecter ce numéro au workspace "${workspaceName}", répondez avec le code ${verificationCode}.`,
+  });
 }
 
 export async function sendWhatsAppReplyButtons({

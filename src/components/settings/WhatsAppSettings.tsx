@@ -32,7 +32,13 @@ type WhatsAppLinkRecord = {
   phone: string;
   waUserId?: string;
   label?: string;
+  status: 'pending_verification' | 'verified' | 'disabled' | 'failed';
   isActive: boolean;
+  verificationCode?: string;
+  verificationExpiresAt?: string;
+  initializationMessageSentAt?: string;
+  initializationLastError?: string;
+  verifiedAt?: string;
   lastInboundAt?: string;
   updatedAt: string;
   createdAt: string;
@@ -40,6 +46,7 @@ type WhatsAppLinkRecord = {
 
 type WhatsAppConfigState = {
   metaConfigured: boolean;
+  initTemplateConfigured?: boolean;
   defaultWorkspaceId: string | null;
   defaultUserId: string | null;
   webhookPath: string;
@@ -63,6 +70,12 @@ type SimulationResult = {
     missingFields: string[];
   };
   conversationId?: string;
+  link?: {
+    id: string;
+    status: 'pending_verification' | 'verified' | 'disabled' | 'failed';
+    verificationCode?: string;
+    verificationExpiresAt?: string;
+  };
 };
 
 function isPopulatedUser(user: string | WhatsAppLinkUser): user is WhatsAppLinkUser {
@@ -109,6 +122,7 @@ export default function WhatsAppSettings() {
   const [disconnecting, setDisconnecting] = useState(false);
   const [testingInbound, setTestingInbound] = useState(false);
   const [sendingOutbound, setSendingOutbound] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   const [config, setConfig] = useState<WhatsAppConfigState>({
     metaConfigured: false,
@@ -134,6 +148,7 @@ export default function WhatsAppSettings() {
     'Edwin est connecté. Réponds directement ici pour créer une tâche, un objectif ou envoyer une note vocale.'
   );
   const [outboundQuickReplies, setOutboundQuickReplies] = useState(['', '', '']);
+  const [verificationHintCode, setVerificationHintCode] = useState('');
 
   const loadSettings = async () => {
     if (!token || !currentWorkspace?._id) {
@@ -167,6 +182,7 @@ export default function WhatsAppSettings() {
         waUserId: nextLink?.waUserId || '',
         label: nextLink?.label || '',
       });
+      setVerificationHintCode('');
     } catch (error) {
       console.error('Load WhatsApp settings error:', error);
       toast.error(error instanceof Error ? error.message : 'Erreur de chargement WhatsApp');
@@ -204,17 +220,53 @@ export default function WhatsAppSettings() {
       });
 
       const data = await response.json();
-      if (!data.success) {
+      if (!data.success && !data.data?.link) {
         throw new Error(data.error || 'Impossible d’enregistrer le numéro WhatsApp');
       }
 
-      toast.success('Connexion WhatsApp enregistrée');
+      const nextLink = data.data?.link as WhatsAppLinkRecord | undefined;
+      setVerificationHintCode(nextLink?.status === 'pending_verification' ? nextLink.verificationCode || '' : '');
+      toast.success(data.message || 'Connexion WhatsApp enregistrée');
       await loadSettings();
     } catch (error) {
       console.error('Save WhatsApp link error:', error);
       toast.error(error instanceof Error ? error.message : 'Erreur lors de l’enregistrement');
     } finally {
       setSavingLink(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!token || !currentWorkspace?._id) return;
+
+    try {
+      setResendingVerification(true);
+      const response = await fetch('/api/ai/whatsapp/links', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          workspaceId: currentWorkspace._id,
+          action: 'resend_verification',
+        }),
+      });
+
+      const data = await response.json();
+      if (!data.success && !data.data?.link) {
+        throw new Error(data.error || 'Impossible de renvoyer la vérification');
+      }
+
+      const nextLink = data.data?.link as WhatsAppLinkRecord | undefined;
+      setVerificationHintCode(nextLink?.verificationCode || '');
+      toast.success(data.message || 'Message de vérification renvoyé');
+      await loadSettings();
+    } catch (error) {
+      console.error('Resend WhatsApp verification error:', error);
+      toast.error(error instanceof Error ? error.message : 'Erreur de renvoi');
+    } finally {
+      setResendingVerification(false);
     }
   };
 
@@ -292,6 +344,7 @@ export default function WhatsAppSettings() {
       }
 
       setSimulationResult(data.data as SimulationResult);
+      setVerificationHintCode(data.data?.link?.verificationCode || '');
       toast.success('Simulation WhatsApp exécutée');
       await loadSettings();
     } catch (error) {
@@ -390,10 +443,20 @@ export default function WhatsAppSettings() {
               </span>
               <span
                 className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${
-                  currentLink ? 'bg-indigo-500/10 text-indigo-300' : 'bg-white/10 text-dim'
+                  currentLink?.status === 'verified'
+                    ? 'bg-indigo-500/10 text-indigo-300'
+                    : currentLink?.status === 'pending_verification'
+                      ? 'bg-amber-500/10 text-amber-300'
+                      : 'bg-white/10 text-dim'
                 }`}
               >
-                {currentLink ? 'Numéro relié' : 'Aucun numéro relié'}
+                {currentLink?.status === 'verified'
+                  ? 'Numéro vérifié'
+                  : currentLink?.status === 'pending_verification'
+                    ? 'Vérification en attente'
+                    : currentLink
+                      ? 'Numéro relié'
+                      : 'Aucun numéro relié'}
               </span>
               <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-dim">
                 {currentWorkspace.name}
@@ -489,6 +552,18 @@ export default function WhatsAppSettings() {
                 Enregistrer la connexion
               </button>
               <button
+                onClick={handleResendVerification}
+                disabled={!currentLink || currentLink.status === 'verified' || resendingVerification}
+                className="flex min-w-[180px] items-center justify-center gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-3 text-sm font-semibold text-amber-300 transition-colors hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {resendingVerification ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                Renvoyer l&apos;initialisation
+              </button>
+              <button
                 onClick={handleDisconnect}
                 disabled={!currentLink || disconnecting}
                 className="flex min-w-[180px] items-center justify-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50"
@@ -529,7 +604,9 @@ export default function WhatsAppSettings() {
               </div>
               <p className="mt-2 text-sm text-dim">
                 {currentLink
-                  ? `Actif pour ${linkForm.phone || currentLink.phone}`
+                  ? currentLink.status === 'verified'
+                    ? `Actif pour ${linkForm.phone || currentLink.phone}`
+                    : `Numéro enregistré pour ${linkForm.phone || currentLink.phone}, en attente de confirmation`
                   : 'Aucun numéro lié à ton utilisateur dans ce workspace'}
               </p>
             </div>
@@ -550,9 +627,27 @@ export default function WhatsAppSettings() {
               </p>
             </div>
 
+            <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-main">
+                {config.initTemplateConfigured ? (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-amber-400" />
+                )}
+                Initialisation proactive
+              </div>
+              <p className="mt-2 text-sm text-dim">
+                {config.initTemplateConfigured
+                  ? 'Le template d’initialisation est configuré pour contacter un nouveau numéro.'
+                  : 'Ajoute WHATSAPP_INIT_TEMPLATE_NAME pour contacter automatiquement un numéro hors fenêtre 24h.'}
+              </p>
+            </div>
+
             <div className="rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-dim">
-              <p className="font-semibold text-main">Dernière activité entrante</p>
-              <p className="mt-2">{formatDateTime(currentLink?.lastInboundAt)}</p>
+              <p className="font-semibold text-main">Dernière activité et vérification</p>
+              <p className="mt-2">Dernière activité: {formatDateTime(currentLink?.lastInboundAt)}</p>
+              <p className="mt-1">Dernière init: {formatDateTime(currentLink?.initializationMessageSentAt)}</p>
+              <p className="mt-1">Confirmé le: {formatDateTime(currentLink?.verifiedAt)}</p>
             </div>
           </div>
         </section>
@@ -605,6 +700,14 @@ export default function WhatsAppSettings() {
               >
                 Charger un exemple idée
               </button>
+              {verificationHintCode && (
+                <button
+                  onClick={() => setSimulationText(verificationHintCode)}
+                  className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-3 text-sm font-semibold text-amber-300 transition-colors hover:bg-amber-500/15"
+                >
+                  Simuler la confirmation du code
+                </button>
+              )}
             </div>
           </div>
 
@@ -682,6 +785,12 @@ export default function WhatsAppSettings() {
 
                 {simulationResult.conversationId && (
                   <p className="text-xs text-dim">Conversation IA: {simulationResult.conversationId}</p>
+                )}
+
+                {simulationResult.link?.verificationCode && (
+                  <p className="text-xs text-amber-300">
+                    Code de test local: {simulationResult.link.verificationCode}
+                  </p>
                 )}
               </div>
             ) : (
@@ -768,15 +877,15 @@ export default function WhatsAppSettings() {
               <div className="rounded-2xl border border-white/10 p-4">
                 <p className="font-semibold text-main">1. Liaison utilisateur/workspace</p>
                 <p className="mt-2">
-                  Lie ton numéro ci-dessus. Edwin saura alors quel utilisateur et quel workspace
-                  utiliser quand un message arrive.
+                  Lie ton numéro ci-dessus. Edwin crée alors une liaison en attente, envoie un
+                  message d&apos;initialisation, puis active réellement le numéro après confirmation.
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 p-4">
                 <p className="font-semibold text-main">2. Test complet local</p>
                 <p className="mt-2">
-                  Simule une tâche, un objectif puis une clarification. Vérifie que l’entité
-                  apparaît bien dans Edwin après la réponse finale.
+                  Simule d&apos;abord la confirmation du code, puis une tâche, un objectif et une
+                  clarification. Vérifie que l&apos;entité apparaît bien dans Edwin après la réponse finale.
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 p-4">
@@ -837,7 +946,7 @@ export default function WhatsAppSettings() {
                       </div>
                       {isCurrentUser && (
                         <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-indigo-300">
-                          Actif
+                          {link.status === 'verified' ? 'Vérifié' : 'En attente'}
                         </span>
                       )}
                     </div>
@@ -851,6 +960,9 @@ export default function WhatsAppSettings() {
                       </p>
                       <p>
                         <span className="text-main">Label:</span> {link.label || 'Aucun'}
+                      </p>
+                      <p>
+                        <span className="text-main">Statut:</span> {link.status}
                       </p>
                       <p>
                         <span className="text-main">Dernière activité:</span>{' '}

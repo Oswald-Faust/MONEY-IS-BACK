@@ -3,8 +3,9 @@ import connectDB from '@/lib/mongodb';
 import { verifyAuth } from '@/lib/auth';
 import { ensureWorkspaceAccess } from '@/lib/ai/access';
 import WhatsAppLink from '@/models/WhatsAppLink';
-import { processWhatsAppMessage } from '@/lib/whatsapp/orchestrator';
+import { processInboundWhatsAppForLink } from '@/lib/whatsapp/inbound';
 import { normalizePhoneNumber, normalizeWhatsAppUserId } from '@/lib/whatsapp/normalize';
+import { generateVerificationCode, getVerificationExpiryDate } from '@/lib/whatsapp/verification';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,27 +36,36 @@ export async function POST(request: NextRequest) {
       return workspaceAccess.error;
     }
 
-    const link = await WhatsAppLink.findOneAndUpdate(
-      {
-        workspace: workspaceId,
-        user: auth.userId,
-      },
-      {
-        workspace: workspaceId,
-        user: auth.userId,
-        phone,
-        waUserId,
-        label: 'Lien WhatsApp de test',
-        isActive: true,
-      },
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      }
-    );
+    let link = await WhatsAppLink.findOne({
+      workspace: workspaceId,
+      user: auth.userId,
+    });
 
-    const result = await processWhatsAppMessage({
+    if (!link) {
+      link = new WhatsAppLink({
+        workspace: workspaceId,
+        user: auth.userId,
+      });
+    }
+
+    link.workspace = workspaceId as never;
+    link.user = auth.userId as never;
+    link.phone = phone;
+    link.waUserId = waUserId;
+    link.label = 'Lien WhatsApp de test';
+    link.isActive = true;
+    if (!link.verificationCode) {
+      link.verificationCode = generateVerificationCode();
+    }
+    if (!link.verificationExpiresAt) {
+      link.verificationExpiresAt = getVerificationExpiryDate();
+    }
+    if (!link.status) {
+      link.status = 'pending_verification';
+    }
+    await link.save();
+
+    const result = await processInboundWhatsAppForLink({
       workspaceId,
       userId: auth.userId,
       phone,
@@ -68,7 +78,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: result,
+      data: {
+        ...result,
+        link: {
+          id: link._id.toString(),
+          status: link.status,
+          verificationCode: link.verificationCode,
+          verificationExpiresAt: link.verificationExpiresAt,
+        },
+      },
     });
   } catch (error) {
     console.error('WhatsApp test route error:', error);

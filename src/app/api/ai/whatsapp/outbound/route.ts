@@ -61,11 +61,12 @@ export async function POST(request: NextRequest) {
       workspace: workspaceId,
       user: auth.userId,
       isActive: true,
+      status: 'verified',
     }).select('phone waUserId');
 
     if (!link) {
       return NextResponse.json(
-        { success: false, error: 'Aucun numéro WhatsApp lié pour ce workspace' },
+        { success: false, error: 'Aucun numéro WhatsApp vérifié pour ce workspace' },
         { status: 404 }
       );
     }

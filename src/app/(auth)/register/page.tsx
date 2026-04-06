@@ -176,7 +176,7 @@ export default function RegisterPage() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
-                  placeholder="MERCIER"
+                  placeholder="Michael"
                   required
                   className="
                     w-full px-4 py-3 text-sm

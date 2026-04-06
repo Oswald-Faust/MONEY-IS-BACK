@@ -369,45 +369,55 @@ export default function CreateObjectiveModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        />
+      {/* Overlay */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+      />
 
+      {/* Conteneur centré — bottom-sheet sur mobile, centré sur sm+ */}
+      <div className="fixed inset-0 z-[61] flex flex-col items-stretch justify-end sm:items-center sm:justify-center sm:p-4 pointer-events-none">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-4xl bg-bg-secondary border border-glass-border rounded-3xl shadow-2xl overflow-hidden hover:!bg-bg-secondary"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+          className="pointer-events-auto relative w-full sm:max-w-2xl lg:max-w-4xl bg-bg-secondary border border-glass-border rounded-t-[28px] sm:rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[88vh]"
         >
-          <div className="p-6 border-b border-glass-border flex items-center justify-between bg-bg-secondary/20">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-accent-primary/10 text-accent-primary">
-                <Target className="w-6 h-6" />
+          {/* Header */}
+          <div className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5 border-b border-glass-border bg-bg-secondary/20 flex-shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-xl bg-accent-primary/10 text-accent-primary flex-shrink-0">
+                <Target className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-text-main">
-                  {initialData ? 'Modifier l\'objectif' : 'Nouvel objectif'}
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-xl font-bold text-text-main leading-tight">
+                  {initialData ? "Modifier l'objectif" : 'Nouvel objectif'}
                 </h2>
-                <p className="text-sm text-text-muted">
+                <p className="text-xs sm:text-sm text-text-muted hidden sm:block">
                   Les checkpoints sont automatiquement relies a la to-do list.
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors"
+              className="p-2 rounded-xl hover:bg-glass-hover text-text-muted hover:text-text-main transition-colors flex-shrink-0"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          <form id="objective-form" onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[78vh] overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Formulaire scrollable */}
+          <form
+            id="objective-form"
+            onSubmit={handleSubmit}
+            className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 sm:px-6 sm:py-6 space-y-5"
+          >
+            {/* Titre + Projet */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-text-muted ml-1">Titre de l&apos;objectif</label>
                 <input
@@ -437,25 +447,27 @@ export default function CreateObjectiveModal({
               </div>
             </div>
 
+            {/* Description */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-text-muted ml-1">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(event) => setFormData({ ...formData, description: event.target.value })}
                 placeholder="Contexte, resultat attendu, indicateurs de succes..."
-                rows={4}
+                rows={3}
                 className="w-full px-4 py-3 bg-bg-tertiary border border-glass-border rounded-2xl text-text-main placeholder-text-muted/50 focus:border-accent-primary/50 outline-none transition-all resize-none"
               />
             </div>
 
+            {/* Assistance IA */}
             <div className="space-y-3 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
                   <label className="text-sm font-medium text-text-main flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-accent-primary" />
+                    <Sparkles className="w-4 h-4 text-accent-primary flex-shrink-0" />
                     Assistance IA
                   </label>
-                  <p className="mt-1 text-xs text-text-muted">
+                  <p className="mt-0.5 text-xs text-text-muted">
                     Genere une description, une priorite et des checkpoints executables.
                   </p>
                 </div>
@@ -463,7 +475,7 @@ export default function CreateObjectiveModal({
                   type="button"
                   onClick={handleGenerateWithAI}
                   disabled={isGeneratingWithAI}
-                  className="inline-flex items-center gap-2 rounded-xl bg-accent-primary px-4 py-2 text-xs font-bold text-white shadow-lg shadow-accent-primary/20 transition-all hover:opacity-90 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-primary px-3 py-2 text-xs font-bold text-white shadow-lg shadow-accent-primary/20 transition-all hover:opacity-90 disabled:opacity-50 flex-shrink-0"
                 >
                   {isGeneratingWithAI ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -479,7 +491,7 @@ export default function CreateObjectiveModal({
                 onChange={(event) => setAiPrompt(event.target.value)}
                 placeholder="Ex: Nous voulons lancer une beta privee en 30 jours avec des etapes concretes, une priorite claire et une execution simple."
                 rows={3}
-                className="w-full rounded-2xl border border-indigo-500/10 bg-bg-secondary px-4 py-3 text-sm text-text-main placeholder-text-muted/50 focus:border-accent-primary/40 focus:outline-none"
+                className="w-full rounded-2xl border border-indigo-500/10 bg-bg-secondary px-4 py-3 text-sm text-text-main placeholder-text-muted/50 focus:border-accent-primary/40 focus:outline-none resize-none"
               />
 
               {followUpQuestions.length > 0 && (
@@ -498,7 +510,8 @@ export default function CreateObjectiveModal({
               )}
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            {/* Assignés + Priorité + Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <UserSelector
                   value={formData.assignees}
@@ -517,7 +530,7 @@ export default function CreateObjectiveModal({
                       key={option.value}
                       type="button"
                       onClick={() => setFormData({ ...formData, priority: option.value })}
-                      className={`py-2 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all ${
+                      className={`py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all ${
                         formData.priority === option.value
                           ? 'bg-accent-primary/10 border-accent-primary text-accent-primary'
                           : 'bg-bg-tertiary border-glass-border text-text-muted hover:border-text-dim'
@@ -540,69 +553,74 @@ export default function CreateObjectiveModal({
               </div>
             </div>
 
+            {/* Checkpoints */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between ml-1">
+              <div className="flex items-start justify-between ml-1 gap-3">
                 <div>
                   <label className="text-sm font-medium text-text-muted">Checkpoints lies a la to-do list</label>
-                  <p className="text-xs text-text-muted mt-1">
+                  <p className="text-xs text-text-muted mt-0.5">
                     Chaque checkpoint cree ou met a jour automatiquement une tache reliee.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={addCheckpoint}
-                  className="text-xs font-bold text-accent-primary hover:underline flex items-center gap-1 transition-colors"
+                  className="text-xs font-bold text-accent-primary hover:underline flex items-center gap-1 transition-colors flex-shrink-0"
                 >
                   <Plus className="w-3 h-3" />
                   Ajouter
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {formData.checkpoints.map((checkpoint, index) => (
-                  <div key={checkpoint.id} className="rounded-2xl border border-glass-border bg-bg-tertiary/50 p-4 space-y-4">
+                  <div key={checkpoint.id} className="rounded-2xl border border-glass-border bg-bg-tertiary/50 p-3 sm:p-4 space-y-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-bg-secondary border border-glass-border flex items-center justify-center text-xs font-bold text-text-muted">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-bg-secondary border border-glass-border flex items-center justify-center text-xs font-bold text-text-muted flex-shrink-0">
                         {index + 1}
                       </div>
-                      <div className="flex-1 space-y-3">
-                        <div className="flex flex-col xl:flex-row gap-3">
+                      <div className="flex-1 min-w-0 space-y-3">
+                        {/* Titre checkpoint + supprimer */}
+                        <div className="flex gap-2">
                           <input
                             type="text"
                             value={checkpoint.title}
                             onChange={(event) => updateCheckpoint(checkpoint.id, { title: event.target.value })}
                             placeholder="Titre du checkpoint..."
-                            className="flex-1 px-4 py-3 bg-bg-secondary border border-glass-border rounded-xl text-text-main placeholder-text-muted/40 focus:border-accent-primary/30 outline-none transition-all"
+                            className="flex-1 min-w-0 px-3 py-2.5 bg-bg-secondary border border-glass-border rounded-xl text-sm text-text-main placeholder-text-muted/40 focus:border-accent-primary/30 outline-none transition-all"
                           />
                           <button
                             type="button"
                             onClick={() => removeCheckpoint(checkpoint.id)}
-                            className="self-start p-3 rounded-xl hover:bg-red-500/10 text-text-muted hover:text-red-500 transition-colors"
+                            className="p-2.5 rounded-xl hover:bg-red-500/10 text-text-muted hover:text-red-500 transition-colors flex-shrink-0"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-4">
+                        {/* Priorité + Échéance */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
                               <Flag className="w-3.5 h-3.5" />
-                              Priorite de la tache
+                              Priorite
                             </label>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-3 gap-1.5">
                               {checkpointPriorityOptions.map((option) => (
                                 <button
                                   key={option.value}
                                   type="button"
                                   onClick={() => updateCheckpoint(checkpoint.id, { priority: option.value })}
-                                  className={`px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
+                                  className={`px-2 py-2 rounded-xl border text-xs font-semibold transition-all ${
                                     checkpoint.priority === option.value
                                       ? 'text-text-main border-white/20'
                                       : 'text-text-muted border-glass-border hover:border-white/10'
                                   }`}
                                   style={{
                                     backgroundColor:
-                                      checkpoint.priority === option.value ? `${option.color}20` : 'rgba(255,255,255,0.02)',
+                                      checkpoint.priority === option.value
+                                        ? `${option.color}20`
+                                        : 'rgba(255,255,255,0.02)',
                                   }}
                                 >
                                   {option.label}
@@ -620,23 +638,25 @@ export default function CreateObjectiveModal({
                               type="date"
                               value={checkpoint.dueDate}
                               onChange={(event) => updateCheckpoint(checkpoint.id, { dueDate: event.target.value })}
-                              className="w-full px-4 py-3 bg-bg-secondary border border-glass-border rounded-xl text-text-main outline-none focus:border-accent-primary/50 transition-all"
+                              className="w-full px-3 py-2.5 bg-bg-secondary border border-glass-border rounded-xl text-sm text-text-main outline-none focus:border-accent-primary/50 transition-all"
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 items-end">
-                          <UserSelector
-                            value={checkpoint.assignees}
-                            onChange={(userIds) => updateCheckpoint(checkpoint.id, { assignees: userIds as string[] })}
-                            multiple={true}
-                            label="Assignes du checkpoint"
-                            projectId={formData.project || undefined}
-                            workspaceId={checkpointWorkspaceId}
-                          />
-
+                        {/* Assignés checkpoint + lien tâche */}
+                        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                          <div className="flex-1 min-w-0">
+                            <UserSelector
+                              value={checkpoint.assignees}
+                              onChange={(userIds) => updateCheckpoint(checkpoint.id, { assignees: userIds as string[] })}
+                              multiple={true}
+                              label="Assignes du checkpoint"
+                              projectId={formData.project || undefined}
+                              workspaceId={checkpointWorkspaceId}
+                            />
+                          </div>
                           {checkpoint.task && (
-                            <div className="px-3 py-2 rounded-xl bg-bg-secondary border border-glass-border text-xs text-text-muted flex items-center gap-2 whitespace-nowrap">
+                            <div className="px-3 py-2 rounded-xl bg-bg-secondary border border-glass-border text-xs text-text-muted flex items-center gap-2 whitespace-nowrap flex-shrink-0">
                               <Link2 className="w-3.5 h-3.5" />
                               Tache deja liee
                             </div>
@@ -650,11 +670,12 @@ export default function CreateObjectiveModal({
             </div>
           </form>
 
-          <div className="p-6 border-t border-glass-border bg-bg-secondary/50 flex items-center justify-end gap-3">
+          {/* Footer */}
+          <div className="flex-shrink-0 px-4 py-4 sm:px-6 sm:py-5 border-t border-glass-border bg-bg-secondary/50 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl text-sm font-medium text-text-muted hover:text-text-main hover:bg-glass-hover transition-all"
+              className="px-5 py-2.5 rounded-xl text-sm font-medium text-text-muted hover:text-text-main hover:bg-glass-hover transition-all"
             >
               Annuler
             </button>
@@ -662,14 +683,14 @@ export default function CreateObjectiveModal({
               type="submit"
               form="objective-form"
               disabled={loading}
-              className="px-8 py-2.5 rounded-xl bg-accent-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-lg shadow-accent-primary/20"
+              className="px-6 py-2.5 rounded-xl bg-accent-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-lg shadow-accent-primary/20"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : initialData ? (
                 'Enregistrer'
               ) : (
-                'Creer l\'objectif'
+                "Creer l'objectif"
               )}
             </button>
           </div>

@@ -7,7 +7,7 @@ import {
   sendWhatsAppReplyButtons,
   sendWhatsAppTextMessage,
 } from '@/lib/whatsapp/client';
-import { processWhatsAppMessage } from '@/lib/whatsapp/orchestrator';
+import { processInboundWhatsAppForLink } from '@/lib/whatsapp/inbound';
 import { transcribeAudioBuffer } from '@/lib/ai/audio';
 import { normalizePhoneNumber, normalizeWhatsAppUserId } from '@/lib/whatsapp/normalize';
 
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
       const linkedAccount = await WhatsAppLink.findOne({
         isActive: true,
         $or: [{ waUserId: normalizedWaUserId }, { phone: normalizedPhone }],
-      }).select('workspace user');
+      }).select('workspace user status');
 
       const workspaceId =
         linkedAccount?.workspace?.toString() || process.env.WHATSAPP_DEFAULT_WORKSPACE_ID;
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      const result = await processWhatsAppMessage({
+      const result = await processInboundWhatsAppForLink({
         workspaceId,
         userId,
         phone: normalizedPhone,
