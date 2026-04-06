@@ -6,6 +6,7 @@ import AIConversation from '@/models/AIConversation';
 import Project from '@/models/Project';
 import { ensureConversationAccess } from '@/lib/ai/access';
 import { generateAssistantReply } from '@/lib/ai';
+import { checkAIQuota, incrementAIUsage } from '@/lib/ai/quota';
 import { createProjectForWorkspace } from '@/lib/projects/create-project';
 
 function normalizeConversationTitle(input?: string) {
@@ -94,6 +95,24 @@ export async function POST(
 
     if (!content) {
       return NextResponse.json({ success: false, error: 'Message requis' }, { status: 400 });
+    }
+
+    // Vérification du quota IA
+    const quota = await checkAIQuota(access.workspace._id.toString());
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'quota_exceeded',
+          quota: {
+            tokensUsed: quota.tokensUsed,
+            tokensLimit: quota.tokensLimit,
+            plan: quota.plan,
+            month: quota.month,
+          },
+        },
+        { status: 429 }
+      );
     }
 
     const userMessage = await AIMessage.create({
@@ -196,6 +215,9 @@ export async function POST(
         }
       }
     }
+
+    // Incrémenter le quota avec les tokens réellement consommés
+    await incrementAIUsage(access.workspace._id.toString(), assistantReply.tokensUsed, 'assistant');
 
     const assistantMessage = await AIMessage.create({
       conversation: id,

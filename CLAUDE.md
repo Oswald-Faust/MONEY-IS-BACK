@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Edwin** (branded as "Money Is Back") is a French-first SaaS productivity hub: workspaces, projects, tasks, routines, objectives, ideas, file drive, messaging system, and secure credential vault. Pricing in euros.
+**Edwin** (branded as "Money Is Back") is a French-first SaaS productivity hub: workspaces, projects, tasks, routines, objectives, ideas, file drive, messaging system, secure credential vault, and WhatsApp AI assistant. Pricing in euros.
 
 The `busted-data/` sibling directory is a reference snapshot — not the active codebase.
 
@@ -32,6 +32,7 @@ No test framework configured.
 - **Nodemailer** — SMTP email with configurable templates (Hostinger SMTP default)
 - **Framer Motion** — animations on landing page
 - **lucide-react** — icons throughout the app
+- **OpenAI** — audio transcription for WhatsApp voice messages
 
 ## Route Groups
 
@@ -64,7 +65,7 @@ Two Zustand stores, both persisted:
 
 **`useAppStore`** (`project-hub-storage`):
 - All domain data: `workspaces`, `currentWorkspace`, `projects`, `currentProject`, `tasks`, `routines`, `objectives`, `ideas`, `driveFiles`, `driveFolders`
-- UI state: `sidebarCollapsed`, `isMobileMenuOpen`, `activeView`
+- UI state: `sidebarCollapsed`, `isMobileMenuOpen`, `isAiAssistantOpen`, `activeView`
 - Modal booleans: `isProjectModalOpen`, `isTaskModalOpen`, `isRoutineModalOpen`, `isObjectiveModalOpen`, `isIdeaModalOpen`, `isWorkspaceModalOpen`, `isUploadModalOpen`, `isCreateFolderModalOpen`, `isSearchModalOpen`, `isCreateUserModalOpen` + their related IDs
 - Methods: full CRUD for each entity (set, add, update, delete)
 - Modal state is NOT persisted (only domain data + UI prefs are)
@@ -96,6 +97,10 @@ All models use `mongoose.models` caching pattern to prevent re-registration.
 | `EmailConfig` | smtp{host, port, secure, user, pass, from}, automations{onRegister, onPayment, onInvitation…} |
 | `EmailCampaign` | name, subject, body, status (draft\|sending\|sent\|failed), audience{type, customEmails}, stats{total, sent, failed} |
 | `EmailSendLog` | to, subject, status, category, templateId, campaignId, userId, errorMessage, sentAt |
+| `AIConversation` | workspace, user, phone (WhatsApp), title, lastMessage, messageCount, status |
+| `AIMessage` | conversation, role (user\|assistant), content, metadata{intent, payload} |
+| `WhatsAppLink` | workspace, user, phone, waUserId, label, isActive, lastInboundAt — unique indexes on (workspace,user), (workspace,phone), (workspace,waUserId) |
+| `WhatsAppPendingAction` | workspace, user, phone, intent (task\|objective\|idea), payload{title,description,projectName…}, missingFields[], expiresAt |
 
 ### Security
 
@@ -120,9 +125,29 @@ All routes return `{ success, data/error }`. Auth via `Authorization: Bearer <to
 
 **Stripe:** `POST /stripe/checkout` (creates session, ad-hoc pricing), `POST /stripe/webhook`
 
+**AI & WhatsApp:**
+- `POST /api/ai/whatsapp/webhook` — Meta webhook (GET = verify token, POST = inbound messages)
+- `POST /api/ai/whatsapp/test` — Test without Meta integration
+- `POST /api/ai/whatsapp/links` — Link phone number to workspace
+- `POST /api/ai/whatsapp/outbound` — Send outbound message
+- `GET/POST /api/ai/conversations[/[id]/messages]` — AI conversation history
+- `POST /api/ai/objectives/generate` — AI-generated objectives
+- `GET /api/ai/search` — AI-powered search
+
 **Admin only:** `/admin/stats`, `/admin/users`, `/admin/workspaces`, `/admin/subscriptions`, `/admin/logs`, `/admin/settings`, `/admin/projects/access`, `/admin/emails/*` (campaigns, templates, logs, analytics, test, settings)
 
-**Other:** `GET /search` (global cross-resource), `POST /contact`, `POST /debug/seed-users`
+**Other:** `GET /search` (global cross-resource), `POST /contact`, `POST /invitations/validate`, `POST /invitations/accept`, `POST /debug/seed-users`
+
+## WhatsApp AI Integration (`src/lib/whatsapp/`)
+
+Flow: Meta webhook → `orchestrator.ts` → AI intent detection → entity creation or multi-turn clarification
+
+- **`client.ts`** — Cloud API v23.0: `sendWhatsAppTextMessage()`, `sendWhatsAppReplyButtons()`, `isWhatsAppConfigured()`
+- **`orchestrator.ts`** — `processWhatsAppMessage()`: resolves phone→workspace via `WhatsAppLink`, calls Claude/AI for intent (task|objective|idea), stores `WhatsAppPendingAction` for multi-turn flows, sends quick reply buttons
+- **`actions.ts`** — `createTaskFromWhatsApp()`, `createObjectiveFromWhatsApp()`, `createIdeaFromWhatsApp()`
+- **`normalize.ts`** — E.164 phone normalization
+
+Audio messages are transcribed via OpenAI (`src/lib/ai/audio.ts`) before processing.
 
 ## Subscription Plans (`src/lib/limits.ts`)
 
@@ -149,8 +174,10 @@ All routes return `{ success, data/error }`. Auth via `Authorization: Bearer <to
 - `--text-main/dim/muted` — text hierarchy
 - `--glass-bg / --glass-border` — glass morphism (very subtle in dark mode)
 - `--accent-primary: #6366f1` (indigo) — accent app
+- `--accent-secondary: #8b5cf6` (purple)
 - `--color-neon-cyan: #00FFB2` — landing page accent uniquement
 - `--sidebar-w: 280px / --sidebar-coll: 80px`
+- `.glass-card`, `.btn-primary`, `.priority-important/less/waiting` — utility classes
 
 **Font:** Inter (Google Fonts). **Path alias:** `@/*` → `./src/*`. **Icons:** lucide-react exclusively.
 
@@ -184,6 +211,8 @@ Translation files: `src/lib/i18n/translations/fr.ts` and `en.ts`. Comments and v
 | `src/lib/stripe.ts` | Initialized Stripe instance |
 | `src/lib/mail.ts` | Email sending + template rendering + logging |
 | `src/lib/i18n/` | React i18n context + fr/en translation files |
+| `src/lib/whatsapp/` | WhatsApp Cloud API client + AI orchestrator |
+| `src/lib/ai/` | AI utilities (context, access, audio transcription) |
 
 ## Required Environment Variables
 
@@ -196,6 +225,22 @@ NEXT_PUBLIC_APP_URL
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
-STRIPE_PRICE_PRO_MONTHLY / YEARLY      # référencés mais pricing ad-hoc utilisé
+STRIPE_PRICE_PRO_MONTHLY / YEARLY
 STRIPE_PRICE_BUSINESS_MONTHLY / YEARLY
+
+# Google OAuth
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+
+# WhatsApp (optional)
+WHATSAPP_VERIFY_TOKEN
+WHATSAPP_ACCESS_TOKEN
+WHATSAPP_PHONE_NUMBER_ID
+WHATSAPP_GRAPH_API_VERSION  # default: v23.0
+WHATSAPP_DEFAULT_WORKSPACE_ID  # dev/testing only
+WHATSAPP_DEFAULT_USER_ID       # dev/testing only
+
+# OpenAI (WhatsApp voice messages)
+OPENAI_API_KEY
+OPENAI_TRANSCRIPTION_MODEL  # default: gpt-4o-mini-transcribe
 ```

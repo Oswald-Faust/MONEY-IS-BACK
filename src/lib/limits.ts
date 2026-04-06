@@ -6,6 +6,9 @@ export const PLAN_LIMITS = {
     storageGB: 2,
     maxIds: 5,
     support: 'Email (48h)',
+    // IA : -1 = illimité, sinon tokens/mois
+    aiTokensPerMonth: 150_000,
+    aiWhatsapp: false,
   },
   pro: {
     maxProjects: Infinity,
@@ -14,6 +17,8 @@ export const PLAN_LIMITS = {
     storageGB: Infinity,
     maxIds: Infinity,
     support: 'Prioritaire',
+    aiTokensPerMonth: 500_000,
+    aiWhatsapp: true,
   },
   team: { // This is the plan name used in Stripe metadata
     maxProjects: Infinity,
@@ -22,6 +27,8 @@ export const PLAN_LIMITS = {
     storageGB: Infinity,
     maxIds: Infinity,
     support: 'Prioritaire 24/7',
+    aiTokensPerMonth: 2_000_000,
+    aiWhatsapp: true,
   },
   business: { // Alias for legacy/consistency
     maxProjects: Infinity,
@@ -30,6 +37,8 @@ export const PLAN_LIMITS = {
     storageGB: Infinity,
     maxIds: Infinity,
     support: 'Prioritaire 24/7',
+    aiTokensPerMonth: 8_000_000,
+    aiWhatsapp: true,
   },
   enterprise: {
     maxProjects: Infinity,
@@ -38,6 +47,8 @@ export const PLAN_LIMITS = {
     storageGB: Infinity,
     maxIds: Infinity,
     support: 'Dédié',
+    aiTokensPerMonth: -1, // illimité
+    aiWhatsapp: true,
   }
 };
 

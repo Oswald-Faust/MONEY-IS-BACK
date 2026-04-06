@@ -4,6 +4,7 @@ import dbConnect from '@/lib/mongodb';
 import Workspace from '@/models/Workspace';
 import Stripe from 'stripe';
 import { sendPaymentNotification } from '@/lib/mail';
+import { TOKEN_PACKS, type TokenPackId } from '@/app/api/stripe/tokens/route';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -29,6 +30,34 @@ export async function POST(req: NextRequest) {
 
   switch (event.type) {
     case 'checkout.session.completed': {
+      // ── Achat de pack de tokens (one-time) ──────────────────────────────
+      if (session.metadata?.type === 'token_pack') {
+        const workspaceId = session.metadata.workspaceId;
+        const packId = session.metadata.packId as TokenPackId;
+        const tokens = parseInt(session.metadata.tokens || '0', 10);
+
+        if (workspaceId && tokens > 0) {
+          const pack = TOKEN_PACKS[packId];
+          await Workspace.findByIdAndUpdate(workspaceId, {
+            $inc: { bonusTokens: tokens },
+          });
+          console.log(`Token pack "${pack?.label}" crédité: +${tokens} tokens → workspace ${workspaceId}`);
+
+          if (session.customer_details?.email) {
+            const amount = session.amount_total
+              ? `${(session.amount_total / 100).toFixed(2)} EUR`
+              : 'N/A';
+            sendPaymentNotification(
+              session.customer_details.email,
+              `Pack tokens (${pack?.label})`,
+              amount
+            ).catch(err => console.error('Email notification error:', err));
+          }
+        }
+        break;
+      }
+
+      // ── Abonnement récurrent ─────────────────────────────────────────────
       const workspaceId = session.metadata?.workspaceId;
       const planId = session.metadata?.planId;
       const subscriptionId = session.subscription as string;

@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import { verifyAuth } from '@/lib/auth';
 import { generateSearchInsight } from '@/lib/ai';
 import { ensureWorkspaceAccess } from '@/lib/ai/access';
+import { checkAIQuota, incrementAIUsage } from '@/lib/ai/quota';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,7 +31,20 @@ export async function GET(request: NextRequest) {
       return access.error;
     }
 
+    const quota = await checkAIQuota(workspaceId);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'quota_exceeded',
+          quota: { tokensUsed: quota.tokensUsed, tokensLimit: quota.tokensLimit, plan: quota.plan, month: quota.month },
+        },
+        { status: 429 }
+      );
+    }
+
     const insight = await generateSearchInsight({ workspaceId, query: query.trim() });
+    await incrementAIUsage(workspaceId, insight.tokensUsed, 'search');
 
     return NextResponse.json({
       success: true,
