@@ -10,6 +10,9 @@ import {
 import { processWhatsAppMessage } from '@/lib/whatsapp/orchestrator';
 import { transcribeAudioBuffer } from '@/lib/ai/audio';
 import { normalizePhoneNumber, normalizeWhatsAppUserId } from '@/lib/whatsapp/normalize';
+import { checkAIQuota, incrementAIUsage } from '@/lib/ai/quota';
+import { PLAN_LIMITS } from '@/lib/limits';
+import Workspace from '@/models/Workspace';
 
 type IncomingWebhookMessage = {
   id: string;
@@ -192,12 +195,34 @@ export async function POST(request: NextRequest) {
       if (!workspaceId || !userId) {
         await sendWhatsAppTextMessage({
           to: incoming.from,
-          body: 'Votre numéro WhatsApp n’est pas encore relié à un workspace Edwin.',
+          body: ‘Votre numéro WhatsApp n’est pas encore relié à un workspace Edwin.’,
         });
         continue;
       }
 
-      let text = incoming.text?.trim() || '';
+      // Vérifier si le plan autorise WhatsApp IA
+      const ws = await Workspace.findById(workspaceId).select(‘subscriptionPlan’).lean();
+      const plan = (ws?.subscriptionPlan as keyof typeof PLAN_LIMITS) || ‘starter’;
+      const planLimits = PLAN_LIMITS[plan] ?? PLAN_LIMITS.starter;
+      if (!planLimits.aiWhatsapp) {
+        await sendWhatsAppTextMessage({
+          to: incoming.from,
+          body: `L’assistant WhatsApp IA n’est pas inclus dans votre plan ${plan}. Passez au plan Pro ou supérieur sur edwinhub.com.`,
+        });
+        continue;
+      }
+
+      // Vérifier le quota de tokens IA
+      const quota = await checkAIQuota(workspaceId);
+      if (!quota.allowed) {
+        await sendWhatsAppTextMessage({
+          to: incoming.from,
+          body: `Votre quota IA mensuel est épuisé (${quota.tokensUsed.toLocaleString(‘fr’)} / ${quota.tokensLimit.toLocaleString(‘fr’)} tokens). Il se renouvelle le 1er du mois prochain.`,
+        });
+        continue;
+      }
+
+      let text = incoming.text?.trim() || ‘’;
 
       if (incoming.type === 'audio' && incoming.audioId) {
         try {
@@ -240,6 +265,11 @@ export async function POST(request: NextRequest) {
         createdEntity: result.createdEntity,
         pending: result.pending,
       });
+
+      // Incrémenter le quota — estimation conservative par interaction WhatsApp
+      if (!result.duplicate) {
+        await incrementAIUsage(workspaceId, result.tokensUsed ?? 1500, 'whatsapp');
+      }
 
       if (result.reply && !result.duplicate) {
         if (result.quickReplies && result.quickReplies.length > 0) {

@@ -6,18 +6,45 @@ import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Workspace } from '@/types';
-import { 
-  Check, 
-  Zap, 
-  Star, 
-  Rocket, 
-  Clock, 
+import {
+  Check,
+  Zap,
+  Star,
+  Rocket,
+  Clock,
   Calendar,
   CreditCard,
   ShieldCheck,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  Search,
+  Target,
+  Smartphone,
+  Plus,
+  RefreshCw,
+  Infinity as InfinityIcon,
 } from 'lucide-react';
+
+const TOKEN_PACKS = [
+  { id: 'starter_pack',  label: 'Pack Starter',  tokens: 200_000,   price: 2.99,  description: '~40–60 échanges supplémentaires' },
+  { id: 'standard_pack', label: 'Pack Standard', tokens: 1_000_000, price: 9.99,  description: '~200–300 échanges supplémentaires', popular: true },
+  { id: 'pro_pack',      label: 'Pack Pro',      tokens: 5_000_000, price: 34.99, description: '~1 000–1 500 échanges supplémentaires' },
+];
+
+const AI_PLAN_FEATURES = [
+  { plan: 'starter',    tokens: '150 000',      whatsapp: false, label: 'Gratuit' },
+  { plan: 'pro',        tokens: '500 000',      whatsapp: true,  label: 'Pro' },
+  { plan: 'team',       tokens: '2 000 000',    whatsapp: true,  label: 'Team' },
+  { plan: 'business',   tokens: '8 000 000',    whatsapp: true,  label: 'Business' },
+  { plan: 'enterprise', tokens: 'Illimité',     whatsapp: true,  label: 'Enterprise' },
+];
+
+function formatTokenDisplay(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(0)}M`;
+  if (n >= 1_000)     return `${(n / 1_000).toFixed(0)}k`;
+  return String(n);
+}
 
 const plans = [
   {
@@ -98,6 +125,7 @@ export default function UpgradePage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [isUpgrading, setIsUpgrading] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [purchasingPack, setPurchasingPack] = useState<string | null>(null);
   
   const { currentWorkspace, setCurrentWorkspace, setWorkspaces } = useAppStore();
   const { token } = useAuthStore();
@@ -203,6 +231,31 @@ export default function UpgradePage() {
       refreshData(true);
     }
   }, [token, refreshData]);
+
+  const handleBuyPack = async (packId: string) => {
+    if (!currentWorkspace) {
+      toast.error('Veuillez sélectionner un workspace');
+      return;
+    }
+    setPurchasingPack(packId);
+    try {
+      const res = await fetch('/api/stripe/tokens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ workspaceId: currentWorkspace._id, packId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || 'Erreur lors de la création du paiement');
+      }
+    } catch {
+      toast.error('Erreur réseau');
+    } finally {
+      setPurchasingPack(null);
+    }
+  };
 
   const handleUpgrade = async (planId: string) => {
     if (planId === 'enterprise') return;
@@ -458,6 +511,146 @@ export default function UpgradePage() {
               </motion.div>
             );
           })}
+        </motion.div>
+
+        {/* ── Section IA & Tokens ─────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-24"
+        >
+          {/* Header section */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/5 text-[10px] font-mono text-indigo-400 tracking-widest uppercase mb-4">
+              <Sparkles className="w-3 h-3" />
+              INTELLIGENCE ARTIFICIELLE
+            </div>
+            <h2 className="text-3xl font-bold text-text-main mb-3 tracking-tight">Quota IA par plan</h2>
+            <p className="text-text-dim max-w-xl mx-auto text-sm">
+              Chaque token consommé correspond à un échange avec l&apos;IA (message envoyé + réponse reçue + contexte workspace). Les tokens se renouvellent chaque mois.
+            </p>
+          </div>
+
+          {/* Tableau tokens par plan */}
+          <div className="overflow-x-auto rounded-2xl border border-glass-border bg-bg-secondary mb-6">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-glass-border">
+                  <th className="text-left px-6 py-4 text-text-muted font-medium">Fonctionnalité</th>
+                  {AI_PLAN_FEATURES.map(p => (
+                    <th key={p.plan} className={`px-6 py-4 text-center font-semibold ${p.plan === currentPlanId ? 'text-indigo-400' : 'text-text-dim'}`}>
+                      {p.label}
+                      {p.plan === currentPlanId && <span className="ml-1 text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded-md font-bold">ACTUEL</span>}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-glass-border">
+                  <td className="px-6 py-4 text-text-dim flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+                    Tokens IA / mois
+                  </td>
+                  {AI_PLAN_FEATURES.map(p => (
+                    <td key={p.plan} className="px-6 py-4 text-center">
+                      {p.tokens === 'Illimité'
+                        ? <span className="inline-flex items-center gap-1 text-[#00FFB2] font-semibold"><InfinityIcon className="w-4 h-4" /> Illimité</span>
+                        : <span className={`font-semibold ${p.plan === currentPlanId ? 'text-indigo-400' : 'text-text-main'}`}>{p.tokens}</span>
+                      }
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-b border-glass-border">
+                  <td className="px-6 py-4 text-text-dim flex items-center gap-2">
+                    <Smartphone className="w-4 h-4 text-green-400 flex-shrink-0" />
+                    WhatsApp IA
+                  </td>
+                  {AI_PLAN_FEATURES.map(p => (
+                    <td key={p.plan} className="px-6 py-4 text-center">
+                      {p.whatsapp
+                        ? <Check className="w-4 h-4 text-[#00FFB2] mx-auto" />
+                        : <span className="text-text-muted text-xs">—</span>
+                      }
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-b border-glass-border">
+                  <td className="px-6 py-4 text-text-dim flex items-center gap-2">
+                    <Search className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                    Recherche IA
+                  </td>
+                  {AI_PLAN_FEATURES.map(() => (
+                    <td key={Math.random()} className="px-6 py-4 text-center">
+                      <Check className="w-4 h-4 text-[#00FFB2] mx-auto" />
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-text-dim flex items-center gap-2">
+                    <Target className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                    Génération d&apos;objectifs
+                  </td>
+                  {AI_PLAN_FEATURES.map(() => (
+                    <td key={Math.random()} className="px-6 py-4 text-center">
+                      <Check className="w-4 h-4 text-[#00FFB2] mx-auto" />
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-center text-xs text-text-muted mb-12">
+            1 échange assistant ≈ 3 000–7 000 tokens · 1 recherche IA ≈ 2 000–4 000 tokens · 1 génération d&apos;objectif ≈ 3 000–6 000 tokens
+          </p>
+
+          {/* Packs de tokens */}
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-text-main mb-1">Acheter des tokens supplémentaires</h3>
+            <p className="text-sm text-text-dim">
+              Disponibles pour tous les plans. Les tokens achetés s&apos;ajoutent à votre quota mensuel et <strong className="text-text-main">n&apos;expirent pas</strong> en fin de mois.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {TOKEN_PACKS.map(pack => (
+              <div
+                key={pack.id}
+                className={`relative rounded-2xl p-6 flex flex-col gap-4 border transition-all ${
+                  pack.popular
+                    ? 'bg-indigo-600 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.15)]'
+                    : 'bg-bg-secondary border-glass-border hover:border-indigo-500/30'
+                }`}
+              >
+                {pack.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-indigo-500 text-white text-[10px] font-bold tracking-widest uppercase">
+                    POPULAIRE
+                  </div>
+                )}
+                <div>
+                  <p className={`font-bold text-lg ${pack.popular ? 'text-white' : 'text-text-main'}`}>{pack.label}</p>
+                  <p className={`text-2xl font-extrabold mt-1 ${pack.popular ? 'text-white' : 'text-indigo-400'}`}>
+                    {formatTokenDisplay(pack.tokens)} <span className="text-sm font-normal opacity-70">tokens</span>
+                  </p>
+                  <p className={`text-xs mt-1 ${pack.popular ? 'text-indigo-100' : 'text-text-muted'}`}>{pack.description}</p>
+                </div>
+                <button
+                  onClick={() => handleBuyPack(pack.id)}
+                  disabled={!!purchasingPack}
+                  className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${
+                    pack.popular
+                      ? 'bg-white text-indigo-600 hover:bg-indigo-50'
+                      : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20'
+                  }`}
+                >
+                  {purchasingPack === pack.id
+                    ? <><RefreshCw className="w-4 h-4 animate-spin" /> Chargement...</>
+                    : <><Plus className="w-4 h-4" /> {pack.price.toFixed(2)} €</>
+                  }
+                </button>
+              </div>
+            ))}
+          </div>
         </motion.div>
 
         {/* FAQ or Trust Badges Section */}
