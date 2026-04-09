@@ -298,6 +298,7 @@ async function buildCheckpointTaskPayload(
     dueDate: checkpoint.dueDate,
     assignee: assigneeInfo.assignee,
     assignees: assigneeInfo.assignees,
+    creator: objective.creator,
   };
 }
 

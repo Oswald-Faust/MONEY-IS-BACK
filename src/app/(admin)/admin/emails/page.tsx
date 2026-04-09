@@ -23,6 +23,15 @@ import {
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store';
 
+const BREVO_SMTP_PRESET = {
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false,
+  user: '',
+  pass: '',
+  from: 'Edwin <no-reply@your-domain.com>',
+};
+
 type Template = {
   _id?: string;
   name: string;
@@ -218,12 +227,10 @@ export default function EmailsAdminPage() {
 
   const [emailConfig, setEmailConfig] = useState({
     smtp: {
-      host: 'smtp.hostinger.com',
-      port: 465,
-      secure: true,
+      ...BREVO_SMTP_PRESET,
       user: '',
       pass: '',
-      from: 'Edwin <contact@edwin.com>',
+      from: BREVO_SMTP_PRESET.from,
     },
     automations: {
       onRegister: true,
@@ -647,11 +654,34 @@ export default function EmailsAdminPage() {
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400">
                   <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                   <div className="text-sm">
-                    <p className="font-bold mb-1">Configuration SMTP</p>
+                    <p className="font-bold mb-1">Configuration Brevo SMTP</p>
                     <p>
-                      Hôte, port, identifiants et adresse expéditrice. Utilisez un e-mail pro (Hostinger ou autre) avec SMTP activé.
+                      Utilisez vos identifiants SMTP Brevo. Recommandé: `smtp-relay.brevo.com`, port `587`, SSL désactivé, utilisateur = votre login SMTP Brevo, mot de passe = votre clé SMTP Brevo.
                     </p>
                   </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEmailConfig({
+                        ...emailConfig,
+                        smtp: {
+                          ...emailConfig.smtp,
+                          ...BREVO_SMTP_PRESET,
+                          user: emailConfig.smtp.user,
+                          pass: emailConfig.smtp.pass,
+                        },
+                      })
+                    }
+                    className="px-4 py-2 rounded-xl border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/10 transition-colors text-sm font-medium"
+                  >
+                    Préremplir Brevo
+                  </button>
+                  <p className="text-xs text-text-dim self-center">
+                    Vérifie aussi que le domaine expéditeur est validé dans Brevo.
+                  </p>
                 </div>
 
                 <form onSubmit={handleSaveSettings} className="space-y-4">

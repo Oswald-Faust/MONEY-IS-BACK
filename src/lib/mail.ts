@@ -52,6 +52,35 @@ type SendEmailResult = {
   status?: 'sent' | 'failed' | 'skipped';
 };
 
+function formatEmailError(error: unknown): string {
+  if (error instanceof Error) {
+    const details = error as Error & {
+      code?: string;
+      response?: string;
+      responseCode?: number;
+      command?: string;
+    };
+
+    return [
+      details.message,
+      details.code ? `code: ${details.code}` : null,
+      typeof details.responseCode === 'number' ? `responseCode: ${details.responseCode}` : null,
+      details.command ? `command: ${details.command}` : null,
+      details.response ? `response: ${details.response}` : null,
+    ]
+      .filter(Boolean)
+      .join(' | ');
+  }
+
+  if (typeof error === 'string') return error;
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return 'Unknown error';
+  }
+}
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 function buildEmailLayout({
@@ -625,6 +654,9 @@ export async function sendEmail({
       host: config.smtp.host,
       port: config.smtp.port,
       secure: Boolean(config.smtp.secure),
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
       auth: {
         user: config.smtp.user,
         pass: config.smtp.pass,
@@ -658,6 +690,7 @@ export async function sendEmail({
 
     return { success: true, status: 'sent', messageId: info.messageId };
   } catch (error) {
+    const formattedError = formatEmailError(error);
     console.error('Error sending email:', error);
     await writeEmailLog({
       to: normalizedTo,
@@ -672,10 +705,10 @@ export async function sendEmail({
       userId,
       variables,
       metadata,
-      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorMessage: formattedError,
     });
 
-    return { success: false, status: 'failed', error };
+    return { success: false, status: 'failed', error: formattedError };
   }
 }
 

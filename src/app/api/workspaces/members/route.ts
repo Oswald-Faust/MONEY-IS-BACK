@@ -7,8 +7,6 @@ import Invitation from '@/models/Invitation';
 import Project from '@/models/Project';
 import { verifyAuth } from '@/lib/auth';
 import { sendInvitationEmail, sendWorkspaceWelcomeEmail } from '@/lib/mail';
-import type { IWorkspace } from '@/models/Workspace';
-import type { IUser } from '@/models/User';
 
 // GET /api/workspaces/members?workspaceId=...
 export async function GET(request: NextRequest) {
@@ -57,7 +55,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-  } catch (error: Error | any) {
+  } catch (error: unknown) {
     console.error('Get members error:', error);
     return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
   }
@@ -131,7 +129,7 @@ export async function POST(request: NextRequest) {
                 try {
                     const project = await Project.findById(projectId);
                     if (project && project.workspace.toString() === workspaceId) {
-                        const isAlreadyMember = project.members.some((m: { user: any }) => m.user.toString() === existingUser._id.toString());
+                        const isAlreadyMember = project.members.some((m: { user: { toString(): string } }) => m.user.toString() === existingUser._id.toString());
                         const isProjectOwner = project.owner.toString() === existingUser._id.toString();
                         if (!isAlreadyMember && !isProjectOwner) {
                             project.members.push({ user: existingUser._id, role, joinedAt: new Date() });
@@ -147,12 +145,16 @@ export async function POST(request: NextRequest) {
         // Notify user via email
         const inviter = await User.findById(auth.userId);
         const inviterName = inviter ? `${inviter.firstName} ${inviter.lastName}` : 'Un membre';
-        sendWorkspaceWelcomeEmail(email, workspace.name, inviterName).catch(err => console.error('Error sending welcome email:', err));
+        const emailResult = await sendWorkspaceWelcomeEmail(email, workspace.name, inviterName);
 
         return NextResponse.json({
             success: true,
-            message: 'Utilisateur ajouté avec succès',
-            type: 'added'
+            message: emailResult.success
+              ? 'Utilisateur ajouté avec succès'
+              : 'Utilisateur ajouté, mais l’e-mail de notification a échoué',
+            type: 'added',
+            emailStatus: emailResult.status,
+            emailError: emailResult.success ? undefined : String(emailResult.error || 'Échec e-mail'),
         });
     } else {
         // Create Invitation
@@ -184,17 +186,21 @@ export async function POST(request: NextRequest) {
 
         const inviter = await User.findById(auth.userId);
         const inviterName = inviter ? `${inviter.firstName} ${inviter.lastName}` : 'Un membre';
-        sendInvitationEmail(email, token, workspace.name, inviterName).catch(err => console.error('Error sending invitation email:', err));
+        const emailResult = await sendInvitationEmail(email, token, workspace.name, inviterName);
 
         return NextResponse.json({
             success: true,
-            message: 'Invitation envoyée avec succès',
+            message: emailResult.success
+              ? 'Invitation envoyée avec succès'
+              : 'Invitation créée, mais l’e-mail n’a pas pu être envoyé',
             type: 'invited',
-            invitation
+            invitation,
+            emailStatus: emailResult.status,
+            emailError: emailResult.success ? undefined : String(emailResult.error || 'Échec e-mail'),
         });
     }
 
-  } catch (error: Error | any) {
+  } catch (error: unknown) {
     console.error('Invite member error:', error);
     return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
   }
@@ -245,7 +251,7 @@ export async function PUT(request: NextRequest) {
 
         return NextResponse.json({ success: true, message: 'Rôle mis à jour' });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Update member error:', error);
         return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
     }
@@ -300,7 +306,7 @@ export async function PATCH(request: NextRequest) {
         if (!emailResult.success) {
             return NextResponse.json({
                 success: false,
-                error: 'Échec lors de l’envoi de l’e-mail',
+                error: typeof emailResult.error === 'string' ? emailResult.error : 'Échec lors de l’envoi de l’e-mail',
                 emailStatus: emailResult.status,
             }, { status: 502 });
         }
@@ -310,7 +316,7 @@ export async function PATCH(request: NextRequest) {
             message: 'Invitation renvoyée',
             emailStatus: emailResult.status,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Resend invitation error:', error);
         return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
     }
@@ -351,7 +357,7 @@ export async function DELETE(request: NextRequest) {
                  return NextResponse.json({ success: false, error: 'Vous ne pouvez pas vous supprimer vous-même (quittez le workspace)' }, { status: 400 });
             }
 
-            workspace.members = workspace.members.filter((m: any) => m.user.toString() !== userId);
+            workspace.members = workspace.members.filter((m) => m.user.toString() !== userId);
             await workspace.save();
 
             // Update user workspaces list
@@ -366,7 +372,7 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'User ID ou Invitation ID requis' }, { status: 400 });
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Delete member error:', error);
         return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
     }

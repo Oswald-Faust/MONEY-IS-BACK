@@ -34,7 +34,10 @@ export async function POST(request: NextRequest) {
     if (result.success) {
       return NextResponse.json({ success: true, messageId: result.messageId });
     } else {
-      return NextResponse.json({ success: false, error: result.error }, { status: 500 });
+      return NextResponse.json({
+        success: false,
+        error: typeof result.error === 'string' ? result.error : 'Échec de l’envoi SMTP',
+      }, { status: 500 });
     }
   } catch (error) {
     console.error('API Error:', error);

@@ -22,12 +22,12 @@ export interface IEmailConfig extends Document {
 const EmailConfigSchema = new Schema<IEmailConfig>(
   {
     smtp: {
-      host: { type: String, default: 'smtp.hostinger.com' },
-      port: { type: Number, default: 465 },
-      secure: { type: Boolean, default: true },
+      host: { type: String, default: 'smtp-relay.brevo.com' },
+      port: { type: Number, default: 587 },
+      secure: { type: Boolean, default: false },
       user: { type: String, default: '' },
       pass: { type: String, default: '' },
-      from: { type: String, default: 'Edwin <contact@edwin.com>' },
+      from: { type: String, default: 'Edwin <no-reply@your-domain.com>' },
     },
     automations: {
       onRegister: { type: Boolean, default: true },

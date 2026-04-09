@@ -221,6 +221,10 @@ export default function OnboardingPage() {
 
       if (resData.success) {
         toast.success('Workspace configuré avec succès !');
+        if (Array.isArray(resData.emailFailures) && resData.emailFailures.length > 0) {
+          const failedRecipients = resData.emailFailures.map((item: { email: string }) => item.email).join(', ');
+          toast.error(`Invitations non envoyées: ${failedRecipients}`);
+        }
         
         const workspaceId = resData.data._id;
         

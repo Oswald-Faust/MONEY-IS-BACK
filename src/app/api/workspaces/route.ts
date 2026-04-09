@@ -4,6 +4,7 @@ import Workspace from '@/models/Workspace';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 import { PLAN_LIMITS } from '@/lib/limits';
+import { sendInvitationEmail } from '@/lib/mail';
 
 type SubscriptionPlan = 'starter' | 'pro' | 'team' | 'business' | 'enterprise';
 type SubscriptionInterval = 'month' | 'year';
@@ -255,45 +256,61 @@ export async function POST(request: NextRequest) {
     });
 
     // Handle Invitations
+    const invitationEmailFailures: Array<{ email: string; error: string }> = [];
+
     if (invitedEmails && Array.isArray(invitedEmails) && invitedEmails.length > 0) {
       const Invitations = (await import('@/models/Invitation')).default;
-      const { v4: uuidv4 } = await import('uuid'); // Dynamic import for uuid if needed or use native crypto
+      const { v4: uuidv4 } = await import('uuid');
+      const inviter = await User.findById(userId).select('firstName lastName');
+      const inviterName = inviter ? `${inviter.firstName} ${inviter.lastName}` : 'Un membre';
+      const uniqueEmails = [...new Set(invitedEmails.map((email: string) => String(email || '').trim().toLowerCase()))]
+        .filter((email) => email.includes('@'));
 
-      const invitePromises = invitedEmails.map(async (email: string) => {
-        // Validate email format if needed
-        if (!email || !email.includes('@')) return;
-
+      for (const email of uniqueEmails) {
         try {
-          // Check if already invited
-          const existing = await Invitations.findOne({ 
-             email: email.toLowerCase(), 
-             workspace: workspace._id,
-             status: 'pending'
+          const existing = await Invitations.findOne({
+            email,
+            workspace: workspace._id,
+            status: 'pending'
           });
           
-          if (!existing) {
-             await Invitations.create({
-                email: email.toLowerCase(),
-                workspace: workspace._id,
-                role: 'editor', // Default role
-                token: uuidv4(),
-                inviter: userId,
-                status: 'pending',
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
-             });
+          if (existing) {
+            invitationEmailFailures.push({ email, error: 'Une invitation est déjà en attente pour cet email' });
+            continue;
+          }
+
+          const invitation = await Invitations.create({
+            email,
+            workspace: workspace._id,
+            role: 'editor',
+            token: uuidv4(),
+            inviter: userId,
+            status: 'pending',
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          });
+
+          const emailResult = await sendInvitationEmail(email, invitation.token, workspace.name, inviterName);
+          if (!emailResult.success) {
+            invitationEmailFailures.push({
+              email,
+              error: typeof emailResult.error === 'string' ? emailResult.error : 'Échec de l’envoi de l’invitation',
+            });
           }
         } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
           console.error(`Failed to invite ${email}`, err);
+          invitationEmailFailures.push({ email, error: errorMessage });
         }
-      });
-      
-      await Promise.all(invitePromises);
+      }
     }
 
     return NextResponse.json({
       success: true,
       data: workspace,
-      message: 'Workspace créé avec succès'
+      message: invitationEmailFailures.length > 0
+        ? 'Workspace créé, mais certaines invitations e-mail ont échoué'
+        : 'Workspace créé avec succès',
+      emailFailures: invitationEmailFailures,
     });
 
   } catch (error) {

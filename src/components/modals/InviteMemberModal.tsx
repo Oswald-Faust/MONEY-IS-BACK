@@ -73,6 +73,11 @@ export default function InviteMemberModal({ isOpen, onClose, workspaceId, onSucc
       const data = await response.json();
 
       if (data.success) {
+        if (data.emailStatus === 'failed' || data.emailStatus === 'skipped') {
+          toast.error(data.emailError || 'Invitation créée, mais l’e-mail n’a pas pu être envoyé');
+        } else {
+          toast.success(data.message || 'Invitation envoyée');
+        }
         setSuccessData({
           email,
           token: data.invitation?.token || ''
