@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Loader2, File as FileIcon } from 'lucide-react';
+import { upload } from '@vercel/blob/client';
 import { useAppStore, useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
@@ -13,7 +14,14 @@ interface UploadFileModalProps {
 
 export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProps) {
   const { token } = useAuthStore();
-  const { driveFolders, projects, addDriveFile, uploadProjectId, uploadFolderId } = useAppStore();
+  const {
+    driveFolders,
+    projects,
+    currentProject,
+    addDriveFile,
+    uploadProjectId,
+    uploadFolderId,
+  } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [projectId, setProjectId] = useState('');
   const [folderId, setFolderId] = useState('');
@@ -21,30 +29,43 @@ export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProp
 
   React.useEffect(() => {
     if (isOpen) {
-      setProjectId(uploadProjectId || '');
+      // Pré-sélectionner le projet courant si aucun n'est passé explicitement
+      setProjectId(uploadProjectId || currentProject?._id || '');
       setFolderId(uploadFolderId || '');
     }
-  }, [isOpen, uploadProjectId, uploadFolderId]);
+  }, [isOpen, uploadProjectId, uploadFolderId, currentProject]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile || !token) return toast.error('Veuillez sélectionner un fichier');
-    
+
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      if (projectId) formData.append('projectId', projectId);
-      if (folderId) formData.append('folderId', folderId);
+      // Upload direct client → Vercel Blob (contourne la limite 4.5 MB Vercel)
+      const blob = await upload(selectedFile.name, selectedFile, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const res = await fetch('/api/upload', {
+      // Enregistrement en base de données
+      const res = await fetch('/api/upload/complete', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          url: blob.url,
+          name: selectedFile.name,
+          size: selectedFile.size,
+          type: selectedFile.type || 'application/octet-stream',
+          projectId: projectId || null,
+          folderId: folderId || null,
+        }),
       });
 
       const data = await res.json();
-
       if (data.success) {
         addDriveFile(data.file);
         toast.success('Fichier uploadé avec succès');
@@ -53,11 +74,11 @@ export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProp
         setProjectId('');
         setFolderId('');
       } else {
-        toast.error(data.error || 'Erreur lors de l\'upload');
+        toast.error(data.error || "Erreur lors de l'enregistrement");
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      toast.error('Erreur de connexion lors de l\'upload');
+      toast.error("Erreur lors de l'upload");
     } finally {
       setLoading(false);
     }
@@ -75,7 +96,7 @@ export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProp
           onClick={onClose}
           className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         />
-        
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -89,24 +110,31 @@ export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProp
               </div>
               <h2 className="text-xl font-bold text-white">Uploader un fichier</h2>
             </div>
-            <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white">
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white"
+            >
               <X className="w-6 h-6" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400 ml-1">Sélectionner un fichier</label>
+              <label className="text-sm font-medium text-gray-400 ml-1">
+                Sélectionner un fichier
+              </label>
               <div className="relative group">
                 <input
                   type="file"
-                  onChange={e => setSelectedFile(e.target.files?.[0] || null)}
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   className="absolute inset-0 opacity-0 cursor-pointer z-10"
                 />
-                <div className={`
-                  w-full px-4 py-8 bg-white/[0.02] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all
-                  ${selectedFile ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-white/10 group-hover:border-white/20'}
-                `}>
+                <div
+                  className={`
+                    w-full px-4 py-8 bg-white/[0.02] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all
+                    ${selectedFile ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-white/10 group-hover:border-white/20'}
+                  `}
+                >
                   {selectedFile ? (
                     <>
                       <FileIcon className="w-10 h-10 text-indigo-400 mb-2" />
@@ -121,6 +149,7 @@ export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProp
                     <>
                       <Upload className="w-10 h-10 text-gray-600 mb-2" />
                       <p className="text-sm text-gray-400">Cliquez ou glissez un fichier</p>
+                      <p className="text-xs text-gray-600 mt-1">Jusqu&apos;à 50 MB</p>
                     </>
                   )}
                 </div>
@@ -132,12 +161,14 @@ export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProp
                 <label className="text-sm font-medium text-gray-400 ml-1">Projet</label>
                 <select
                   value={projectId}
-                  onChange={e => setProjectId(e.target.value)}
+                  onChange={(e) => setProjectId(e.target.value)}
                   className="w-full px-4 py-3 bg-[#1a1a24] border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500/50 appearance-none text-sm"
                 >
                   <option value="">Aucun</option>
-                  {projects.map(p => (
-                    <option key={p._id} value={p._id}>{p.name}</option>
+                  {projects.map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -145,12 +176,14 @@ export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProp
                 <label className="text-sm font-medium text-gray-400 ml-1">Dossier</label>
                 <select
                   value={folderId}
-                  onChange={e => setFolderId(e.target.value)}
+                  onChange={(e) => setFolderId(e.target.value)}
                   className="w-full px-4 py-3 bg-[#1a1a24] border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500/50 appearance-none text-sm"
                 >
                   <option value="">Racine</option>
-                  {driveFolders.map(f => (
-                    <option key={f._id} value={f._id}>{f.name}</option>
+                  {driveFolders.map((f) => (
+                    <option key={f._id} value={f._id}>
+                      {f.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -160,7 +193,14 @@ export default function UploadFileModal({ isOpen, onClose }: UploadFileModalProp
               disabled={loading || !selectedFile}
               className="w-full py-4 rounded-2xl bg-indigo-500 text-white font-bold hover:bg-indigo-400 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 transition-all"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Lancer l\'upload'}
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Upload en cours…
+                </>
+              ) : (
+                "Lancer l'upload"
+              )}
             </button>
           </form>
         </motion.div>

@@ -260,6 +260,22 @@ export default function SecureIdsPage() {
           </div>
 
           <form onSubmit={handleUnlock} className="w-full space-y-4">
+            {user?.authProvider === 'google' && (
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-900 dark:text-amber-100 space-y-2">
+                <p className="font-semibold text-amber-900 dark:text-amber-200">Compte Google détecté</p>
+                <p className="text-amber-800 dark:text-amber-100/80">
+                  Si aucun mot de passe de projet n&apos;est défini, vous devez d&apos;abord créer votre mot de passe dans les paramètres de sécurité.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => router.push('/settings')}
+                  className="text-amber-700 hover:text-amber-900 dark:text-amber-200 dark:hover:text-white transition-colors font-medium"
+                >
+                  Aller à Paramètres &gt; Sécurité
+                </button>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="text-xs font-bold text-text-dim uppercase tracking-wider">Mot de passe sécurisé</label>
               <div className="relative">

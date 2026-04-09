@@ -59,6 +59,7 @@ const PRESET_COLORS = [
 export default function SettingsPage() {
   const { user, updateUser, token } = useAuthStore();
   const { currentWorkspace } = useAppStore();
+  const isGoogleAccount = user?.authProvider === 'google';
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -141,9 +142,12 @@ export default function SettingsPage() {
          }
 
       } else if (activeTab === 'security') {
-        // Validation des mots de passe
-        if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-            toast.error('Veuillez remplir tous les champs du mot de passe');
+        if (!passwordData.newPassword || !passwordData.confirmPassword || (!isGoogleAccount && !passwordData.currentPassword)) {
+            toast.error(
+              isGoogleAccount
+                ? 'Veuillez remplir les champs du nouveau mot de passe'
+                : 'Veuillez remplir tous les champs du mot de passe'
+            );
             setIsSaving(false);
             return;
         }
@@ -406,18 +410,25 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <Lock className="w-5 h-5 text-indigo-400" />
-                    Changer le mot de passe
+                    {isGoogleAccount ? 'Définir un mot de passe' : 'Changer le mot de passe'}
                   </h3>
+                  <p className="text-sm text-dim">
+                    {isGoogleAccount
+                      ? 'Votre compte a été créé avec Google. Définissez ici un mot de passe local pour accéder à la zone sécurisée et vous connecter aussi sans Google.'
+                      : 'Mettez à jour votre mot de passe pour sécuriser votre compte.'}
+                  </p>
                   <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-wider text-muted">Mot de passe actuel</label>
-                      <input 
-                        type="password" 
-                        className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-3 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                      />
-                    </div>
+                    {!isGoogleAccount && (
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Mot de passe actuel</label>
+                        <input 
+                          type="password" 
+                          className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-3 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                          value={passwordData.currentPassword}
+                          onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                        />
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-wider text-muted">Nouveau mot de passe</label>
                       <input 

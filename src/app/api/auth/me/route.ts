@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
+          authProvider: user.authProvider,
           role: user.role,
           avatar: user.avatar,
           preferences: user.preferences,

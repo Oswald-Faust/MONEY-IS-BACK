@@ -241,7 +241,7 @@ export default function DrivePage() {
           <HardDrive className="w-16 h-16 text-text-muted mx-auto mb-6 opacity-20" />
           <p className="text-text-dim font-medium tracking-wide">{t.drivePage.emptyMessage}</p>
           <button
-            onClick={() => setUploadModalOpen(true)}
+            onClick={() => setUploadModalOpen(true, projectId || undefined, currentFolderId || undefined)}
             className="mt-4 text-indigo-400 hover:text-indigo-300 text-sm font-bold uppercase tracking-widest transition-colors"
           >
             {t.drivePage.uploadFirst}

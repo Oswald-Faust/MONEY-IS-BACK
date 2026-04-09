@@ -3,6 +3,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  authProvider?: 'password' | 'google';
   avatar?: string;
   bio?: string;
   profileColor?: string;

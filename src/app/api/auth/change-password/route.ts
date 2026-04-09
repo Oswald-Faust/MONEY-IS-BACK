@@ -19,10 +19,11 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { currentPassword, newPassword } = body;
+    const currentPasswordValue = typeof currentPassword === 'string' ? currentPassword : '';
 
-    if (!currentPassword || !newPassword) {
+    if (!newPassword) {
       return NextResponse.json(
-        { success: false, error: 'Veuillez fournir l\'ancien et le nouveau mot de passe' },
+        { success: false, error: 'Veuillez fournir un nouveau mot de passe' },
         { status: 400 }
       );
     }
@@ -44,14 +45,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier l'ancien mot de passe
-    const isMatch = await user.comparePassword(currentPassword);
-    
-    if (!isMatch) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ancien mot de passe est incorrect' },
-        { status: 400 }
-      );
+    const canSetPasswordWithoutCurrentPassword = user.authProvider === 'google';
+
+    if (!canSetPasswordWithoutCurrentPassword) {
+      if (!currentPasswordValue) {
+        return NextResponse.json(
+          { success: false, error: 'Veuillez fournir l\'ancien mot de passe' },
+          { status: 400 }
+        );
+      }
+
+      const isMatch = await user.comparePassword(currentPasswordValue);
+      
+      if (!isMatch) {
+        return NextResponse.json(
+          { success: false, error: 'L\'ancien mot de passe est incorrect' },
+          { status: 400 }
+        );
+      }
     }
 
     // Mettre à jour le mot de passe
@@ -61,9 +72,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Mot de passe modifié avec succès',
+      message: canSetPasswordWithoutCurrentPassword
+        ? 'Mot de passe défini avec succès'
+        : 'Mot de passe modifié avec succès',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Change password error:', error);
     return NextResponse.json(
       { success: false, error: 'Erreur lors du changement de mot de passe' },

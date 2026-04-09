@@ -170,6 +170,12 @@ export default function DashboardPage() {
   const importantTasks = tasks.filter(t => t.priority === 'important');
   const otherTasks = tasks.filter(t => t.priority !== 'important');
 
+  const activeProjectsCount = projects.filter(p => p.status === 'active').length;
+  const pausedProjectsCount = projects.filter(p => p.status === 'paused').length;
+  const totalProjectTasks = projects.reduce((sum, p) => sum + p.tasksCount, 0);
+  const completedProjectTasks = projects.reduce((sum, p) => sum + p.completedTasksCount, 0);
+  const projectCompletionRate = totalProjectTasks > 0 ? Math.round((completedProjectTasks / totalProjectTasks) * 100) : 0;
+
   return (
     <div className="page-fade space-y-12 pb-20">
       {/* Header with Welcome message */}
@@ -265,71 +271,120 @@ export default function DashboardPage() {
 
       {/* Mes Business - Full Width Section */}
       <section>
-        <div className="flex items-center justify-between mb-8">
-          <div className="relative group">
-            <div className="absolute -inset-x-4 -inset-y-2 bg-indigo-500/5 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-            <h2 className="section-title mb-0 flex items-center gap-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
-                <LayoutGrid className="w-4 h-4" />
+        <motion.div
+          initial={{ opacity: 0, y: -18 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-[32px] border border-glass-border bg-bg-secondary/70 p-6 md:p-8 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.65)] mb-6"
+        >
+          <div className="absolute -left-16 top-0 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute right-0 top-10 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+
+          <div className="relative space-y-6">
+            {/* Title row */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-text-dim">
+                  <LayoutGrid className="w-3.5 h-3.5 text-accent-primary" />
+                  {currentWorkspace?.name}
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-text-main tracking-tight flex items-center gap-3">
+                  <FolderKanban className="w-7 h-7 text-accent-primary" />
+                  {t.dashboard.myBusiness}
+                </h2>
               </div>
-              {t.dashboard.myBusiness}
-            </h2>
+              <Link
+                href="/projects"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-primary px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-accent-primary/20 hover:opacity-90 transition-all flex-shrink-0 self-start"
+              >
+                {t.dashboard.manageAll}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+              <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                  {t.projectsPage.stats.active}
+                </p>
+                <p className="mt-3 text-3xl font-bold text-text-main">{activeProjectsCount}</p>
+              </div>
+              <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                  {t.projectsPage.stats.paused}
+                </p>
+                <p className="mt-3 text-3xl font-bold text-text-main">{pausedProjectsCount}</p>
+              </div>
+              <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                  {t.projectsPage.stats.totalTasks}
+                </p>
+                <p className="mt-3 text-3xl font-bold text-text-main">{totalProjectTasks}</p>
+              </div>
+              <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                  {t.projectsPage.stats.completion}
+                </p>
+                <p className="mt-3 text-3xl font-bold text-text-main">{projectCompletionRate}%</p>
+              </div>
+            </div>
           </div>
-          <Link href="/projects" className="px-4 py-2 rounded-2xl text-sm font-semibold text-accent-primary hover:text-text-main hover:bg-accent-primary/10 flex items-center gap-2 transition-all group/link">
-            {t.dashboard.manageAll} 
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-        
+        </motion.div>
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-12 text-text-dim bg-glass-bg rounded-xl border border-glass-border">
-            <FolderKanban className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p className="text-lg font-medium text-text-main mb-1">{t.dashboard.noProjects}</p>
-            <p className="text-sm text-text-dim">{t.dashboard.createFirstProject}</p>
-            <button 
+          <div className="glass-card rounded-[30px] border-dashed border-2 bg-bg-secondary/40 p-16 text-center">
+            <FolderKanban className="mx-auto mb-6 h-16 w-16 text-text-muted opacity-20" />
+            <h3 className="mb-2 text-2xl font-bold text-text-main">{t.dashboard.noProjects}</h3>
+            <p className="mx-auto mb-8 max-w-md text-sm text-text-dim">{t.dashboard.createFirstProject}</p>
+            <button
               onClick={() => setProjectModalOpen(true)}
-              className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-2xl text-sm hover:bg-indigo-600 transition-colors"
+              className="rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 px-5 py-3 text-sm font-semibold text-white"
             >
               {t.dashboard.createProject}
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {projects.slice(0, 4).map((project) => (
-              <ProjectCard 
-                key={project._id} 
-                project={project}
-                onEdit={(p) => {
-                  setCurrentProject(p);
-                  setProjectModalOpen(true);
-                }}
-                onDelete={async (p) => {
-                  if (window.confirm(`Êtes-vous sûr de vouloir supprimer le projet ${p.name} ?`)) {
-                    try {
-                      const response = await fetch(`/api/projects?id=${p._id}`, {
-                        method: 'DELETE',
-                        headers: {
-                          'Authorization': `Bearer ${token}`,
-                        },
-                      });
-                      
-                      const data = await response.json();
-                      if (data.success) {
-                        deleteProject(p._id);
-                        toast.success('Projet supprimé !');
-                      } else {
-                        toast.error(data.error || 'Erreur lors de la suppression');
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {projects.slice(0, 4).map((project, index) => (
+              <motion.div
+                key={project._id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.04 }}
+                className="h-full"
+              >
+                <ProjectCard
+                  project={project}
+                  variant="grid"
+                  onEdit={(p) => {
+                    setCurrentProject(p);
+                    setProjectModalOpen(true);
+                  }}
+                  onDelete={async (p) => {
+                    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le projet ${p.name} ?`)) {
+                      try {
+                        const response = await fetch(`/api/projects?id=${p._id}`, {
+                          method: 'DELETE',
+                          headers: { 'Authorization': `Bearer ${token}` },
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                          deleteProject(p._id);
+                          toast.success('Projet supprimé !');
+                        } else {
+                          toast.error(data.error || 'Erreur lors de la suppression');
+                        }
+                      } catch {
+                        toast.error('Erreur de connexion');
                       }
-                    } catch {
-                      toast.error('Erreur de connexion');
                     }
-                  }
-                }}
-              />
+                  }}
+                />
+              </motion.div>
             ))}
           </div>
         )}

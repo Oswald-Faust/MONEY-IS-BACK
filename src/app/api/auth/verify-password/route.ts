@@ -53,6 +53,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (user.authProvider === 'google') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Définissez d’abord un mot de passe dans Paramètres > Sécurité pour accéder au coffre.',
+          code: 'PASSWORD_SETUP_REQUIRED',
+        },
+        { status: 403 }
+      );
+    }
+
     // 5. Verify against User Password (fallback or default)
     const isMatch = await user.comparePassword(password);
     

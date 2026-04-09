@@ -1,12 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { put } from '@vercel/blob';
 import { verifyAuth } from '@/lib/auth';
-import { DriveFile, User } from '@/models';
+import { User } from '@/models';
 import GlobalSettings from '@/models/GlobalSettings';
 import connectToDatabase from '@/lib/mongodb';
-import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
+  const contentType = request.headers.get('content-type') || '';
+
+  // ── Client-side upload (JSON body) — contourne la limite 4.5MB de Vercel ──
+  if (contentType.includes('application/json')) {
+    const body = (await request.json()) as HandleUploadBody;
+
+    try {
+      const jsonResponse = await handleUpload({
+        body,
+        request,
+        onBeforeGenerateToken: async (_pathname, clientPayload) => {
+          // Vérification auth via le header Authorization envoyé par upload()
+          const auth = await verifyAuth(request);
+          if (!auth.success) throw new Error(auth.error || 'Non autorisé');
+
+          await connectToDatabase();
+          const [settings, userObj] = await Promise.all([
+            GlobalSettings.findOne(),
+            User.findById(auth.userId).select('driveAccess role'),
+          ]);
+
+          const payload = JSON.parse(clientPayload || '{}');
+          const skipChecks = ['avatar', 'workspace-icon'].includes(payload.uploadType || '');
+
+          if (!skipChecks && userObj?.role !== 'admin') {
+            if (settings?.permissions?.driveAccess === false || userObj?.driveAccess === false) {
+              throw new Error('Accès Drive restreint par un administrateur');
+            }
+          }
+
+          return {
+            maximumSizeInBytes: 50 * 1024 * 1024, // 50 MB
+          };
+        },
+        onUploadCompleted: async () => {
+          // L'entrée DriveFile est créée côté client via /api/upload/complete
+        },
+      });
+
+      return NextResponse.json(jsonResponse);
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Erreur upload' },
+        { status: 400 }
+      );
+    }
+  }
+
+  // ── Server-side upload (multipart/form-data) — avatars & icônes seulement ──
   try {
     const auth = await verifyAuth(request);
     if (!auth.success) {
@@ -15,17 +64,13 @@ export async function POST(request: NextRequest) {
 
     await connectToDatabase();
 
-    // Fetch user and settings for permission check
     const [settings, userObj] = await Promise.all([
       GlobalSettings.findOne(),
-      User.findById(auth.userId).select('driveAccess role')
+      User.findById(auth.userId).select('driveAccess role'),
     ]);
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const projectId = formData.get('projectId') as string;
-    const folderId = formData.get('folderId') as string;
-
     const { searchParams } = new URL(request.url);
     const uploadType = searchParams.get('type');
 
@@ -34,73 +79,36 @@ export async function POST(request: NextRequest) {
     }
 
     const originalName = file.name;
-
-    // 1. Check Module Access (Skip for avatars and admins)
     const skipChecks = ['avatar', 'workspace-icon'].includes(uploadType || '');
-    if (!skipChecks && userObj?.role !== 'admin') {
-       const isGlobalDriveDisabled = settings?.permissions?.driveAccess === false;
-       const isUserDriveDisabled = userObj?.driveAccess === false;
 
-       if (isGlobalDriveDisabled || isUserDriveDisabled) {
-         return NextResponse.json({ success: false, error: 'Accès Drive restreint par un administrateur' }, { status: 403 });
-       }
+    if (!skipChecks && userObj?.role !== 'admin') {
+      const isGlobalDriveDisabled = settings?.permissions?.driveAccess === false;
+      const isUserDriveDisabled = userObj?.driveAccess === false;
+      if (isGlobalDriveDisabled || isUserDriveDisabled) {
+        return NextResponse.json(
+          { success: false, error: 'Accès Drive restreint par un administrateur' },
+          { status: 403 }
+        );
+      }
     }
 
-    // 2. Check File Type (Skip for avatars and admins)
     const allowedExtensions = settings?.permissions?.allowedFileTypes || [];
     if (!skipChecks && allowedExtensions.length > 0 && userObj?.role !== 'admin') {
       const parts = originalName.split('.');
       const extension = (parts.length > 1 ? '.' + parts.pop() : '').toLowerCase();
-      
       if (!allowedExtensions.includes(extension)) {
-        return NextResponse.json({ 
-          success: false, 
-          error: `Type de fichier non autorisé. Extensions permises: ${allowedExtensions.join(', ')}` 
-        }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: `Type de fichier non autorisé. Extensions permises: ${allowedExtensions.join(', ')}` },
+          { status: 400 }
+        );
       }
     }
 
-    // Limit check (e.g. 50MB) 
-    const MAX_SIZE = 50 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-        return NextResponse.json({ success: false, error: 'Fichier trop volumineux (Max 50MB)' }, { status: 400 });
-    }
+    const blob = await put(originalName, file, { access: 'public' });
 
-    // Upload to Vercel Blob
-    const blob = await put(originalName, file, {
-      access: 'public',
-      // The token is automatically picked up from process.env.BLOB_READ_WRITE_TOKEN
-    });
-
-    if (skipChecks) {
-        return NextResponse.json({ 
-            success: true, 
-            url: blob.url,
-            message: `${uploadType === 'avatar' ? 'Avatar' : 'Icône'} uploadé avec succès` 
-        });
-    }
-
-    await connectToDatabase();
-
-    const driveFile = await DriveFile.create({
-        name: originalName,
-        type: file.type || 'application/octet-stream',
-        size: file.size,
-        url: blob.url,
-        project: projectId ? new mongoose.Types.ObjectId(projectId) : null,
-        folderId: folderId ? new mongoose.Types.ObjectId(folderId) : null,
-        owner: new mongoose.Types.ObjectId(auth.userId)
-    } as any);
-
-    return NextResponse.json({ 
-        success: true, 
-        file: driveFile,
-        url: blob.url,
-        message: 'Fichier uploadé avec succès sur Vercel Blob' 
-    });
-
+    return NextResponse.json({ success: true, url: blob.url });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur lors de l\'upload';
+    const errorMessage = error instanceof Error ? error.message : "Erreur lors de l'upload";
     console.error('Upload error:', error);
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }

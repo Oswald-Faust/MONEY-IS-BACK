@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         updates.googleId = profile.sub;
       }
 
-      if (user.authProvider !== 'google') {
+      if (user.authProvider !== 'password' && user.authProvider !== 'google') {
         updates.authProvider = 'google';
       }
 

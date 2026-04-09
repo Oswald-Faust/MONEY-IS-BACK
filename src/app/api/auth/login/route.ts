@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      authProvider: user.authProvider,
       role: user.role,
       avatar: user.avatar,
       preferences: user.preferences,
@@ -76,10 +77,10 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur lors de la connexion' },
+      { success: false, error: error instanceof Error ? error.message : 'Erreur lors de la connexion' },
       { status: 500 }
     );
   }

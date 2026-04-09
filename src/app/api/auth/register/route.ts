@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      authProvider: user.authProvider,
       role: user.role,
       avatar: user.avatar,
       preferences: user.preferences,
@@ -99,10 +100,10 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Register error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur lors de l\'inscription' },
+      { success: false, error: error instanceof Error ? error.message : 'Erreur lors de l\'inscription' },
       { status: 500 }
     );
   }
