@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FolderKanban, Plus, Search, Sparkles } from 'lucide-react';
+import { FolderKanban, LayoutGrid, List, Plus, Search, Sparkles } from 'lucide-react';
 import ProjectCard from '@/components/ui/ProjectCard';
 import CreateProjectModal from '@/components/modals/CreateProjectModal';
 import EditTaskModal from '@/components/modals/EditTaskModal';
@@ -13,6 +13,9 @@ import { useTranslation } from '@/lib/i18n';
 import toast from 'react-hot-toast';
 
 type ProjectStatusFilter = 'all' | 'active' | 'archived' | 'paused';
+type ViewMode = 'grid' | 'list';
+
+const VIEW_MODE_KEY = 'projects-view-mode';
 
 export default function ProjectsPage() {
   const {
@@ -30,7 +33,19 @@ export default function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const searchParams = useSearchParams();
+
+  // Restore view preference
+  useEffect(() => {
+    const saved = localStorage.getItem(VIEW_MODE_KEY);
+    if (saved === 'list' || saved === 'grid') setViewMode(saved);
+  }, []);
+
+  const handleViewMode = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem(VIEW_MODE_KEY, mode);
+  };
 
   useEffect(() => {
     const taskId = searchParams.get('taskId');
@@ -179,6 +194,7 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-8 pb-10">
+      {/* ── Header ── */}
       <motion.section
         initial={{ opacity: 0, y: -18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -188,6 +204,7 @@ export default function ProjectsPage() {
         <div className="absolute right-0 top-10 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <div className="relative space-y-8">
+          {/* Title row */}
           <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-2xl space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-text-dim">
@@ -205,7 +222,10 @@ export default function ProjectsPage() {
                 </p>
                 {currentWorkspace && (
                   <p className="mt-4 text-sm text-text-muted">
-                    {t.projectsPage.workspaceLabel}: <span className="text-text-main font-semibold">{currentWorkspace.name}</span>
+                    {t.projectsPage.workspaceLabel}:{' '}
+                    <span className="text-text-main font-semibold">
+                      {currentWorkspace.name}
+                    </span>
                   </p>
                 )}
               </div>
@@ -225,6 +245,7 @@ export default function ProjectsPage() {
             </motion.button>
           </div>
 
+          {/* Stats */}
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
             <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 md:p-5">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
@@ -252,24 +273,54 @@ export default function ProjectsPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder={t.projectsPage.searchPlaceholder}
-                className="w-full rounded-2xl border border-glass-border bg-bg-tertiary pl-12 pr-4 py-3.5 text-sm text-text-main placeholder:text-text-muted focus:border-accent-primary/40 focus:outline-none focus:ring-4 focus:ring-accent-primary/5 transition-all duration-200"
-              />
+          {/* Search + filters + view toggle */}
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-3 items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder={t.projectsPage.searchPlaceholder}
+                  className="w-full rounded-2xl border border-glass-border bg-bg-tertiary pl-12 pr-4 py-3.5 text-sm text-text-main placeholder:text-text-muted focus:border-accent-primary/40 focus:outline-none focus:ring-4 focus:ring-accent-primary/5 transition-all duration-200"
+                />
+              </div>
+
+              {/* View toggle */}
+              <div className="flex-shrink-0 flex items-center gap-1 rounded-2xl border border-glass-border bg-bg-tertiary p-1.5">
+                <button
+                  onClick={() => handleViewMode('grid')}
+                  title="Vue grille"
+                  className={`p-2.5 rounded-xl transition-all ${
+                    viewMode === 'grid'
+                      ? 'bg-accent-primary text-white shadow-sm'
+                      : 'text-text-muted hover:text-text-main hover:bg-glass-hover'
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleViewMode('list')}
+                  title="Vue liste"
+                  className={`p-2.5 rounded-xl transition-all ${
+                    viewMode === 'list'
+                      ? 'bg-accent-primary text-white shadow-sm'
+                      : 'text-text-muted hover:text-text-main hover:bg-glass-hover'
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
+            {/* Status filters */}
             <div className="flex flex-wrap gap-2">
               {statusOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setStatusFilter(option.value)}
-                  className={`rounded-2xl border px-4 py-3 text-left transition-all ${
+                  className={`rounded-2xl border px-4 py-2.5 text-left transition-all ${
                     statusFilter === option.value
                       ? 'border-accent-primary/30 bg-accent-primary/10 text-accent-primary shadow-sm'
                       : 'border-glass-border bg-bg-tertiary text-text-muted hover:bg-glass-hover hover:text-text-main'
@@ -278,7 +329,7 @@ export default function ProjectsPage() {
                   <div className="text-[11px] font-bold uppercase tracking-[0.16em]">
                     {option.label}
                   </div>
-                  <div className="mt-1 text-lg font-bold">{option.count}</div>
+                  <div className="mt-0.5 text-lg font-bold">{option.count}</div>
                 </button>
               ))}
             </div>
@@ -286,6 +337,7 @@ export default function ProjectsPage() {
         </div>
       </motion.section>
 
+      {/* ── Content ── */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-4">
@@ -298,7 +350,9 @@ export default function ProjectsPage() {
           <FolderKanban className="mx-auto mb-6 h-16 w-16 text-text-muted opacity-20" />
           <h3 className="mb-2 text-2xl font-bold text-text-main">{t.projectsPage.empty.title}</h3>
           <p className="mx-auto mb-8 max-w-md text-sm text-text-dim">
-            {searchQuery ? t.projectsPage.empty.tryAnotherSearch : t.projectsPage.empty.createFirst}
+            {searchQuery
+              ? t.projectsPage.empty.tryAnotherSearch
+              : t.projectsPage.empty.createFirst}
           </p>
           <button
             onClick={() => {
@@ -319,37 +373,62 @@ export default function ProjectsPage() {
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + sectionIndex * 0.05 }}
-                className="space-y-5"
+                className="space-y-4"
               >
-                <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                {/* Section header */}
+                <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
                   <div>
                     <h2 className="text-xl font-bold text-text-main">
                       {section.title}{' '}
                       <span className="text-text-muted">({section.items.length})</span>
                     </h2>
-                    <p className="mt-1 text-sm text-text-dim">{section.description}</p>
+                    <p className="mt-0.5 text-sm text-text-dim">{section.description}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  {section.items.map((project, index) => (
-                    <motion.div
-                      key={project._id}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <ProjectCard
-                        project={project}
-                        variant="expanded"
-                        onEdit={handleEditProject}
-                        onDelete={(currentProject) =>
-                          handleDeleteProject(currentProject._id, currentProject.name)
-                        }
-                      />
-                    </motion.div>
-                  ))}
-                </div>
+                {/* Grid or List */}
+                {viewMode === 'grid' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {section.items.map((project, index) => (
+                      <motion.div
+                        key={project._id}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.04 }}
+                        className="h-full"
+                      >
+                        <ProjectCard
+                          project={project}
+                          variant="grid"
+                          onEdit={handleEditProject}
+                          onDelete={(currentProject) =>
+                            handleDeleteProject(currentProject._id, currentProject.name)
+                          }
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {section.items.map((project, index) => (
+                      <motion.div
+                        key={project._id}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.03 }}
+                      >
+                        <ProjectCard
+                          project={project}
+                          variant="list"
+                          onEdit={handleEditProject}
+                          onDelete={(currentProject) =>
+                            handleDeleteProject(currentProject._id, currentProject.name)
+                          }
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </motion.section>
             ) : null
           )}
