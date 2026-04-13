@@ -35,6 +35,19 @@ export default function CustomCalendar({
 }: CustomCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
+  const parseCalendarDate = (value?: string) => {
+    if (!value) return null;
+
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (dateOnlyMatch) {
+      const [, year, month, day] = dateOnlyMatch;
+      return new Date(Number(year), Number(month) - 1, Number(day), 12);
+    }
+
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  };
+
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
@@ -55,12 +68,14 @@ export default function CustomCalendar({
   const getEventsForDate = (date: Date) => {
     const dayTasks = tasks.filter((task) => {
       if (!task.dueDate) return false;
-      return isSameDay(new Date(task.dueDate), date);
+      const parsedDate = parseCalendarDate(task.dueDate);
+      return parsedDate ? isSameDay(parsedDate, date) : false;
     });
 
     const dayObjectives = objectives.filter((obj) => {
       if (!obj.targetDate) return false;
-      return isSameDay(new Date(obj.targetDate), date);
+      const parsedDate = parseCalendarDate(obj.targetDate);
+      return parsedDate ? isSameDay(parsedDate, date) : false;
     });
 
     return [

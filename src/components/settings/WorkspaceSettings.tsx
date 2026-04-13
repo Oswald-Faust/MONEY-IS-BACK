@@ -185,16 +185,16 @@ export default function WorkspaceSettings() {
   return (
     <div className="space-y-10">
       <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-xl font-bold text-main flex items-center gap-2">
           <Briefcase className="w-5 h-5 text-indigo-400" />
           Paramètres du Workspace
         </h2>
-        <p className="text-sm text-gray-500">Personnalisez l&apos;identité et l&apos;apparence de votre espace de travail.</p>
+        <p className="text-sm text-dim">Personnalisez l&apos;identité et l&apos;apparence de votre espace de travail.</p>
       </div>
 
       <div className="space-y-8">
         {/* Workspace Identity Section */}
-        <div className="flex flex-col md:flex-row items-center gap-8 border-b border-white/5 pb-10">
+        <div className="flex flex-col md:flex-row items-center gap-8 border-b border-glass-border pb-10">
           <div className="relative group">
             <div 
               className="w-24 h-24 rounded-3xl bg-indigo-500/10 flex items-center justify-center border-2 border-dashed border-white/20 group-hover:border-indigo-500/50 transition-all overflow-hidden relative"
@@ -230,7 +230,7 @@ export default function WorkspaceSettings() {
                   type="text" 
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full pl-12 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                  className="w-full pl-12 bg-bg-secondary border border-glass-border rounded-xl px-4 py-2.5 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                   placeholder="Mon équipe géniale"
                 />
               </div>
@@ -241,7 +241,7 @@ export default function WorkspaceSettings() {
                 rows={2}
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                className="w-full bg-bg-secondary border border-glass-border rounded-xl px-4 py-3 text-main focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                 placeholder="Décrivez votre espace de travail..."
               />
             </div>
@@ -262,14 +262,14 @@ export default function WorkspaceSettings() {
                     ...formData, 
                     settings: { ...formData.settings, defaultProjectColor: color }
                   })}
-                  className={`w-full aspect-square rounded-xl transition-all hover:scale-105 relative flex items-center justify-center ${formData.settings.defaultProjectColor === color ? 'ring-2 ring-white ring-offset-4 ring-offset-[#0f0f13]' : 'opacity-70 hover:opacity-100'}`}
+                  className={`w-full aspect-square rounded-xl transition-all hover:scale-105 relative flex items-center justify-center ${formData.settings.defaultProjectColor === color ? 'ring-2 ring-text-main ring-offset-4 ring-offset-bg-primary' : 'opacity-70 hover:opacity-100'}`}
                   style={{ backgroundColor: color }}
                 >
                   {formData.settings.defaultProjectColor === color && <Check className="w-4 h-4 text-white" />}
                 </button>
               ))}
             </div>
-            <p className="text-[10px] text-gray-500 italic mt-2">Cette couleur sera utilisée pour vos projets par défaut et votre avatar de workspace.</p>
+            <p className="text-[10px] text-dim italic mt-2">Cette couleur sera utilisée pour vos projets par défaut et votre avatar de workspace.</p>
           </div>
 
           <div className="space-y-4">
@@ -287,7 +287,7 @@ export default function WorkspaceSettings() {
                   className={`flex-1 flex flex-col items-center gap-3 p-4 rounded-2xl border transition-all ${
                     formData.settings.theme === theme.id 
                       ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 shadow-xl shadow-indigo-500/5' 
-                      : 'bg-white/5 border-white/10 text-dim hover:text-white'
+                      : 'bg-bg-secondary border-glass-border text-dim hover:text-main'
                   }`}
                 >
                   <theme.icon className="w-6 h-6" />
@@ -299,10 +299,10 @@ export default function WorkspaceSettings() {
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-10 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/5">
+        <div className="pt-10 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-glass-border">
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-red-500">Zone de danger</h4>
-            <p className="text-xs text-gray-500">Ces actions sont irréversibles.</p>
+            <p className="text-xs text-dim">Ces actions sont irréversibles.</p>
           </div>
           <div className="flex gap-4 w-full sm:w-auto">
              <button 

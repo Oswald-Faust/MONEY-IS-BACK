@@ -408,7 +408,7 @@ export default function SettingsPage() {
             {activeTab === 'security' && (
               <div className="space-y-8">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-main flex items-center gap-2">
                     <Lock className="w-5 h-5 text-indigo-400" />
                     {isGoogleAccount ? 'Définir un mot de passe' : 'Changer le mot de passe'}
                   </h3>

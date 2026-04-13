@@ -46,11 +46,13 @@ export async function GET(request: NextRequest) {
       expiresAt: { $gt: new Date() }
     }).populate('inviter', 'firstName lastName');
 
+    const validMembers = workspace.members.filter((member) => member.user != null);
+
     return NextResponse.json({
       success: true,
       data: {
         owner: workspace.owner,
-        members: workspace.members,
+        members: validMembers,
         invitations
       }
     });

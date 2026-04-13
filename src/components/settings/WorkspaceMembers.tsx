@@ -29,7 +29,7 @@ interface Member {
         lastName: string;
         email: string;
         avatar?: string;
-    };
+    } | null;
     role: string;
 }
 
@@ -121,6 +121,10 @@ export default function WorkspaceMembers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [resendingInvitationId, setResendingInvitationId] = useState<string | null>(null);
 
+  const isValidMember = (member: Member): member is Member & { user: NonNullable<Member['user']> } => {
+    return member.user != null;
+  };
+
   const fetchMembers = useCallback(async () => {
     if (!currentWorkspace || !token) return;
 
@@ -132,7 +136,7 @@ export default function WorkspaceMembers() {
       const data = await response.json();
 
       if (data.success) {
-        setMembers(data.data.members || []);
+        setMembers((data.data.members || []).filter(isValidMember));
         setInvitations(data.data.invitations || []);
       } else {
         toast.error(data.error || t.workspaceMembers.toasts.loadError);
@@ -227,7 +231,7 @@ export default function WorkspaceMembers() {
   const updateRole = async (userId: string, newRole: string) => {
     try {
         // Optimistic update
-        setMembers(prev => prev.map(m => m.user._id === userId ? { ...m, role: newRole } : m));
+        setMembers(prev => prev.map(m => m.user?._id === userId ? { ...m, role: newRole } : m));
 
         const response = await fetch('/api/workspaces/members', {
             method: 'PUT',
@@ -257,7 +261,9 @@ export default function WorkspaceMembers() {
   };
 
   // Filter logic
-  const filteredMembers = members.filter(m =>
+  const validMembers = members.filter(isValidMember);
+
+  const filteredMembers = validMembers.filter(m =>
     m.user?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.user?.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.user?.email?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -273,7 +279,7 @@ export default function WorkspaceMembers() {
   const isOwner = ownerId === user?._id;
 
   // Find current user in members list to check role (if not owner)
-  const currentUserMember = members.find((m: Member) => m.user._id === user?._id);
+  const currentUserMember = validMembers.find((m) => m.user._id === user?._id);
   const isAdmin = isOwner || (currentUserMember && currentUserMember.role === 'admin');
 
   const getRoleLabel = (role: string) => {

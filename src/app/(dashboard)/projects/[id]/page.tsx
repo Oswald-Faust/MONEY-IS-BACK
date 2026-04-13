@@ -32,6 +32,19 @@ export default function ProjectDetailPage() {
   const { projects, tasks, objectives, setTaskModalOpen, setTasks, setObjectives } = useAppStore();
   const { token, user } = useAuthStore();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
+  const parseCalendarDate = (value?: string) => {
+    if (!value) return null;
+
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (dateOnlyMatch) {
+      const [, year, month, day] = dateOnlyMatch;
+      return new Date(Number(year), Number(month) - 1, Number(day), 12);
+    }
+
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  };
   
   // Helper to check if project matches, handling both string ID and populated object
   const isProjectMatch = (itemProject: string | { _id: string } | undefined | null, targetId: string) => {
@@ -84,8 +97,14 @@ export default function ProjectDetailPage() {
       d1.getMonth() === d2.getMonth() && 
       d1.getFullYear() === d2.getFullYear();
 
-    const dayTasks = projectTasks.filter(t => t.dueDate && isSameDay(new Date(t.dueDate), selectedDate));
-    const dayObjectives = projectObjectives.filter(o => o.targetDate && isSameDay(new Date(o.targetDate), selectedDate));
+    const dayTasks = projectTasks.filter((task) => {
+      const parsedDate = parseCalendarDate(task.dueDate);
+      return parsedDate ? isSameDay(parsedDate, selectedDate) : false;
+    });
+    const dayObjectives = projectObjectives.filter((objective) => {
+      const parsedDate = parseCalendarDate(objective.targetDate);
+      return parsedDate ? isSameDay(parsedDate, selectedDate) : false;
+    });
 
     return [
       ...dayTasks.map(t => ({ ...t, type: 'task' as const })),
