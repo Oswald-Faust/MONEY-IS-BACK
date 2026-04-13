@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const blob = await put(originalName, file, { access: 'public' });
+    const blob = await put(originalName, file, { access: 'public', addRandomSuffix: true });
 
     return NextResponse.json({ success: true, url: blob.url });
   } catch (error: unknown) {

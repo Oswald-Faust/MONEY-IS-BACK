@@ -211,9 +211,10 @@ export default function TaskDetailPage() {
       const data = await response.json();
 
       if (data.success) {
+        const projectId = task?.project && typeof task.project === 'object' ? task.project._id : task?.project;
         deleteTask(id as string);
         toast.success('Tâche supprimée');
-        router.push('/tasks');
+        router.push(projectId ? `/tasks?project=${projectId}` : '/tasks');
       } else {
         toast.error(data.error || 'Erreur lors de la suppression');
       }

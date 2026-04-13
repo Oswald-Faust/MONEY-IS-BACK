@@ -55,8 +55,9 @@ export default function TeamSection({ workspaceId }: TeamSectionProps) {
   // Let's include everyone but maybe highlight me or just list them.
   // The user asked for "Mon équipe".
 
-  const displayedMembers = members.slice(0, 5); // Show first 5
-  const remainingCount = members.length - 5;
+  const validMembers = members.filter((m) => m.user != null);
+  const displayedMembers = validMembers.slice(0, 5); // Show first 5
+  const remainingCount = validMembers.length - 5;
 
   return (
     <section>
