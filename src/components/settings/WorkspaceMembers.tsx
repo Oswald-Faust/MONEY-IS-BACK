@@ -33,12 +33,16 @@ interface Member {
     role: string;
 }
 
+type ValidMember = Member & {
+    user: NonNullable<Member['user']>;
+};
+
 // Sub-component for Role Selector to manage its own state
 const RoleSelector = ({
     member,
     onUpdate
 }: {
-    member: Member,
+    member: ValidMember,
     onUpdate: (userId: string, role: string) => void
 }) => {
     const { t } = useTranslation();
@@ -121,7 +125,7 @@ export default function WorkspaceMembers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [resendingInvitationId, setResendingInvitationId] = useState<string | null>(null);
 
-  const isValidMember = (member: Member): member is Member & { user: NonNullable<Member['user']> } => {
+  const isValidMember = (member: Member): member is ValidMember => {
     return member.user != null;
   };
 
