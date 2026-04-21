@@ -6,6 +6,8 @@ interface AITextResult {
   text: string;
   provider: AIProvider;
   model: string;
+  /** Tokens totaux consommés (input + output) */
+  tokensUsed: number;
 }
 
 interface ObjectiveGenerationInput {
@@ -67,6 +69,7 @@ export interface ObjectiveDraftResult {
   followUpQuestions: string[];
   provider: AIProvider;
   model: string;
+  tokensUsed: number;
 }
 
 export interface AssistantReplyResult {
@@ -77,6 +80,7 @@ export interface AssistantReplyResult {
   requestedAction?: AssistantRequestedAction;
   provider: AIProvider;
   model: string;
+  tokensUsed: number;
 }
 
 function extractJson(text: string) {
@@ -151,6 +155,7 @@ async function callOpenAI({
     text,
     provider: 'openai',
     model,
+    tokensUsed: data?.usage?.total_tokens ?? 0,
   };
 }
 
@@ -211,6 +216,7 @@ async function callGemini({
     text,
     provider: 'gemini',
     model,
+    tokensUsed: data?.usageMetadata?.totalTokenCount ?? 0,
   };
 }
 
@@ -241,7 +247,7 @@ export async function generateStructuredAI<T>({
   system: string;
   prompt: string;
   temperature?: number;
-}): Promise<{ data: T; provider: AIProvider; model: string }> {
+}): Promise<{ data: T; provider: AIProvider; model: string; tokensUsed: number }> {
   const result = await runAI({
     system,
     prompt,
@@ -253,6 +259,7 @@ export async function generateStructuredAI<T>({
     data: extractJson(result.text) as T,
     provider: result.provider,
     model: result.model,
+    tokensUsed: result.tokensUsed,
   };
 }
 
@@ -333,6 +340,7 @@ Contraintes:
     followUpQuestions: Array.isArray(parsed.followUpQuestions) ? parsed.followUpQuestions.slice(0, 4) : [],
     provider: result.provider,
     model: result.model,
+    tokensUsed: result.tokensUsed,
   };
 }
 
@@ -340,6 +348,7 @@ export interface SearchInsightResult {
   reply: string;
   provider: AIProvider;
   model: string;
+  tokensUsed: number;
 }
 
 export async function generateSearchInsight({
@@ -377,6 +386,7 @@ Retourne uniquement: { "reply": "string" }
     reply: typeof parsed.reply === 'string' ? parsed.reply : 'Je n\'ai pas trouvé de résultats correspondants.',
     provider: result.provider,
     model: result.model,
+    tokensUsed: result.tokensUsed,
   };
 }
 
@@ -488,5 +498,6 @@ Contraintes:
         : undefined,
     provider: result.provider,
     model: result.model,
+    tokensUsed: result.tokensUsed,
   };
 }

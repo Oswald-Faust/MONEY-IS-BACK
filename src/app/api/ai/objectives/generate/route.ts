@@ -4,6 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import Project from '@/models/Project';
 import { ensureWorkspaceAccess } from '@/lib/ai/access';
 import { generateObjectiveDraft } from '@/lib/ai';
+import { checkAIQuota, incrementAIUsage } from '@/lib/ai/quota';
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,6 +55,18 @@ export async function POST(request: NextRequest) {
       return workspaceAccess.error;
     }
 
+    const quota = await checkAIQuota(finalWorkspaceId);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'quota_exceeded',
+          quota: { tokensUsed: quota.tokensUsed, tokensLimit: quota.tokensLimit, plan: quota.plan, month: quota.month },
+        },
+        { status: 429 }
+      );
+    }
+
     const draft = await generateObjectiveDraft({
       workspaceId: finalWorkspaceId,
       projectId,
@@ -61,6 +74,7 @@ export async function POST(request: NextRequest) {
       description,
       prompt,
     });
+    await incrementAIUsage(finalWorkspaceId, draft.tokensUsed, 'objectives');
 
     return NextResponse.json({
       success: true,

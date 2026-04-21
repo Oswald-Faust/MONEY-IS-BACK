@@ -37,6 +37,8 @@ export interface IWorkspace extends Document {
   subscriptionPriceId?: string;
   subscriptionInterval?: 'month' | 'year';
   subscriptionEnd?: Date;
+  /** Tokens IA bonus achetés à l'unité — ne se reset pas chaque mois */
+  bonusTokens: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -159,6 +161,11 @@ const WorkspaceSchema = new Schema<IWorkspace>(
       enum: ['month', 'year'],
     },
     subscriptionEnd: Date,
+    bonusTokens: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,

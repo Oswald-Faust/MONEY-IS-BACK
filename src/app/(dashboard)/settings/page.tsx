@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  User, 
-  Shield, 
+import {
+  User,
+  Shield,
   Lock,
   Camera,
   Mail,
@@ -16,7 +16,8 @@ import {
   Users,
   ShieldCheck,
   Briefcase,
-  MessageCircleMore
+  MessageCircleMore,
+  Sparkles
 } from 'lucide-react';
 import { useAuthStore, useAppStore } from '@/store';
 import toast from 'react-hot-toast';
@@ -26,6 +27,7 @@ import Avatar from '@/components/ui/Avatar';
 import WorkspaceMembers from '@/components/settings/WorkspaceMembers';
 import WorkspaceSettings from '@/components/settings/WorkspaceSettings';
 import WhatsAppSettings from '@/components/settings/WhatsAppSettings';
+import AIQuotaWidget from '@/components/settings/AIQuotaWidget';
 
 type SidebarItem = {
   id: string;
@@ -41,6 +43,7 @@ const sidebarItems: SidebarItem[] = [
   { id: 'workspace', label: 'Espace de travail', icon: Briefcase, workspaceOnly: true },
   { id: 'members', label: 'Personnes', icon: Users, workspaceOnly: true },
   { id: 'whatsapp', label: 'WhatsApp & IA', icon: MessageCircleMore, workspaceOnly: true },
+  { id: 'ai_quota', label: 'Tokens IA', icon: Sparkles, workspaceOnly: true },
   { id: 'access', label: 'Accès & Vérifications', icon: ShieldCheck, adminOnly: true },
   { id: 'users', label: 'Gestion des utilisateurs', icon: Users, adminOnly: true },
 ];
@@ -63,6 +66,13 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+
+  // Ouvrir le bon onglet depuis les params URL (ex: ?tab=ai après achat Stripe)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'ai') setActiveTab('ai_quota');
+  }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Form states
@@ -480,6 +490,18 @@ export default function SettingsPage() {
 
             {activeTab === 'whatsapp' && currentWorkspace && (
               <WhatsAppSettings />
+            )}
+
+            {activeTab === 'ai_quota' && currentWorkspace && (
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold" style={{ color: 'var(--text-main)' }}>Tokens IA</h2>
+                  <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+                    Suivez votre consommation mensuelle et achetez des tokens supplémentaires.
+                  </p>
+                </div>
+                <AIQuotaWidget />
+              </div>
             )}
 
             {/* Footer Actions */}
